@@ -1,8 +1,314 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  LANDLORD
+  MODERATOR
+  ADMIN
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  COMMUNITY_VERIFIED
+  OFFICIALLY_VERIFIED
+  REJECTED
+}
+
+enum GenderPreference {
+  ANY
+  FEMALE_ONLY
+  MALE_ONLY
+}
+
+enum RoomType {
+  SINGLE
+  SHARED
+  STUDIO
+}
+
+enum AmenityCategory {
+  BASIC_UTILITY
+  ROOM_FEATURE
+  COMMON_AREA
+  STUDY_WORK
+  SAFETY_SECURITY
+}
+
+enum ReportReason {
+  FRAUD_OR_SCAM
+  INACCURATE_PRICE
+  MISLEADING_PHOTOS
+  HOUSE_RULES_VIOLATION
+  PROPERTY_UNAVAILABLE
+  INAPPROPRIATE_CONTENT
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum StayDurationCategory {
+  FEW_DAYS
+  FEW_WEEKS
+  ONE_SEMESTER
+  ONE_YEAR
+  MORE_THAN_A_YEAR
+}
+
+model User {
+  id              String      @id @default(uuid())
+  email           String      @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  phone           String?     @db.VarChar(30)
+  avatarUrl       String?
+  role            Role        @default(STUDENT)
+  isEmailVerified Boolean     @default(false)
+  universityId    String?
+  university      University? @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+
+  managedPensions   Pension[]  @relation("LandlordPensions")
+  submittedPensions Pension[]  @relation("SubmittedPensions")
+  reviews           Review[]
+  reports           Report[]
+  favorites         Favorite[]
+
+  @@index([universityId])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model University {
+  id           String    @id @default(uuid())
+  name         String
+  shortName    String?   @db.VarChar(50)
+  emailDomains String[]  @default([])
+  city         String
+  address      String
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  students       User[]
+  nearbyPensions PensionUniversity[]
+
+  @@index([city])
+  @@index([deletedAt])
+  @@map("universities")
+}
+
+model Pension {
+  id           String @id @default(uuid())
+  slug         String @unique
+  title        String
+  description  String
+  address      String
+  city         String
+  neighborhood String
+  latitude     Float
+  longitude    Float
+
+  contactName     String?
+  contactPhone    String? @db.VarChar(30)
+  contactWhatsapp String? @db.VarChar(30)
+  contactEmail    String?
+
+  baseMonthlyPrice Decimal  @db.Decimal(10, 2)
+  deposit          Decimal? @db.Decimal(10, 2)
+  currency         String   @default("CLP") @db.VarChar(3)
+
+  waterIncluded       Boolean @default(true)
+  electricityIncluded Boolean @default(true)
+  gasIncluded         Boolean @default(true)
+  internetIncluded    Boolean @default(true)
+
+  curfewTime       String?          @db.VarChar(5)
+  guestsAllowed    Boolean          @default(false)
+  smokingAllowed   Boolean          @default(false)
+  petsAllowed      Boolean          @default(false)
+  genderPreference GenderPreference @default(ANY)
+  quietHoursStart  String?          @db.VarChar(5)
+  quietHoursEnd    String?          @db.VarChar(5)
+
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  ratingAverage      Decimal            @default(0) @db.Decimal(3, 2)
+  ratingCount        Int                @default(0)
+  isActive           Boolean            @default(true)
+
+  landlordId String?
+  landlord   User?   @relation("LandlordPensions", fields: [landlordId], references: [id], onDelete: SetNull)
+
+  submittedById String?
+  submittedBy   User?   @relation("SubmittedPensions", fields: [submittedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  rooms              Room[]
+  images             PensionImage[]
+  amenities          Amenity[]
+  reviews            Review[]
+  reports            Report[]
+  favorites          Favorite[]
+  nearbyUniversities PensionUniversity[]
+
+  @@index([city, neighborhood])
+  @@index([baseMonthlyPrice])
+  @@index([verificationStatus])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("pensions")
+}
+
+model PensionUniversity {
+  pensionId      String
+  universityId   String
+  distanceMeters Int
+  walkingMinutes Int?   @db.SmallInt
+  transitMinutes Int?   @db.SmallInt
+
+  pension    Pension    @relation(fields: [pensionId], references: [id], onDelete: Cascade)
+  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@id([pensionId, universityId])
+  @@index([universityId])
+  @@map("pension_universities")
+}
+
+model Room {
+  id                 String    @id @default(uuid())
+  pensionId          String
+  roomNumber         String?   @db.VarChar(20)
+  title              String
+  description        String?
+  type               RoomType  @default(SINGLE)
+  monthlyPrice       Decimal   @db.Decimal(10, 2)
+  deposit            Decimal?  @db.Decimal(10, 2)
+  hasPrivateBathroom Boolean   @default(false)
+  totalBeds          Int       @default(1) @db.SmallInt
+  availableBeds      Int       @default(1) @db.SmallInt
+  isAvailable        Boolean   @default(true)
+  images             String[]  @default([])
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
+
+  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
+
+  @@index([pensionId])
+  @@index([isAvailable])
+  @@index([deletedAt])
+  @@map("rooms")
+}
+
+model PensionImage {
+  id         String    @id @default(uuid())
+  pensionId  String
+  url        String
+  caption    String?
+  isFeatured Boolean   @default(false)
+  sortOrder  Int       @default(0) @db.SmallInt
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+
+  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
+
+  @@index([pensionId])
+  @@index([deletedAt])
+  @@map("pension_images")
+}
+
+model Amenity {
+  id        String          @id @default(uuid())
+  slug      String          @unique @db.VarChar(60)
+  name      String          @db.VarChar(100)
+  category  AmenityCategory @default(BASIC_UTILITY)
+  iconKey   String?         @db.VarChar(50)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  deletedAt DateTime?
+
+  pensions Pension[]
+
+  @@index([deletedAt])
+  @@map("amenities")
+}
+
+model Review {
+  id                   String                @id @default(uuid())
+  pensionId            String
+  userId               String
+  overallRating        Int                   @db.SmallInt
+  cleanlinessRating    Int?                  @db.SmallInt
+  landlordRating       Int?                  @db.SmallInt
+  quietnessRating      Int?                  @db.SmallInt
+  wifiRating           Int?                  @db.SmallInt
+  comment              String
+  images               String[]              @default([])
+  stayDurationCategory StayDurationCategory?
+  stayStartDate        DateTime?
+  stayEndDate          DateTime?
+  exactStayDays        Int?                  @db.SmallInt
+  isResidentVerified   Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
+
+  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pensionId, userId])
+  @@index([pensionId])
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("reviews")
+}
+
+model Report {
+  id              String       @id @default(uuid())
+  pensionId       String
+  userId          String
+  reason          ReportReason
+  description     String
+  status          ReportStatus @default(PENDING)
+  resolutionNotes String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+
+  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([pensionId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("reports")
+}
+
+model Favorite {
+  userId    String
+  pensionId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, pensionId])
+  @@map("favorites")
 }
