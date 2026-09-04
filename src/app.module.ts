@@ -4,7 +4,9 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
 import { validateEnv } from './common/config/env.validation.js';
+import { PensionsModule } from './pensions/pensions.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { RoomsModule } from './rooms/rooms.module.js';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
     }),
     PrismaModule,
     AuthModule,
+    PensionsModule,
+    RoomsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
