@@ -1,20 +1,25 @@
-# Task: 005 - Global Environment Configuration & Exception Filter
+# Task: 006 - JWT Authentication, RBAC & Ownership Security
 
 ## Objective
-Implement strict environment variable validation and global exception filters in NestJS, ensuring consistent API error response envelopes across all modules.
+Implement JWT-based authentication with bcrypt password hashing, registration, login, and granular authorization guards ensuring users can only access their own private data and administrators have global access.
 
 ## Checklist
-- [ ] Implement environment variable schema validation
-- [ ] Create global `HttpExceptionFilter` in `src/common/filters/`
-- [ ] Create global response transform interceptor in `src/common/interceptors/`
-- [ ] Configure global validation pipe and Swagger OpenAPI in `src/main.ts`
-- [ ] Write unit tests for exception filter and interceptors
-- [ ] Verify build and tests (`pnpm build && pnpm test`)
+- [ ] Install authentication dependencies (`@nestjs/jwt`, `@nestjs/passport`, `passport`, `passport-jwt`, `bcrypt`, `@types/bcrypt`, `@types/passport-jwt`)
+- [ ] Create `AuthModule` with registration, login, and current user profile (`/auth/register`, `/auth/login`, `/auth/me`)
+- [ ] Implement `JwtStrategy` and `JwtAuthGuard`
+- [ ] Implement `RolesGuard` and `@Roles()` decorator
+- [ ] Implement `OwnershipGuard` verifying entity owner matches authenticated user ID or user has ADMIN role
+- [ ] Write unit tests for authentication service, strategy, and authorization guards
+- [ ] Verify build and tests (`pnpm build && pnpm test && pnpm run check`)
 
 ## Target Files
-- `src/common/filters/http-exception.filter.ts`
-- `src/common/interceptors/transform.interceptor.ts`
-- `src/main.ts`
+- `src/auth/auth.module.ts`
+- `src/auth/auth.service.ts`
+- `src/auth/auth.controller.ts`
+- `src/auth/strategies/jwt.strategy.ts`
+- `src/auth/guards/jwt-auth.guard.ts`
+- `src/auth/guards/roles.guard.ts`
+- `src/auth/guards/ownership.guard.ts`
 
 ## Verification
-- Command: `pnpm build && pnpm test`
+- Command: `pnpm build && pnpm test && pnpm run check`
