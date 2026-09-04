@@ -16,6 +16,17 @@
     "lineWidth": 100
   },
   "javascript": {
+    "globals": [
+      "describe",
+      "it",
+      "test",
+      "beforeEach",
+      "afterEach",
+      "beforeAll",
+      "afterAll",
+      "expect",
+      "vi"
+    ],
     "parser": {
       "unsafeParameterDecoratorsEnabled": true
     },
@@ -28,12 +39,34 @@
   "linter": {
     "enabled": true,
     "rules": {
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUndeclaredVariables": "error"
+      },
       "suspicious": {
-        "noExplicitAny": "error"
+        "noExplicitAny": "error",
+        "noDoubleEquals": "error",
+        "noDuplicateParameters": "error",
+        "noDuplicateClassMembers": "error"
       },
       "style": {
+        "useConst": "error",
+        "useTemplate": "error",
+        "useNodejsImportProtocol": "error",
+        "noNonNullAssertion": "error",
         "noParameterProperties": "off",
         "useImportType": "off"
+      },
+      "security": {
+        "noGlobalEval": "error"
+      },
+      "performance": {
+        "noAccumulatingSpread": "error",
+        "noDelete": "error"
+      },
+      "complexity": {
+        "noExtraBooleanCast": "error"
       }
     }
   }
