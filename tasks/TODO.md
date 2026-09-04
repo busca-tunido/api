@@ -1,21 +1,15 @@
-# Task: 008 - Universities, Reviews, Reports & Favorites Modules
+# Task: 009 - E2E Integration Testing & OpenAPI Client Validation
 
 ## Objective
-Implement remaining REST API modules for Universities (campus data, institutional email domains), Reviews (ratings, verified resident status, average recalculation), Reports (fraud/scam moderation), and Favorites (student bookmarking) with JWT ownership protection.
+Implement end-to-end integration tests validating authentication flows, ownership enforcement, role permissions, and ensure OpenAPI documentation accurately describes all request and response contracts.
 
 ## Checklist
-- [ ] Create `UniversitiesModule` with city filtering and campus coordinates
-- [ ] Create `ReviewsModule` with pension rating average recalculation and ownership protection (students only edit their own reviews)
-- [ ] Create `ReportsModule` with reason categories and moderator/admin resolution
-- [ ] Create `FavoritesModule` allowing students to bookmark and query their saved pensions
-- [ ] Write unit tests for all services and controllers
+- [ ] Implement E2E integration test suite for `/auth` (register, login, me)
+- [ ] Implement E2E test validating ownership guard prevents non-owners from modifying resources
 - [ ] Verify build and tests (`pnpm build && pnpm test && pnpm run check`)
 
 ## Target Files
-- `src/universities/`
-- `src/reviews/`
-- `src/reports/`
-- `src/favorites/`
+- `test/app.e2e-spec.ts`
 
 ## Verification
 - Command: `pnpm build && pnpm test && pnpm run check`
