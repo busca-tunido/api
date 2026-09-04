@@ -21,8 +21,8 @@ async function bootstrap(): Promise<void> {
   app.useGlobalInterceptors(new TransformInterceptor());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Busca TuNido API')
-    .setDescription('Backend REST API for Busca TuNido platform')
+    .setTitle('BuscaTuNido API')
+    .setDescription('Backend REST API for BuscaTuNido platform')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

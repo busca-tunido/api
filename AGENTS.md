@@ -1,12 +1,12 @@
 # Context & Architectural Guidelines for AI Coding Assistants
 
-This document provides essential architectural context, domain patterns, and development guidelines for AI coding assistants contributing to **Busca TuNido API**.
+This document provides essential architectural context, domain patterns, and development guidelines for AI coding assistants contributing to **BuscaTuNido API**.
 
 ---
 
 ## 1. Project Overview & Architecture
 
-Busca TuNido API is a modular backend service written in TypeScript using [NestJS](https://nestjs.com/) and [Prisma ORM](https://www.prisma.io/) on top of [PostgreSQL](https://www.postgresql.org/).
+BuscaTuNido API is a modular backend service written in TypeScript using [NestJS](https://nestjs.com/) and [Prisma ORM](https://www.prisma.io/) on top of [PostgreSQL](https://www.postgresql.org/).
 
 ### Core Components Structure (Provisional Baseline):
 
@@ -49,7 +49,6 @@ Busca TuNido API is a modular backend service written in TypeScript using [NestJ
 5. **Conventional Commits (Concise, Single-Line Only)**:
    - All git commit messages must strictly follow the Conventional Commits specification (e.g., `feat`, `fix`, `chore`, `refactor`, `test`, `docs`).
    - Commit messages must be concise, single-line only, and omit any extended body description.
-
 
 ---
 
