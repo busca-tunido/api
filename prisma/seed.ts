@@ -203,25 +203,115 @@ const AMENITY_DEFINITIONS: Array<{
   category: AmenityCategory;
   iconKey: string;
 }> = [
-  { slug: 'wifi-alta-velocidad', name: 'Wi-Fi fibra óptica alta velocidad', category: 'BASIC_UTILITY', iconKey: 'wifi' },
-  { slug: 'agua-caliente', name: 'Agua caliente 24/7', category: 'BASIC_UTILITY', iconKey: 'droplet' },
-  { slug: 'luz-incluida', name: 'Electricidad incluida en renta', category: 'BASIC_UTILITY', iconKey: 'zap' },
+  {
+    slug: 'wifi-alta-velocidad',
+    name: 'Wi-Fi fibra óptica alta velocidad',
+    category: 'BASIC_UTILITY',
+    iconKey: 'wifi',
+  },
+  {
+    slug: 'agua-caliente',
+    name: 'Agua caliente 24/7',
+    category: 'BASIC_UTILITY',
+    iconKey: 'droplet',
+  },
+  {
+    slug: 'luz-incluida',
+    name: 'Electricidad incluida en renta',
+    category: 'BASIC_UTILITY',
+    iconKey: 'zap',
+  },
   { slug: 'gas-incluido', name: 'Gas incluido', category: 'BASIC_UTILITY', iconKey: 'flame' },
-  { slug: 'calefaccion', name: 'Calefacción central o estufa', category: 'BASIC_UTILITY', iconKey: 'thermometer' },
-  { slug: 'bano-privado', name: 'Baño privado en habitación', category: 'ROOM_FEATURE', iconKey: 'bath' },
-  { slug: 'escritorio-estudio', name: 'Escritorio y silla ergonómica', category: 'ROOM_FEATURE', iconKey: 'monitor' },
-  { slug: 'closet-amplio', name: 'Clóset empotrado amplio', category: 'ROOM_FEATURE', iconKey: 'archive' },
-  { slug: 'cama-plaza-media', name: 'Cama 1.5 plazas con colchón nuevo', category: 'ROOM_FEATURE', iconKey: 'bed' },
-  { slug: 'ventana-exterior', name: 'Ventana al exterior con luz natural', category: 'ROOM_FEATURE', iconKey: 'sun' },
-  { slug: 'cocina-equipada', name: 'Cocina compartida full equipada', category: 'COMMON_AREA', iconKey: 'utensils' },
-  { slug: 'lavadora-secadora', name: 'Lavandería (lavadora y secadora)', category: 'COMMON_AREA', iconKey: 'disc' },
-  { slug: 'living-comedor', name: 'Sala de estar y comedor compartido', category: 'COMMON_AREA', iconKey: 'coffee' },
-  { slug: 'patio-terraza', name: 'Terraza / Patio al aire libre', category: 'COMMON_AREA', iconKey: 'trees' },
-  { slug: 'sala-estudio-cowork', name: 'Sala de estudio silenciosa y coworking', category: 'STUDY_WORK', iconKey: 'book-open' },
-  { slug: 'impresora-scanner', name: 'Punto de impresión y escáner', category: 'STUDY_WORK', iconKey: 'printer' },
-  { slug: 'conserjeria-24-7', name: 'Conserjería / Control de acceso 24/7', category: 'SAFETY_SECURITY', iconKey: 'shield' },
-  { slug: 'camaras-seguridad', name: 'Cámaras de vigilancia en accesos', category: 'SAFETY_SECURITY', iconKey: 'video' },
-  { slug: 'cerradura-digital', name: 'Cerradura digital en dormitorios', category: 'SAFETY_SECURITY', iconKey: 'key' },
+  {
+    slug: 'calefaccion',
+    name: 'Calefacción central o estufa',
+    category: 'BASIC_UTILITY',
+    iconKey: 'thermometer',
+  },
+  {
+    slug: 'bano-privado',
+    name: 'Baño privado en habitación',
+    category: 'ROOM_FEATURE',
+    iconKey: 'bath',
+  },
+  {
+    slug: 'escritorio-estudio',
+    name: 'Escritorio y silla ergonómica',
+    category: 'ROOM_FEATURE',
+    iconKey: 'monitor',
+  },
+  {
+    slug: 'closet-amplio',
+    name: 'Clóset empotrado amplio',
+    category: 'ROOM_FEATURE',
+    iconKey: 'archive',
+  },
+  {
+    slug: 'cama-plaza-media',
+    name: 'Cama 1.5 plazas con colchón nuevo',
+    category: 'ROOM_FEATURE',
+    iconKey: 'bed',
+  },
+  {
+    slug: 'ventana-exterior',
+    name: 'Ventana al exterior con luz natural',
+    category: 'ROOM_FEATURE',
+    iconKey: 'sun',
+  },
+  {
+    slug: 'cocina-equipada',
+    name: 'Cocina compartida full equipada',
+    category: 'COMMON_AREA',
+    iconKey: 'utensils',
+  },
+  {
+    slug: 'lavadora-secadora',
+    name: 'Lavandería (lavadora y secadora)',
+    category: 'COMMON_AREA',
+    iconKey: 'disc',
+  },
+  {
+    slug: 'living-comedor',
+    name: 'Sala de estar y comedor compartido',
+    category: 'COMMON_AREA',
+    iconKey: 'coffee',
+  },
+  {
+    slug: 'patio-terraza',
+    name: 'Terraza / Patio al aire libre',
+    category: 'COMMON_AREA',
+    iconKey: 'trees',
+  },
+  {
+    slug: 'sala-estudio-cowork',
+    name: 'Sala de estudio silenciosa y coworking',
+    category: 'STUDY_WORK',
+    iconKey: 'book-open',
+  },
+  {
+    slug: 'impresora-scanner',
+    name: 'Punto de impresión y escáner',
+    category: 'STUDY_WORK',
+    iconKey: 'printer',
+  },
+  {
+    slug: 'conserjeria-24-7',
+    name: 'Conserjería / Control de acceso 24/7',
+    category: 'SAFETY_SECURITY',
+    iconKey: 'shield',
+  },
+  {
+    slug: 'camaras-seguridad',
+    name: 'Cámaras de vigilancia en accesos',
+    category: 'SAFETY_SECURITY',
+    iconKey: 'video',
+  },
+  {
+    slug: 'cerradura-digital',
+    name: 'Cerradura digital en dormitorios',
+    category: 'SAFETY_SECURITY',
+    iconKey: 'key',
+  },
 ];
 
 const ROOM_PHOTOS = [
@@ -279,10 +369,19 @@ const fetchUniversities = async (): Promise<HipolabsUniversity[]> => {
 
 const getCityFromUniversity = (uni: HipolabsUniversity): CityCoord => {
   const nameLower = uni.name.toLowerCase();
-  if (nameLower.includes('valparaíso') || nameLower.includes('playa ancha') || nameLower.includes('santa maría') || nameLower.includes('viña')) {
+  if (
+    nameLower.includes('valparaíso') ||
+    nameLower.includes('playa ancha') ||
+    nameLower.includes('santa maría') ||
+    nameLower.includes('viña')
+  ) {
     return CITY_COORDS.Valparaíso;
   }
-  if (nameLower.includes('concepción') || nameLower.includes('bío-bío') || nameLower.includes('biobío')) {
+  if (
+    nameLower.includes('concepción') ||
+    nameLower.includes('bío-bío') ||
+    nameLower.includes('biobío')
+  ) {
     return CITY_COORDS.Concepción;
   }
   if (nameLower.includes('antofagasta') || nameLower.includes('norte')) {
@@ -298,7 +397,10 @@ const getCityFromUniversity = (uni: HipolabsUniversity): CityCoord => {
 };
 
 const generateShortName = (name: string): string => {
-  const words = name.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').split(/\s+/).filter(Boolean);
+  const words = name
+    .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')
+    .split(/\s+/)
+    .filter(Boolean);
   if (words.length <= 2) return words.join(' ');
   const initials = words
     .filter((w) => !['de', 'del', 'la', 'los', 'las', 'y', 'el'].includes(w.toLowerCase()))
@@ -318,7 +420,8 @@ const slugify = (text: string): string => {
 
 const main = async (): Promise<void> => {
   const connectionString =
-    process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/buscatunido?schema=public';
+    process.env.DATABASE_URL ||
+    'postgresql://postgres:postgres@localhost:5432/buscatunido?schema=public';
   const pool = new Pool({ connectionString });
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
@@ -340,7 +443,7 @@ const main = async (): Promise<void> => {
   `);
 
   const fetchedUnis = await fetchUniversities();
-  const selectedUnis = fetchedUnis.slice(0, 20);
+  const selectedUnis = fetchedUnis.slice(0, 30);
 
   const universityRecords = [];
   for (let index = 0; index < selectedUnis.length; index++) {
@@ -373,7 +476,7 @@ const main = async (): Promise<void> => {
 
   const defaultPasswordHash = '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6x8ekEY58Eb67980EbGO';
 
-  const adminUser = await prisma.user.create({
+  const _adminUser = await prisma.user.create({
     data: {
       email: 'admin@buscatunido.cl',
       passwordHash: defaultPasswordHash,
@@ -382,11 +485,12 @@ const main = async (): Promise<void> => {
       phone: '+56911223344',
       role: 'ADMIN' as Role,
       isEmailVerified: true,
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      avatarUrl:
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
     },
   });
 
-  const moderatorUser = await prisma.user.create({
+  const _moderatorUser = await prisma.user.create({
     data: {
       email: 'moderador@buscatunido.cl',
       passwordHash: defaultPasswordHash,
@@ -395,12 +499,13 @@ const main = async (): Promise<void> => {
       phone: '+56922334455',
       role: 'MODERATOR' as Role,
       isEmailVerified: true,
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+      avatarUrl:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
     },
   });
 
   const landlordUsers = [];
-  for (let i = 1; i <= 8; i++) {
+  for (let i = 1; i <= 35; i++) {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
     const landlord = await prisma.user.create({
@@ -419,7 +524,7 @@ const main = async (): Promise<void> => {
   }
 
   const studentUsers = [];
-  for (let i = 1; i <= 25; i++) {
+  for (let i = 1; i <= 200; i++) {
     const targetUni = universityRecords[i % universityRecords.length];
     const uniDomain = targetUni.emailDomains[0] || 'alumnos.universidad.cl';
     const firstName = faker.person.firstName();
@@ -436,29 +541,35 @@ const main = async (): Promise<void> => {
         role: 'STUDENT' as Role,
         isEmailVerified: faker.datatype.boolean(0.85),
         universityId: targetUni.id,
-        avatarUrl: `https://images.unsplash.com/photo-${1530000000000 + i * 40000000}?auto=format&fit=crop&w=300&q=80`,
+        avatarUrl: `https://images.unsplash.com/photo-${1530000000000 + (i % 20) * 40000000}?auto=format&fit=crop&w=300&q=80`,
       },
     });
     studentUsers.push(student);
   }
 
+  const allRooms = [];
+  const allImages = [];
+  const allPensionUnis = [];
+  const allReviews = [];
   const pensionRecords = [];
-  for (let i = 0; i < 24; i++) {
+
+  for (let i = 0; i < 120; i++) {
     const assignedUni = universityRecords[i % universityRecords.length];
     const cityInfo = CITY_COORDS[assignedUni.city] || CITY_COORDS.Santiago;
     const neighborhood = faker.helpers.arrayElement(cityInfo.neighborhoods);
     const prefix = faker.helpers.arrayElement(PENSION_TITLES_PREFIXES);
-    const title = `${prefix} ${neighborhood} ${faker.location.street()}`;
+    const street = faker.location.street();
+    const title = `${prefix} ${neighborhood} ${street}`;
     const slug = `${slugify(title)}-${i + 1}`;
     const landlord = landlordUsers[i % landlordUsers.length];
 
-    const offsetLat = (Math.random() - 0.5) * 0.015;
-    const offsetLng = (Math.random() - 0.5) * 0.015;
+    const offsetLat = (Math.random() - 0.5) * 0.02;
+    const offsetLng = (Math.random() - 0.5) * 0.02;
     const pLat = assignedUni.latitude + offsetLat;
     const pLng = assignedUni.longitude + offsetLng;
 
     const basePrice = faker.helpers.arrayElement([
-      190000, 220000, 250000, 280000, 310000, 340000, 380000, 420000,
+      190000, 220000, 240000, 260000, 280000, 310000, 340000, 380000, 420000,
     ]);
     const hasDeposit = faker.datatype.boolean(0.7);
     const depositAmount = hasDeposit ? basePrice : null;
@@ -480,12 +591,60 @@ const main = async (): Promise<void> => {
 
     const selectedAmenities = faker.helpers.arrayElements(amenityRecords, { min: 4, max: 10 });
 
+    const numReviews = faker.number.int({ min: 2, max: 5 });
+    const reviewingStudents = faker.helpers.arrayElements(studentUsers, numReviews);
+    let sumOverall = 0;
+
+    const pensionTempId = faker.string.uuid();
+
+    for (const student of reviewingStudents) {
+      const overall = faker.helpers.arrayElement([4, 5, 4, 5, 3, 5, 4]);
+      sumOverall += overall;
+      const cleanliness = Math.min(
+        5,
+        Math.max(1, overall + faker.helpers.arrayElement([-1, 0, 1])),
+      );
+      const landlordRat = Math.min(
+        5,
+        Math.max(1, overall + faker.helpers.arrayElement([-1, 0, 1])),
+      );
+      const quietness = Math.min(5, Math.max(1, overall + faker.helpers.arrayElement([-1, 0, 0])));
+      const wifi = Math.min(5, Math.max(1, overall + faker.helpers.arrayElement([0, 1, 0])));
+
+      const stayDuration = faker.helpers.arrayElement([
+        'ONE_SEMESTER',
+        'ONE_YEAR',
+        'FEW_WEEKS',
+        'MORE_THAN_A_YEAR',
+      ]) as StayDurationCategory;
+
+      allReviews.push({
+        pensionId: pensionTempId,
+        userId: student.id,
+        overallRating: overall,
+        cleanlinessRating: cleanliness,
+        landlordRating: landlordRat,
+        quietnessRating: quietness,
+        wifiRating: wifi,
+        comment: faker.helpers.arrayElement(REVIEW_COMMENTS),
+        stayDurationCategory: stayDuration,
+        stayStartDate: new Date('2025-03-01'),
+        stayEndDate: new Date('2025-12-15'),
+        exactStayDays: 289,
+        isResidentVerified: student.isEmailVerified,
+        images: faker.datatype.boolean(0.3) ? [faker.helpers.arrayElement(ROOM_PHOTOS)] : [],
+      });
+    }
+
+    const calculatedAvg = Number((sumOverall / numReviews).toFixed(2));
+
     const createdPension = await prisma.pension.create({
       data: {
+        id: pensionTempId,
         slug,
         title,
         description: `Excelente pensión para estudiantes ubicada en ${neighborhood}, a corta distancia de ${assignedUni.name}. Cuenta con grato ambiente de estudio, cocina completamente equipada, dormitorios iluminados y servicios básicos incluidos en la renta. Barrio seguro y con conectividad inmediata a locomoción colectiva.`,
-        address: `${faker.location.street()} ${faker.number.int({ min: 100, max: 2800 })}`,
+        address: `${street} ${faker.number.int({ min: 100, max: 2800 })}`,
         city: assignedUni.city,
         neighborhood,
         latitude: pLat,
@@ -509,6 +668,8 @@ const main = async (): Promise<void> => {
         quietHoursStart: '23:00',
         quietHoursEnd: '07:00',
         verificationStatus: verification,
+        ratingAverage: calculatedAvg,
+        ratingCount: numReviews,
         isActive: true,
         landlordId: landlord.id,
         submittedById: landlord.id,
@@ -518,116 +679,68 @@ const main = async (): Promise<void> => {
       },
     });
 
+    pensionRecords.push(createdPension);
+
     const distMeters = faker.number.int({ min: 250, max: 2200 });
     const walkMin = Math.round(distMeters / 80);
     const transMin = Math.round(distMeters / 250) + 4;
 
-    await prisma.pensionUniversity.create({
-      data: {
-        pensionId: createdPension.id,
-        universityId: assignedUni.id,
-        distanceMeters: distMeters,
-        walkingMinutes: walkMin,
-        transitMinutes: transMin,
-      },
+    allPensionUnis.push({
+      pensionId: createdPension.id,
+      universityId: assignedUni.id,
+      distanceMeters: distMeters,
+      walkingMinutes: walkMin,
+      transitMinutes: transMin,
     });
 
     const numImages = faker.number.int({ min: 3, max: 6 });
     const pickedImages = faker.helpers.arrayElements(ROOM_PHOTOS, numImages);
     for (let imgIndex = 0; imgIndex < pickedImages.length; imgIndex++) {
-      await prisma.pensionImage.create({
-        data: {
-          pensionId: createdPension.id,
-          url: pickedImages[imgIndex],
-          caption: imgIndex === 0 ? 'Fachada y vista general' : `Área interior ${imgIndex}`,
-          isFeatured: imgIndex === 0,
-          sortOrder: imgIndex,
-        },
+      allImages.push({
+        pensionId: createdPension.id,
+        url: pickedImages[imgIndex],
+        caption: imgIndex === 0 ? 'Fachada y vista general' : `Área interior ${imgIndex}`,
+        isFeatured: imgIndex === 0,
+        sortOrder: imgIndex,
       });
     }
 
     const numRooms = faker.number.int({ min: 2, max: 5 });
     for (let r = 1; r <= numRooms; r++) {
-      const roomType = faker.helpers.arrayElement(['SINGLE', 'SINGLE', 'SHARED', 'STUDIO']) as RoomType;
+      const roomType = faker.helpers.arrayElement([
+        'SINGLE',
+        'SINGLE',
+        'SHARED',
+        'STUDIO',
+      ]) as RoomType;
       const hasPrivateBath = roomType === 'STUDIO' ? true : faker.datatype.boolean(0.4);
       const roomPriceModifier = roomType === 'SHARED' ? -30000 : roomType === 'STUDIO' ? 50000 : 0;
       const roomPrice = Math.max(150000, basePrice + roomPriceModifier);
 
-      await prisma.room.create({
-        data: {
-          pensionId: createdPension.id,
-          roomNumber: `Hab ${r * 10 + r}`,
-          title: `Habitación ${roomType === 'SINGLE' ? 'Individual' : roomType === 'SHARED' ? 'Compartida' : 'Estudio'} #${r}`,
-          description: `Habitación amoblada con cama, escritorio y clóset. ${hasPrivateBath ? 'Incluye baño privado.' : 'Baño compartido.'}`,
-          type: roomType,
-          monthlyPrice: roomPrice,
-          deposit: hasDeposit ? roomPrice : null,
-          hasPrivateBathroom: hasPrivateBath,
-          totalBeds: roomType === 'SHARED' ? 2 : 1,
-          availableBeds: 1,
-          isAvailable: faker.datatype.boolean(0.8),
-          images: faker.helpers.arrayElements(ROOM_PHOTOS, 2),
-        },
-      });
-    }
-
-    pensionRecords.push(createdPension);
-  }
-
-  for (let pIdx = 0; pIdx < pensionRecords.length; pIdx++) {
-    const pension = pensionRecords[pIdx];
-    const numReviews = faker.number.int({ min: 1, max: 4 });
-    const reviewingStudents = faker.helpers.arrayElements(studentUsers, numReviews);
-
-    let sumOverall = 0;
-    for (const student of reviewingStudents) {
-      const overall = faker.helpers.arrayElement([4, 5, 4, 5, 3, 5, 4]);
-      sumOverall += overall;
-      const cleanliness = Math.min(5, Math.max(1, overall + faker.helpers.arrayElement([-1, 0, 1])));
-      const landlordRat = Math.min(5, Math.max(1, overall + faker.helpers.arrayElement([-1, 0, 1])));
-      const quietness = Math.min(5, Math.max(1, overall + faker.helpers.arrayElement([-1, 0, 0])));
-      const wifi = Math.min(5, Math.max(1, overall + faker.helpers.arrayElement([0, 1, 0])));
-
-      const stayDuration = faker.helpers.arrayElement([
-        'ONE_SEMESTER',
-        'ONE_YEAR',
-        'FEW_WEEKS',
-        'MORE_THAN_A_YEAR',
-      ]) as StayDurationCategory;
-
-      await prisma.review.create({
-        data: {
-          pensionId: pension.id,
-          userId: student.id,
-          overallRating: overall,
-          cleanlinessRating: cleanliness,
-          landlordRating: landlordRat,
-          quietnessRating: quietness,
-          wifiRating: wifi,
-          comment: faker.helpers.arrayElement(REVIEW_COMMENTS),
-          stayDurationCategory: stayDuration,
-          stayStartDate: new Date('2025-03-01'),
-          stayEndDate: new Date('2025-12-15'),
-          exactStayDays: 289,
-          isResidentVerified: student.isEmailVerified,
-          images: faker.datatype.boolean(0.3) ? [faker.helpers.arrayElement(ROOM_PHOTOS)] : [],
-        },
-      });
-    }
-
-    if (numReviews > 0) {
-      const avg = Number((sumOverall / numReviews).toFixed(2));
-      await prisma.pension.update({
-        where: { id: pension.id },
-        data: {
-          ratingAverage: avg,
-          ratingCount: numReviews,
-        },
+      allRooms.push({
+        pensionId: createdPension.id,
+        roomNumber: `Hab ${r * 10 + r}`,
+        title: `Habitación ${roomType === 'SINGLE' ? 'Individual' : roomType === 'SHARED' ? 'Compartida' : 'Estudio'} #${r}`,
+        description: `Habitación amoblada con cama, escritorio y clóset. ${hasPrivateBath ? 'Incluye baño privado.' : 'Baño compartido.'}`,
+        type: roomType,
+        monthlyPrice: roomPrice,
+        deposit: hasDeposit ? roomPrice : null,
+        hasPrivateBathroom: hasPrivateBath,
+        totalBeds: roomType === 'SHARED' ? 2 : 1,
+        availableBeds: 1,
+        isAvailable: faker.datatype.boolean(0.8),
+        images: faker.helpers.arrayElements(ROOM_PHOTOS, 2),
       });
     }
   }
 
-  for (let i = 0; i < 5; i++) {
+  await prisma.pensionUniversity.createMany({ data: allPensionUnis });
+  await prisma.pensionImage.createMany({ data: allImages });
+  await prisma.room.createMany({ data: allRooms });
+  await prisma.review.createMany({ data: allReviews });
+
+  const allReports = [];
+  for (let i = 0; i < 30; i++) {
     const reportedPension = pensionRecords[i % pensionRecords.length];
     const reportingUser = studentUsers[i % studentUsers.length];
     const reason = faker.helpers.arrayElement([
@@ -636,29 +749,29 @@ const main = async (): Promise<void> => {
       'MISLEADING_PHOTOS',
     ]) as ReportReason;
 
-    await prisma.report.create({
-      data: {
-        pensionId: reportedPension.id,
-        userId: reportingUser.id,
-        reason,
-        description: 'La información publicada presenta discrepancias con las condiciones reales acordadas.',
-        status: 'PENDING' as ReportStatus,
-      },
+    allReports.push({
+      pensionId: reportedPension.id,
+      userId: reportingUser.id,
+      reason,
+      description:
+        'La información publicada presenta discrepancias con las condiciones reales acordadas.',
+      status: 'PENDING' as ReportStatus,
     });
   }
+  await prisma.report.createMany({ data: allReports });
 
-  for (let sIdx = 0; sIdx < 10; sIdx++) {
+  const allFavorites = [];
+  for (let sIdx = 0; sIdx < 80; sIdx++) {
     const student = studentUsers[sIdx];
-    const favPensions = faker.helpers.arrayElements(pensionRecords, 3);
+    const favPensions = faker.helpers.arrayElements(pensionRecords, { min: 2, max: 5 });
     for (const p of favPensions) {
-      await prisma.favorite.create({
-        data: {
-          userId: student.id,
-          pensionId: p.id,
-        },
+      allFavorites.push({
+        userId: student.id,
+        pensionId: p.id,
       });
     }
   }
+  await prisma.favorite.createMany({ data: allFavorites, skipDuplicates: true });
 
   await prisma.$disconnect();
   await pool.end();
