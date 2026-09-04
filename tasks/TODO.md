@@ -1,25 +1,19 @@
-# Task: 006 - JWT Authentication, RBAC & Ownership Security
+# Task: 007 - Pensions & Rooms REST API Modules
 
 ## Objective
-Implement JWT-based authentication with bcrypt password hashing, registration, login, and granular authorization guards ensuring users can only access their own private data and administrators have global access.
+Implement full REST API endpoints for Pensions and Rooms with search filters, pagination, geolocation proximity calculation, and ownership-guarded mutations (landlords manage their own pensions/rooms, admins maintain global access).
 
 ## Checklist
-- [ ] Install authentication dependencies (`@nestjs/jwt`, `@nestjs/passport`, `passport`, `passport-jwt`, `bcrypt`, `@types/bcrypt`, `@types/passport-jwt`)
-- [ ] Create `AuthModule` with registration, login, and current user profile (`/auth/register`, `/auth/login`, `/auth/me`)
-- [ ] Implement `JwtStrategy` and `JwtAuthGuard`
-- [ ] Implement `RolesGuard` and `@Roles()` decorator
-- [ ] Implement `OwnershipGuard` verifying entity owner matches authenticated user ID or user has ADMIN role
-- [ ] Write unit tests for authentication service, strategy, and authorization guards
+- [ ] Create `PensionsModule` with search filters (city, university proximity, price range, amenities, gender preference)
+- [ ] Implement `RoomsModule` nested under or related to pensions
+- [ ] Secure mutation endpoints (`POST`, `PATCH`, `DELETE`) with `JwtAuthGuard` and `OwnershipGuard`
+- [ ] Implement public read endpoints (`GET /pensions`, `GET /pensions/:slug`, `GET /pensions/:id/rooms`)
+- [ ] Write unit tests for services and controllers
 - [ ] Verify build and tests (`pnpm build && pnpm test && pnpm run check`)
 
 ## Target Files
-- `src/auth/auth.module.ts`
-- `src/auth/auth.service.ts`
-- `src/auth/auth.controller.ts`
-- `src/auth/strategies/jwt.strategy.ts`
-- `src/auth/guards/jwt-auth.guard.ts`
-- `src/auth/guards/roles.guard.ts`
-- `src/auth/guards/ownership.guard.ts`
+- `src/pensions/`
+- `src/rooms/`
 
 ## Verification
 - Command: `pnpm build && pnpm test && pnpm run check`
