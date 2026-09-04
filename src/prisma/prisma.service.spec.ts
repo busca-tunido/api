@@ -1,7 +1,7 @@
+import { Test, type TestingModule } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from './prisma.service.js';
 import { SOFT_DELETE_MODELS } from './prisma.extension.js';
+import { PrismaService } from './prisma.service.js';
 
 describe('PrismaService', () => {
   it('should be defined and expose soft delete models', async () => {
@@ -37,7 +37,9 @@ describe('PrismaService', () => {
     expect(connectSpy).toHaveBeenCalled();
 
     const disconnectSpy = vi.spyOn(service, '$disconnect').mockResolvedValue(undefined);
-    const poolEndSpy = vi.spyOn((service as unknown as { pool: { end: () => Promise<void> } }).pool, 'end').mockResolvedValue(undefined);
+    const poolEndSpy = vi
+      .spyOn((service as unknown as { pool: { end: () => Promise<void> } }).pool, 'end')
+      .mockResolvedValue(undefined);
     await service.onModuleDestroy();
     expect(disconnectSpy).toHaveBeenCalled();
     expect(poolEndSpy).toHaveBeenCalled();

@@ -1,4 +1,4 @@
-# Task: 004 - Global Environment Configuration & Exception Filter
+# Task: 005 - Global Environment Configuration & Exception Filter
 
 ## Objective
 Implement strict environment variable validation and global exception filters in NestJS, ensuring consistent API error response envelopes across all modules.
