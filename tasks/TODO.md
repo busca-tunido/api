@@ -1,20 +1,20 @@
-# Task: 003 - Implement Prisma Service with Driver Adapter & Soft Delete Extension
+# Task: 004 - Global Environment Configuration & Exception Filter
 
 ## Objective
-Implement `PrismaService` in NestJS using Prisma 7 `@prisma/adapter-pg` driver adapter, configure global `PrismaModule`, and implement Prisma client extensions (`$extends`) for automated soft-delete filtering.
+Implement strict environment variable validation and global exception filters in NestJS, ensuring consistent API error response envelopes across all modules.
 
 ## Checklist
-- [ ] Create `PrismaService` with `pg.Pool` and `@prisma/adapter-pg` instantiation
-- [ ] Implement Prisma client extension for automated soft delete query filtering (`deletedAt: null`)
-- [ ] Implement graceful connection lifecycle hooks (`onModuleInit`, `onModuleDestroy`)
-- [ ] Create and configure global `PrismaModule` in `AppModule`
-- [ ] Write unit tests for `PrismaService`
+- [ ] Implement environment variable schema validation
+- [ ] Create global `HttpExceptionFilter` in `src/common/filters/`
+- [ ] Create global response transform interceptor in `src/common/interceptors/`
+- [ ] Configure global validation pipe and Swagger OpenAPI in `src/main.ts`
+- [ ] Write unit tests for exception filter and interceptors
 - [ ] Verify build and tests (`pnpm build && pnpm test`)
 
 ## Target Files
-- `src/prisma/prisma.service.ts`
-- `src/prisma/prisma.module.ts`
-- `src/app.module.ts`
+- `src/common/filters/http-exception.filter.ts`
+- `src/common/interceptors/transform.interceptor.ts`
+- `src/main.ts`
 
 ## Verification
 - Command: `pnpm build && pnpm test`
