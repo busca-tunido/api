@@ -135,7 +135,14 @@ export class ReviewsService {
     const average =
       count === 0
         ? 0
-        : Number((reviews.reduce((acc, r) => acc + r.overallRating, 0) / count).toFixed(2));
+        : Number(
+            (
+              reviews.reduce(
+                (acc: number, r: { overallRating: number }) => acc + r.overallRating,
+                0,
+              ) / count
+            ).toFixed(2),
+          );
 
     await this.prisma.pension.update({
       where: { id: pensionId },
