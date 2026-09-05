@@ -73,10 +73,35 @@ export class PensionsService {
     }
 
     if (filter.search) {
-      where.OR = [
-        { title: { contains: filter.search, mode: 'insensitive' } },
-        { description: { contains: filter.search, mode: 'insensitive' } },
-      ];
+      const searchTerms = [filter.search];
+      if (/uchile/i.test(filter.search)) {
+        searchTerms.push('Universidad de Chile');
+      }
+      if (/\b(uc|puc|pucch)\b/i.test(filter.search)) {
+        searchTerms.push('Catolica');
+      }
+      if (/\b(usm|utfsm)\b/i.test(filter.search)) {
+        searchTerms.push('Santa María');
+      }
+
+      where.OR = searchTerms.flatMap((term) => [
+        { title: { contains: term, mode: 'insensitive' } },
+        { description: { contains: term, mode: 'insensitive' } },
+        { neighborhood: { contains: term, mode: 'insensitive' } },
+        { address: { contains: term, mode: 'insensitive' } },
+        {
+          nearbyUniversities: {
+            some: {
+              university: {
+                OR: [
+                  { name: { contains: term, mode: 'insensitive' } },
+                  { shortName: { contains: term, mode: 'insensitive' } },
+                ],
+              },
+            },
+          },
+        },
+      ]);
     }
 
     const [items, total] = await Promise.all([
