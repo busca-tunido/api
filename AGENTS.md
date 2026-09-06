@@ -29,8 +29,19 @@ BuscaTuNido API is a modular backend service written in TypeScript using [NestJS
   - `comparison/`: Multi-pension comparison data aggregation.
   - `reports/`: Community flag reports and moderation pipeline.
 - `prisma/schema.prisma`: Database models, indices, and PostgreSQL relations.
+- `api/.data/`: Isolated local PostgreSQL cluster (ignored by git via `.gitignore`).
 - `tasks/TODO.md`: Active task specification being executed.
 - `tasks/completed/`: Historical record of finished task specifications.
+
+### Local Database Management (`pnpm db:*`):
+
+The backend relies on an isolated local database cluster stored in `.data/` for zero-configuration reproducibility:
+
+- `pnpm db:init`: Initializes the local PostgreSQL cluster in `.data/` (`initdb -D .data -U postgres -A trust`).
+- `pnpm db:start`: Starts the local PostgreSQL daemon in the background (`pg_ctl -D .data start`).
+- `pnpm db:stop`: Gracefully shuts down the local PostgreSQL daemon (`pg_ctl -D .data stop`).
+- `pnpm db:status`: Inspects if PostgreSQL is responding to connections (`pg_isready -h localhost -U postgres`).
+- `pnpm db:seed`: Populates initial sample data via Prisma (`prisma db seed`).
 
 ---
 
@@ -49,6 +60,8 @@ BuscaTuNido API is a modular backend service written in TypeScript using [NestJS
 5. **Conventional Commits (Concise, Single-Line Only)**:
    - All git commit messages must strictly follow the Conventional Commits specification (e.g., `feat`, `fix`, `chore`, `refactor`, `test`, `docs`).
    - Commit messages must be concise, single-line only, and omit any extended body description.
+6. **Brand Naming Convention**:
+   - The brand name must always be formatted as a single PascalCase token: `BuscaTuNido` (never separated as `Busca Tu Nido`).
 
 ---
 
