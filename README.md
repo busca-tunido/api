@@ -2,11 +2,11 @@
 
 Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and PostgreSQL.
 
-## Enlaces Públicos / Deployments
+## Public Deployments & Links
 
-- **API en Producción**: [https://buscatunido-api.onrender.com](https://buscatunido-api.onrender.com)
-- **Documentación Swagger / OpenAPI**: [https://buscatunido-api.onrender.com/api/docs](https://buscatunido-api.onrender.com/api/docs)
-- **Web Oficial (Frontend)**: [https://web-theta-three-8zz8it8ws2.vercel.app/](https://web-theta-three-8zz8it8ws2.vercel.app/)
+- **API (Production)**: [https://buscatunido-api.onrender.com](https://buscatunido-api.onrender.com)
+- **Swagger / OpenAPI Documentation**: [https://buscatunido-api.onrender.com/api/docs](https://buscatunido-api.onrender.com/api/docs)
+- **Official Web App (Frontend)**: [https://web-theta-three-8zz8it8ws2.vercel.app/](https://web-theta-three-8zz8it8ws2.vercel.app/)
 
 ## Features
 
@@ -27,56 +27,60 @@ Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and Postgre
 
 - Node.js >= 20
 - pnpm >= 9
-- PostgreSQL CLI tools (`initdb`, `pg_ctl`, `pg_isready` en el PATH o instalados con Scoop/Homebrew)
+- PostgreSQL CLI tools (`initdb`, `pg_ctl`, `pg_isready` in PATH or installed via Scoop/Homebrew)
 
 ### Environment Configuration
 
-Copia el archivo `.env.example` a `.env` y reemplaza los valores.
-
-### Flujo de Ejecución Local
+Copy `.env.example` to `.env` and set your local environment variables:
 
 ```bash
-# 1. Instalar dependencias
+cp .env.example .env
+```
+
+### Local Execution Workflow
+
+```bash
+# 1. Install dependencies
 pnpm install
 
-# 2. Inicializar cluster de base de datos local (solo la primera vez)
+# 2. Initialize local database cluster (first time only)
 pnpm run db:init
 
-# 3. Puesta en marcha y compilación local (inicia DB, aplica Prisma, corre seed y compila NestJS)
+# 3. Start local stack and build (starts DB, pushes Prisma schema, seeds data, and compiles NestJS)
 pnpm run build:local
 
-# 4. Iniciar el servidor en modo desarrollo (http://localhost:4000 y docs en /api/docs)
+# 4. Start NestJS development server (http://localhost:4000 and Swagger docs at /api/docs)
 pnpm start:dev
 
-# 5. Detener la base de datos local al terminar
+# 5. Stop local database daemon when finished
 pnpm run db:stop
 ```
 
 ---
 
-## Despliegue en Servidor (Producción)
+## Production Deployment (Server)
 
-Actualmente la API se encuentra desplegada y automatizada en la nube a través de [Render](https://render.com/):
+The API is continuously deployed and automated in the cloud via [Render](https://render.com/):
 
-- **Servicio**: Web Service en Render
-- **URL Pública**: [https://buscatunido-api.onrender.com](https://buscatunido-api.onrender.com)
-- **Documentación OpenAPI**: [https://buscatunido-api.onrender.com/api/docs](https://buscatunido-api.onrender.com/api/docs)
-- **Repositorio conectado**: `busca-tunido/api` (rama `main`)
-- **Auto-deploy**: Despliegue continuo automático ante cada push a la rama `main`.
+- **Service**: Render Web Service
+- **Public URL**: [https://buscatunido-api.onrender.com](https://buscatunido-api.onrender.com)
+- **OpenAPI Documentation**: [https://buscatunido-api.onrender.com/api/docs](https://buscatunido-api.onrender.com/api/docs)
+- **Connected Repository**: `busca-tunido/api` (branch: `main`)
+- **Auto-deploy**: Triggered automatically on every push to the `main` branch.
 
-### Pipeline de Despliegue en Render
+### Render Deployment Pipeline
 
 ```bash
-# Build Command: instala dependencias, genera Prisma Client y compila con nest build
+# Build Command: install dependencies, generate Prisma Client, and compile with nest build
 pnpm install && pnpm run build
 
-# Start Command: inicia el servidor de producción (node dist/main)
+# Start Command: start production server (node dist/main)
 pnpm run start:prod
 ```
 
-**Variables de Entorno en Render**:
+**Render Environment Variables**:
 - `NODE_ENV`: `production`
-- `DATABASE_URL`: Conexión a la base de datos PostgreSQL en la nube (con SSL).
-- `JWT_SECRET`: Clave criptográfica para la firma y validación de tokens JWT.
-- `JWT_EXPIRATION`: Duración de validez de sesiones (ej. `7d`).
-- `CORS_ORIGIN`: `https://web-theta-three-8zz8it8ws2.vercel.app` (permite comunicación CORS desde el frontend en Vercel).
+- `DATABASE_URL`: Cloud PostgreSQL connection string (with SSL).
+- `JWT_SECRET`: Secret key for signing and verifying JWT tokens.
+- `JWT_EXPIRATION`: Session token duration (e.g., `7d`).
+- `CORS_ORIGIN`: `https://web-theta-three-8zz8it8ws2.vercel.app` (enables cross-origin communication with the official Vercel web frontend).
