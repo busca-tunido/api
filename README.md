@@ -31,77 +31,31 @@ Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and Postgre
 
 ### Environment Configuration
 
-Crear un archivo `.env` en la raíz de `api` (o copiar desde `.env.example`):
-
-```env
-PORT=4000
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/buscatunido?schema=public"
-JWT_SECRET="your-super-secret-jwt-key"
-JWT_EXPIRATION="7d"
-CORS_ORIGIN="https://web-theta-three-8zz8it8ws2.vercel.app"
-```
+Copia el archivo `.env.example` a `.env` y reemplaza los valores.
 
 ### Flujo de Ejecución Local
 
-1. **Instalar dependencias**:
-   ```bash
-   pnpm install
-   ```
-
-2. **Inicializar cluster de base de datos local** (solo la primera vez en una máquina nueva):
-   ```bash
-   pnpm run db:init
-   ```
-
-3. **Puesta en marcha y compilación local (Recomendado)**:
-   Ejecuta en una sola orden el arranque de PostgreSQL, la sincronización de Prisma, la carga de datos de prueba (`seed`) y la compilación de NestJS:
-   ```bash
-   pnpm run build:local
-   ```
-
-   *(Alternativa: Control granular de cada servicio)*:
-   ```bash
-   # Iniciar el servicio de PostgreSQL en segundo plano
-   pnpm run db:start
-
-   # Verificar que el servidor de base de datos esté listo
-   pnpm run db:status
-
-   # Sincronizar modelos de Prisma con la base de datos local
-   pnpm prisma db push
-
-   # Poblar datos de prueba iniciales
-   pnpm run db:seed
-   ```
-
-4. **Iniciar el servidor en modo desarrollo**:
-   ```bash
-   pnpm start:dev
-   ```
-   La API estará disponible en `http://localhost:4000` y Swagger en `http://localhost:4000/api/docs`.
-
-5. **Detener la base de datos local** (al terminar el trabajo):
-   ```bash
-   pnpm run db:stop
-   ```
-
-### Otros Comandos Útiles
-
 ```bash
-# Setup y compilación completa para desarrollo local (db:start + prisma db push + db:seed + nest build)
+# 1. Instalar dependencias
+pnpm install
+
+# 2. Inicializar cluster de base de datos local (solo la primera vez)
+pnpm run db:init
+
+# 3. Puesta en marcha y compilación local (inicia DB, aplica Prisma, corre seed y compila NestJS)
 pnpm run build:local
 
-# Compilación completa con generación de cliente Prisma (producción / CI)
-pnpm run build
+# (Alternativa: Control granular paso a paso)
+# pnpm run db:start   # Inicia el daemon de PostgreSQL
+# pnpm run db:status  # Verifica conectividad de PostgreSQL
+# pnpm prisma db push # Sincroniza el esquema de Prisma
+# pnpm run db:seed    # Puebla la base de datos con datos de prueba
 
-# Ejecutar pruebas unitarias
-pnpm test
+# 4. Iniciar el servidor en modo desarrollo (http://localhost:4000 y docs en /api/docs)
+pnpm start:dev
 
-# Auto-formato y corrección de linter (Biome)
-pnpm run check
-
-# Verificación de calidad de código en modo solo lectura (Biome)
-pnpm run review
+# 5. Detener la base de datos local al terminar
+pnpm run db:stop
 ```
 
 ---
@@ -119,15 +73,21 @@ Actualmente la API se encuentra desplegada y automatizada en la nube a través d
 ### Pipeline de Despliegue en Render
 
 1. **Build Command**:
+
    ```bash
    pnpm install && pnpm run build
    ```
+
    - El comando `pnpm run build` ejecuta `prisma generate && nest build`, asegurando que el cliente de Prisma se compile contra el esquema de base de datos antes de generar el bundle de NestJS en la carpeta `dist/`.
+
 2. **Start Command**:
+
    ```bash
    pnpm run start:prod
    ```
+
    - Inicia el servidor de producción ejecutando `node dist/main`.
+
 3. **Variables de Entorno Configuradas en Render**:
    - `NODE_ENV`: `production`
    - `DATABASE_URL`: Conexión a la base de datos PostgreSQL en la nube (con SSL).
