@@ -83,7 +83,7 @@ CORS_ORIGIN="https://web-theta-three-8zz8it8ws2.vercel.app"
 ### Otros Comandos
 
 ```bash
-# Compilación rápida para desarrollo local
+# Setup y compilación completa para desarrollo local (db:start + prisma db push + db:seed + nest build)
 pnpm run build:local
 
 # Compilación completa con generación de cliente Prisma (producción / CI)

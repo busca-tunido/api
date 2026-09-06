@@ -42,6 +42,7 @@ The backend relies on an isolated local database cluster stored in `.data/` for 
 - `pnpm db:stop`: Gracefully shuts down the local PostgreSQL daemon (`pg_ctl -D .data stop`).
 - `pnpm db:status`: Inspects if PostgreSQL is responding to connections (`pg_isready -h localhost -U postgres`).
 - `pnpm db:seed`: Populates initial sample data via Prisma (`prisma db seed`).
+- `pnpm run build:local`: Sets up and compiles the full local development stack for a new or existing machine (`pnpm db:start && prisma db push && pnpm db:seed && nest build`).
 
 ---
 
