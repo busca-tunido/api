@@ -145,21 +145,21 @@ Refactor the existing database seed into `prisma/seed-test.ts` for active stagin
 
 ## Checklist
 
-- [ ] Rename `prisma/seed.ts` to `prisma/seed-test.ts` and update `prisma.config.ts` and `package.json` (`db:seed` and `build:local`) to run `seed-test.ts`.
-- [ ] Implement external HTTP fetch for Chilean universities with runtime assertion tests (validating `name`, `domains`, `web_pages`, `country === 'Chile'`).
-- [ ] Implement external HTTP fetch for top 100 Chilean city coordinates with runtime assertion tests (validating coordinate bounds `-56 <= lat <= -17`, `-76 <= lng <= -66`, and verifying presence of Santiago, Valparaíso, Concepción, and Valdivia).
-- [ ] Seed static platform amenity definitions (19 items).
-- [ ] Seed fixed `ADMIN` and `MODERATOR` accounts with known password hash.
-- [ ] Seed hundreds of landlord accounts with variable pension portfolios heavily weighted to primary cities.
-- [ ] Seed pension listings with comprehensive metadata, realistic pricing, and connected amenities.
-- [ ] Seed `rooms` for every pension with room types, private/shared bath flags, and price modifiers.
-- [ ] Seed `pension_universities` commute records strictly in the 4 primary cities.
-- [ ] Seed thousands of student accounts with university-domain emails and matching foreign keys.
-- [ ] Seed reviews with dynamic rating calculations, attaching the fixed review image URL only to select reviews in primary cities.
-- [ ] Seed sample `reports` in primary cities for moderation testing.
-- [ ] Assert that the `favorites` table remains strictly empty (`count === 0`).
-- [ ] Execute `seed-test.ts` against local PostgreSQL, verifying that all runtime tests pass and database integrity is maintained.
-- [ ] Validate code quality using Biome (`pnpm run check && pnpm run review`).
+- [x] Rename `prisma/seed.ts` to `prisma/seed-test.ts` and update `prisma.config.ts` and `package.json` (`db:seed` and `build:local`) to run `seed-test.ts`.
+- [x] Implement external HTTP fetch for Chilean universities with runtime assertion tests (validating `name`, `domains`, `web_pages`, `country === 'Chile'`).
+- [x] Implement external HTTP fetch for top 100 Chilean city coordinates with runtime assertion tests (validating coordinate bounds `-56 <= lat <= -17`, `-76 <= lng <= -66`, and verifying presence of Santiago, Valparaíso, Concepción, and Valdivia).
+- [x] Seed static platform amenity definitions (19 items).
+- [x] Seed fixed `ADMIN` and `MODERATOR` accounts with known password hash.
+- [x] Seed hundreds of landlord accounts with variable pension portfolios heavily weighted to primary cities.
+- [x] Seed pension listings with comprehensive metadata, realistic pricing, and connected amenities.
+- [x] Seed `rooms` for every pension with room types, private/shared bath flags, and price modifiers.
+- [x] Seed `pension_universities` commute records strictly in the 4 primary cities.
+- [x] Seed thousands of student accounts with university-domain emails and matching foreign keys.
+- [x] Seed reviews with dynamic rating calculations, attaching the fixed review image URL only to select reviews in primary cities.
+- [x] Seed sample `reports` in primary cities for moderation testing.
+- [x] Assert that the `favorites` table remains strictly empty (`count === 0`).
+- [x] Execute `seed-test.ts` against local PostgreSQL, verifying that all runtime tests pass and database integrity is maintained.
+- [x] Validate code quality using Biome (`pnpm run check && pnpm run review`).
 
 ---
 
