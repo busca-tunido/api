@@ -30,7 +30,7 @@ BuscaTuNido API is a modular backend service written in TypeScript using [NestJS
   - `reports/`: Community flag reports and moderation pipeline.
 - `prisma/schema.prisma`: Database models, indices, and PostgreSQL relations.
 - `api/.data/`: Isolated local PostgreSQL cluster (ignored by git via `.gitignore`).
-- `tasks/TODO.md`: Active task specification being executed.
+- `tasks/[index]_[task-name].md`: Active task specification being executed.
 - `tasks/completed/`: Historical record of finished task specifications.
 
 ### Local Database Management (`pnpm db:*`):
@@ -49,36 +49,45 @@ The backend relies on an isolated local database cluster stored in `.data/` for 
 
 1. **No Code Comments**:
    - Comments inside code are strictly prohibited unless explicitly requested by the user. Write descriptive symbol names and explicit types instead.
-2. **No Direct Config File Edits for Dependencies**:
+1. **No Direct Config File Edits for Dependencies**:
    - Never modify `package.json` or lockfiles manually to install or update dependencies. Use terminal CLI commands (`pnpm add <pkg>`, `pnpm add -D <pkg>`).
-3. **DTO & Payload Validation**:
+1. **DTO & Payload Validation**:
    - Every incoming request must use a DTO decorated with `class-validator` and `class-transformer` rules.
    - All controller endpoints and DTO properties must have OpenAPI `@ApiProperty` / `@ApiOperation` decorators for Swagger generation.
-4. **Strict Typing (Types over Interfaces)**:
+1. **Strict Typing (Types over Interfaces)**:
    - Use TypeScript `type` aliases exclusively; `interface` declarations are strictly forbidden.
    - Explicit return types are required on all controller methods, service methods, and helpers. `any` is strictly prohibited (prefer `unknown` or generics).
-5. **Conventional Commits (Concise, Single-Line Only)**:
+1. **Conventional Commits (Concise, Single-Line Only)**:
    - All git commit messages must strictly follow the Conventional Commits specification (e.g., `feat`, `fix`, `chore`, `refactor`, `test`, `docs`).
    - Commit messages must be concise, single-line only, and omit any extended body description.
-6. **Brand Naming Convention**:
+1. **Brand Naming Convention**:
    - The brand name must always be formatted as a single PascalCase token: `BuscaTuNido` (never separated as `Busca Tu Nido`).
 
 ---
 
-## 3. Task-Driven Lifecycle (TODO Workflow)
+## 3. Task-Driven Lifecycle (`tasks/[index]_[task-name].md` Workflow)
 
-Every backend feature, fix, or refactor must strictly follow the repository-specific task file generated inside the `tasks/` directory (`tasks/TODO.md`).
+Every backend feature, fix, or refactor must strictly adhere to the following workflow:
 
 ### Execution Cycle:
 
-1. **Read Scope**: Inspect `tasks/TODO.md` before altering code. Confine all work exclusively to the items in the checklist.
-2. **Track Progress**: Implement checklist items sequentially, checking off boxes (`- [x]`) as each phase is completed.
-3. **Verify**: Execute verification commands declared in the task (e.g., `pnpm build`). All checks must pass with zero errors before considering the task complete.
-4. **User Verification**: Present the completed checklist and verification results to the user for review and explicit approval before archiving.
-5. **Archive as Documentation**: Upon user approval, move/rename the completed `tasks/TODO.md` into `tasks/completed/[index]-[task-name].md` (e.g., `tasks/completed/001-initialize-nestjs-api.md`). This preserves a lightweight, immutable audit trail of backend development.
-6. **Handoff**: Generate a new, clean `tasks/TODO.md` inside `tasks/` for the next planned task.
+1. **Task Breakdown by Purpose**:
+   - Read the user request(s) and create a separate `tasks/[index]_[task-name].md` file for each request that serves a distinct purpose.
+   - *Example*: Adding a new field to a database model and updating its corresponding DTO/service belong in the same task specification. In contrast, configuring CORS or a global module belongs in a separate task specification.
+1. **Review & Clarification Gate**:
+   - Once all task files are generated, notify the user to review all task specifications in `tasks/`.
+   - Ask clarifying questions if any requirement or detail is ambiguous, and STOP the process so the user can review and approve the tasks.
+1. **Sequential Execution**:
+   - Once the user approves the tasks, execute them one by one until all are completed.
+   - For each task, strictly follow these steps:
+     - **Read Scope**: Inspect `tasks/[index]_[task-name].md` before modifying code. Confine all implementation strictly to the active task checklist.
+     - **Track Progress**: Implement checklist items step-by-step, checking off boxes (`- [x]`) as each phase is completed.
+     - **Verify**: Execute verification commands declared in the task (e.g., `pnpm build`, unit tests). All checks must pass with zero errors.
+     - **User Verification**: Present the completed checklist and verification results to the user for review and explicit approval before archiving.
+     - **Archive as Documentation**: Upon user approval, move/rename the completed `tasks/[index]_[task-name].md` into `tasks/completed/[index]_[task-name].md` (e.g., `tasks/completed/001_initialize-nestjs-api.md`). This preserves a lightweight, immutable audit trail of backend development.
+     - **Handoff**: Proceed to the next pending task in the sequence.
 
-### Standard `TODO.md` Template:
+### Standard `[index]_[task-name].md` Template:
 
 ```markdown
 # Task: [Index] - [Descriptive Title]
