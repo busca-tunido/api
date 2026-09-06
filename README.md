@@ -45,12 +45,6 @@ pnpm run db:init
 # 3. Puesta en marcha y compilación local (inicia DB, aplica Prisma, corre seed y compila NestJS)
 pnpm run build:local
 
-# (Alternativa: Control granular paso a paso)
-# pnpm run db:start   # Inicia el daemon de PostgreSQL
-# pnpm run db:status  # Verifica conectividad de PostgreSQL
-# pnpm prisma db push # Sincroniza el esquema de Prisma
-# pnpm run db:seed    # Puebla la base de datos con datos de prueba
-
 # 4. Iniciar el servidor en modo desarrollo (http://localhost:4000 y docs en /api/docs)
 pnpm start:dev
 
@@ -72,25 +66,17 @@ Actualmente la API se encuentra desplegada y automatizada en la nube a través d
 
 ### Pipeline de Despliegue en Render
 
-1. **Build Command**:
+```bash
+# Build Command: instala dependencias, genera Prisma Client y compila con nest build
+pnpm install && pnpm run build
 
-   ```bash
-   pnpm install && pnpm run build
-   ```
+# Start Command: inicia el servidor de producción (node dist/main)
+pnpm run start:prod
+```
 
-   - El comando `pnpm run build` ejecuta `prisma generate && nest build`, asegurando que el cliente de Prisma se compile contra el esquema de base de datos antes de generar el bundle de NestJS en la carpeta `dist/`.
-
-2. **Start Command**:
-
-   ```bash
-   pnpm run start:prod
-   ```
-
-   - Inicia el servidor de producción ejecutando `node dist/main`.
-
-3. **Variables de Entorno Configuradas en Render**:
-   - `NODE_ENV`: `production`
-   - `DATABASE_URL`: Conexión a la base de datos PostgreSQL en la nube (con SSL).
-   - `JWT_SECRET`: Clave criptográfica para la firma y validación de tokens JWT.
-   - `JWT_EXPIRATION`: Duración de validez de sesiones (ej. `7d`).
-   - `CORS_ORIGIN`: `https://web-theta-three-8zz8it8ws2.vercel.app` (permite comunicación CORS desde el frontend oficial desplegado en Vercel).
+**Variables de Entorno en Render**:
+- `NODE_ENV`: `production`
+- `DATABASE_URL`: Conexión a la base de datos PostgreSQL en la nube (con SSL).
+- `JWT_SECRET`: Clave criptográfica para la firma y validación de tokens JWT.
+- `JWT_EXPIRATION`: Duración de validez de sesiones (ej. `7d`).
+- `CORS_ORIGIN`: `https://web-theta-three-8zz8it8ws2.vercel.app` (permite comunicación CORS desde el frontend en Vercel).
