@@ -109,3 +109,51 @@ Every backend feature, fix, or refactor must strictly adhere to the following wo
 
 - Command: `[e.g., pnpm build]`
 ```
+
+<!-- BEGIN:nestjs-agent-rules -->
+
+---
+
+## 4. NestJS & Prisma Architectural Guidelines
+
+### Core Framework Conventions:
+
+1. **Dependency Injection & Providers**:
+   - Always inject services and repositories via constructor parameter properties: `constructor(private readonly prisma: PrismaService) {}`.
+   - Providers must always be decorated with `@Injectable()`.
+   - Never instantiate services manually with `new Service()`; rely on the NestJS Inversion of Control (IoC) container.
+
+2. **Modular Encapsulation**:
+   - Every domain entity must reside in its own feature module under `src/modules/<feature>/` (e.g., `auth`, `pensions`, `reviews`, `users`).
+   - Modules must explicitly declare `controllers`, `providers`, and `exports`. If another module requires a service, export that service from its module and import the owning module in the consuming module's `imports` array.
+   - Keep module imports circular-dependency free. Use `forwardRef()` only as a last resort when bidirectional relationships are unavoidable.
+
+3. **Request Lifecycle & Layering**:
+   - **Controllers**: Strictly handle HTTP routing, request binding, validation pipe triggers, Swagger metadata, and delegation to services. Never place business logic, complex data transformations, or direct Prisma database calls inside controllers.
+   - **Services**: Encapsulate all business logic, authorization verification, data mutation, and orchestration.
+   - **DTOs (Data Transfer Objects)**:
+     - Mandatory for every request payload (`@Body()`), query parameter set (`@Query()`), and route parameter (`@Param()`).
+     - Every DTO property must have both runtime validation decorators (`class-validator`) and OpenAPI documentation decorators (`@ApiProperty()`, `@ApiPropertyOptional()`).
+     - Use `@Type(() => Number)` or `@Transform()` for incoming query string and route parameter coercion.
+
+4. **Database Access with Prisma ORM**:
+   - Always inject and utilize `PrismaService` (`src/prisma/prisma.service.ts`) for database queries.
+   - Multi-step relational operations must be wrapped in atomic transactions using `this.prisma.$transaction(async (tx) => { ... })`.
+   - Handle Prisma runtime exceptions gracefully:
+     - `P2002` (Unique constraint violation) -> Throw `ConflictException` with a user-friendly message.
+     - `P2025` (Record not found) -> Throw `NotFoundException`.
+
+5. **Authentication, Authorization & Guards**:
+   - Route protection must be applied declaratively with `@UseGuards(JwtAuthGuard)`.
+   - Role-based access control must use the `@Roles(...)` metadata decorator combined with `@UseGuards(JwtAuthGuard, RolesGuard)`.
+   - Extract the authenticated user safely using the custom `@CurrentUser()` parameter decorator rather than accessing `req.user` directly.
+
+6. **Error Handling & HTTP Statuses**:
+   - Never return raw database error objects or stack traces to the client.
+   - Throw semantic NestJS HTTP exceptions: `BadRequestException`, `UnauthorizedException`, `ForbiddenException`, `NotFoundException`, `ConflictException`, or `InternalServerErrorException`.
+
+7. **Testing Standards**:
+   - Unit tests use [Vitest](https://vitest.dev/) with `@nestjs/testing` (`Test.createTestingModule`).
+   - Mock external dependencies and `PrismaService` when testing domain services in isolation.
+
+<!-- END:nestjs-agent-rules -->

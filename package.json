@@ -9,22 +9,26 @@
   "scripts": {
     "build": "prisma generate && nest build",
     "deploy": "nest deploy",
-    "format": "biome format --write .",
+    
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "biome lint .",
+
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+
     "db:init": "initdb -D .data -U postgres -A trust",
     "db:start": "pg_ctl -D .data start",
     "db:stop": "pg_ctl -D .data stop",
     "db:status": "pg_isready -h localhost -U postgres",
     "db:seed": "prisma db seed",
+
+    "format": "biome format --write .",
+    "lint": "biome lint .",
     "check": "biome check --write ."
   },
   "dependencies": {
