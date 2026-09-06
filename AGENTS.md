@@ -94,7 +94,7 @@ The project utilizes [Biome](https://biomejs.dev/) as a unified, ultra-fast tool
      - **Verify**:
        1. Run `pnpm run check` to automatically organize imports, fix linter warnings, and format code.
        2. Run `pnpm run review` to strictly verify that zero linting or formatting diagnostics remain.
-       3. Run application build and test checks (`pnpm build`). All checks must pass with zero errors before completion.
+       3. Run application build and test checks (`pnpm run build:local` for fast local development compilation or `pnpm build`). All checks must pass with zero errors before completion.
      - **User Verification**: Present the completed checklist and verification results to the user for review and explicit approval before archiving.
      - **Archive as Documentation**: Upon user approval, move/rename the completed `tasks/[index]_[task-name].md` into `tasks/completed/[index]_[task-name].md` (e.g., `tasks/completed/001_initialize-nestjs-api.md`). This preserves a lightweight, immutable audit trail of backend development.
      - **Handoff**: Proceed to the next pending task in the sequence.
@@ -120,7 +120,7 @@ The project utilizes [Biome](https://biomejs.dev/) as a unified, ultra-fast tool
 ## Verification
 
 - Code Quality (Biome): `pnpm run check && pnpm run review`
-- Build & Tests: `pnpm build`
+- Build & Tests: `pnpm run build:local` (or `pnpm build`)
 ```
 
 <!-- BEGIN:nestjs-agent-rules -->

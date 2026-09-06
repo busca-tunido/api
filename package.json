@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "prisma generate && nest build",
+    "build:local": "nest build",
     "deploy": "nest deploy",
     
     "start": "nest start",
