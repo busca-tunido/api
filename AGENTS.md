@@ -30,8 +30,8 @@ BuscaTuNido API is a modular backend service written in TypeScript using [NestJS
   - `reports/`: Community flag reports and moderation pipeline.
 - `prisma/schema.prisma`: Database models, indices, and PostgreSQL relations.
 - `api/.data/`: Isolated local PostgreSQL cluster (ignored by git via `.gitignore`).
-- `tasks/[index]_[task-name].md`: Active task specification being executed.
-- `tasks/completed/`: Historical record of finished task specifications.
+- `tasks/[task-name].md`: Active task specification being executed.
+- `tasks/completed/[index]_[task-name].md`: Historical record of finished task specifications with chronological index.
 
 ### Local Database Management (`pnpm db:*`):
 
@@ -66,7 +66,7 @@ The backend relies on an isolated local database cluster stored in `.data/` for 
 
 ---
 
-## 3. Task-Driven Lifecycle (`tasks/[index]_[task-name].md` Workflow)
+## 3. Task-Driven Lifecycle (`tasks/[task-name].md` Workflow)
 
 Every backend feature, fix, or refactor must strictly adhere to the following workflow:
 
@@ -86,7 +86,7 @@ The project utilizes [Biome](https://biomejs.dev/) as a unified, ultra-fast tool
 ### Execution Cycle:
 
 1. **Task Breakdown by Purpose**:
-   - Read the user request(s) and create a separate `tasks/[index]_[task-name].md` file for each request that serves a distinct purpose.
+   - Read the user request(s) and create a separate `tasks/[task-name].md` file for each request that serves a distinct purpose (omitting any index prefix while active in `tasks/`).
    - *Example*: Adding a new field to a database model and updating its corresponding DTO/service belong in the same task specification. In contrast, configuring CORS or a global module belongs in a separate task specification.
 2. **Review & Clarification Gate**:
    - Once all task files are generated, notify the user to review all task specifications in `tasks/`.
@@ -94,20 +94,20 @@ The project utilizes [Biome](https://biomejs.dev/) as a unified, ultra-fast tool
 3. **Sequential Execution**:
    - Once the user approves the tasks, execute them one by one until all are completed.
    - For each task, strictly follow these steps:
-     - **Read Scope**: Inspect `tasks/[index]_[task-name].md` before modifying code. Confine all implementation strictly to the active task checklist.
+     - **Read Scope**: Inspect `tasks/[task-name].md` before modifying code. Confine all implementation strictly to the active task checklist.
      - **Track Progress**: Implement checklist items step-by-step, checking off boxes (`- [x]`) as each phase is completed.
      - **Verify**:
        1. Run `pnpm run check` to automatically organize imports, fix linter warnings, and format code.
        2. Run `pnpm run review` to strictly verify that zero linting or formatting diagnostics remain.
        3. Run application build and test checks (`pnpm run build:local` for fast local development compilation or `pnpm build`). All checks must pass with zero errors before completion.
      - **User Verification**: Present the completed checklist and verification results to the user for review and explicit approval before archiving.
-     - **Archive as Documentation**: Upon user approval, move/rename the completed `tasks/[index]_[task-name].md` into `tasks/completed/[index]_[task-name].md` (e.g., `tasks/completed/001_initialize-nestjs-api.md`). This preserves a lightweight, immutable audit trail of backend development.
+     - **Archive as Documentation**: Upon user approval, move/rename the completed `tasks/[task-name].md` into `tasks/completed/[index]_[task-name].md` (e.g., `tasks/completed/001_initialize-nestjs-api.md`), assigning its chronological three-digit index only upon completion. This preserves a lightweight, immutable audit trail of backend development.
      - **Handoff**: Proceed to the next pending task in the sequence.
 
-### Standard `[index]_[task-name].md` Template:
+### Standard `[task-name].md` Template:
 
 ```markdown
-# Task: [Index] - [Descriptive Title]
+# Task: [Descriptive Title]
 
 ## Objective
 
