@@ -17,18 +17,24 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>(
-          'JWT_SECRET',
-          'tunido-super-secure-secret-key-for-jwt-signing',
-        ),
-        signOptions: {
-          expiresIn: configService.get<string>(
-            'JWT_EXPIRES_IN',
-            '7d',
-          ) as `${number}${'s' | 'm' | 'h' | 'd'}`,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        if (!secret) {
+          throw new Error('JWT_SECRET environment variable is required.');
+        }
+        const expiresIn =
+          configService.get<string>('JWT_EXPIRES_IN') ||
+          configService.get<string>('JWT_EXPIRATION');
+        if (!expiresIn) {
+          throw new Error('JWT_EXPIRATION (or JWT_EXPIRES_IN) environment variable is required.');
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: expiresIn as `${number}${'s' | 'm' | 'h' | 'd'}`,
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

@@ -6,6 +6,7 @@ export type EnvironmentConfig = {
   NODE_ENV: Environment;
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
+  CORS_ORIGIN: string;
 };
 
 export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig => {
@@ -15,7 +16,10 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     throw new Error(`Invalid NODE_ENV: ${nodeEnv}. Must be one of ${allowedEnvs.join(', ')}`);
   }
 
-  const rawPort = config.PORT ?? 3000;
+  const rawPort = config.PORT;
+  if (rawPort === undefined || rawPort === null || rawPort === '') {
+    throw new Error('PORT environment variable is required.');
+  }
   const port = Number(rawPort);
   if (Number.isNaN(port) || port <= 0 || port > 65535) {
     throw new Error(`Invalid PORT: ${rawPort}. Must be a valid port number.`);
@@ -26,15 +30,25 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     throw new Error('DATABASE_URL environment variable is required.');
   }
 
-  const jwtSecret =
-    (config.JWT_SECRET as string) || 'tunido-super-secure-secret-key-for-jwt-signing';
-  const jwtExpiresIn = (config.JWT_EXPIRES_IN as string) || '7d';
+  const jwtSecret = config.JWT_SECRET as string | undefined;
+  if (!jwtSecret || typeof jwtSecret !== 'string' || !jwtSecret.trim()) {
+    throw new Error('JWT_SECRET environment variable is required.');
+  }
+
+  const rawExpiresIn = (config.JWT_EXPIRES_IN || config.JWT_EXPIRATION) as string | undefined;
+  if (!rawExpiresIn || typeof rawExpiresIn !== 'string' || !rawExpiresIn.trim()) {
+    throw new Error('JWT_EXPIRATION (or JWT_EXPIRES_IN) environment variable is required.');
+  }
+
+  const corsOrigin =
+    (config.CORS_ORIGIN as string | undefined) || 'https://web-theta-three-8zz8it8ws2.vercel.app';
 
   return {
     PORT: port,
     DATABASE_URL: databaseUrl.trim(),
     NODE_ENV: nodeEnv,
-    JWT_SECRET: jwtSecret,
-    JWT_EXPIRES_IN: jwtExpiresIn,
+    JWT_SECRET: jwtSecret.trim(),
+    JWT_EXPIRES_IN: rawExpiresIn.trim(),
+    CORS_ORIGIN: corsOrigin.trim(),
   };
 };
