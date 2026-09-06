@@ -27,11 +27,11 @@ Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and Postgre
 
 - Node.js >= 20
 - pnpm >= 9
-- PostgreSQL running locally or via Docker
+- PostgreSQL CLI tools (`initdb`, `pg_ctl`, `pg_isready` en el PATH o instalados con Scoop/Homebrew)
 
 ### Environment Configuration
 
-Create a `.env` file in the `api` root:
+Crear un archivo `.env` en la raíz de `api` (o copiar desde `.env.example`):
 
 ```env
 PORT=4000
@@ -41,24 +41,60 @@ JWT_EXPIRATION="7d"
 CORS_ORIGIN="https://web-theta-three-8zz8it8ws2.vercel.app"
 ```
 
-### Commands
+### Flujo de Ejecución Local
+
+1. **Instalar dependencias**:
+   ```bash
+   pnpm install
+   ```
+
+2. **Configurar e iniciar la base de datos local** (cluster aislado en `.data/`):
+   ```bash
+   # Solo la primera vez (inicializa el cluster en .data/)
+   pnpm run db:init
+
+   # Iniciar el servicio de PostgreSQL en segundo plano
+   pnpm run db:start
+
+   # Verificar que el servidor de base de datos esté listo
+   pnpm run db:status
+   ```
+
+3. **Sincronizar el esquema**:
+   ```bash
+   # Sincronizar modelos de Prisma con la base de datos local
+   pnpm prisma db push
+
+   # Poblar datos de prueba (opcional)
+   pnpm run db:seed
+   ```
+
+4. **Iniciar el servidor en modo desarrollo**:
+   ```bash
+   pnpm start:dev
+   ```
+   La API estará disponible en `http://localhost:4000` y Swagger en `http://localhost:4000/api/docs`.
+
+5. **Detener la base de datos local** (al terminar el trabajo):
+   ```bash
+   pnpm run db:stop
+   ```
+
+### Otros Comandos
 
 ```bash
-# Install dependencies
-pnpm install
+# Compilación rápida para desarrollo local
+pnpm run build:local
 
-# Run migrations / push schema
-pnpm prisma db push
+# Compilación completa con generación de cliente Prisma (producción / CI)
+pnpm run build
 
-# Seed sample data
-pnpm prisma db seed
-
-# Start development server
-pnpm start:dev
-
-# Run tests
+# Ejecutar pruebas unitarias
 pnpm test
 
-# Lint and format
+# Auto-formato y corrección de linter (Biome)
 pnpm run check
+
+# Verificación de calidad de código en modo solo lectura (Biome)
+pnpm run review
 ```
