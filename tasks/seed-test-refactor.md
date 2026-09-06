@@ -7,8 +7,8 @@ Refactor the existing seed into `prisma/seed-test.ts` for active staging and tes
 ## Checklist
 
 - [ ] Rename `prisma/seed.ts` to `prisma/seed-test.ts` and update `prisma.config.ts` and `package.json` (`db:seed`) to invoke `seed-test.ts`.
-- [ ] Integrate external API lookup for Chilean universities with names, domains, and campus sites, adding a runtime assertion test that halts execution if university data fails to load.
-- [ ] Query external API for top 100 Chilean city coordinates, adding coordinate bounds validation (Chile: lat between -56 and -17, lng between -76 and -66) and guaranteeing the presence of key cities: Santiago, Valparaíso, Concepción, and Valdivia.
+- [ ] Integrate external API lookup for Chilean universities and strictly validate all received fields: non-empty `name` (>3 chars), valid `domains` array containing at least one valid domain, valid `web_pages` URLs (http/https), and exact country match (`country === 'Chile'`), halting execution with descriptive errors if any record is invalid.
+- [ ] Query external API for top 100 Chilean city coordinates and validate all received fields: non-empty city `name`, numeric `latitude` strictly within Chilean bounds (-56 to -17), numeric `longitude` strictly within Chilean bounds (-76 to -66), and assert mandatory presence of key cities: Santiago, Valparaíso, Concepción, and Valdivia.
 - [ ] Create hundreds of simulated landlord user accounts, distributing pensions with heavy concentration in primary cities (Santiago, Valparaíso, Concepción, Valdivia) and sparse distribution elsewhere.
 - [ ] Populate `rooms` table with diverse room types (single, shared, studio) and realistic price tiers.
 - [ ] Link `pension_universities` with walking and transit commute estimates for pensions in primary cities.
