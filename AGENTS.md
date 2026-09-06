@@ -78,6 +78,10 @@ The project utilizes [Biome](https://biomejs.dev/) as a unified, ultra-fast tool
 - `pnpm run check`: Unified command combining formatting, import organization, and safe lint autofixes (`biome check --write .`). Agents must run this after modifying code.
 - `pnpm run review`: Read-only verification check (`biome check .`) that returns an error exit code if any unresolved formatting or lint errors exist. Mandatory for validation.
 
+> [!IMPORTANT]
+> **Always Use Global `pnpm run <script>` (Do Not Target Individual Files)**:
+> Due to Biome's extreme execution speed (processing the entire project in tens of milliseconds), agents must always execute the predefined global scripts (`pnpm run check`, `pnpm run review`, `pnpm run format`, `pnpm run lint`) targeting the whole repository (`.`) rather than targeting individual files. Running against specific files provides no measurable performance advantage and risks leaving formatting or lint inconsistencies across the project.
+
 ### Execution Cycle:
 
 1. **Task Breakdown by Purpose**:
