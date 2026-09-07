@@ -35,11 +35,16 @@ describe('FavoritesService', () => {
     service = new FavoritesService(mockPrisma as unknown as PrismaService);
   });
 
-  it('should return user favorites', async () => {
+  it('should return user favorites strictly isolated by userId', async () => {
     mockPrisma.favorite.findMany.mockResolvedValue([{ pensionId: 'pen-1', userId: 'user-1' }]);
 
     const result = await service.findAllByUser('user-1');
     expect(result).toHaveLength(1);
+    expect(mockPrisma.favorite.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: 'user-1' },
+      }),
+    );
   });
 
   it('should add pension to favorites', async () => {

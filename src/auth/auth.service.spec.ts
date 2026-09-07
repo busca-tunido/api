@@ -73,6 +73,11 @@ describe('AuthService', () => {
 
       expect(result.accessToken).toBe('mock-jwt-token');
       expect(result.user.email).toBe('test@uchile.cl');
+      expect(mockJwtService.sign).toHaveBeenCalledWith({
+        sub: 'user-1',
+        email: 'test@uchile.cl',
+        role: Role.STUDENT,
+      });
       expect(mockPrisma.user.create).toHaveBeenCalled();
     });
 
@@ -115,6 +120,11 @@ describe('AuthService', () => {
 
       expect(result.accessToken).toBe('mock-jwt-token');
       expect(result.user.id).toBe('user-1');
+      expect(mockJwtService.sign).toHaveBeenCalledWith({
+        sub: 'user-1',
+        email: 'test@uchile.cl',
+        role: Role.STUDENT,
+      });
     });
 
     it('should throw UnauthorizedException if password does not match', async () => {
@@ -171,6 +181,46 @@ describe('AuthService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(service.getProfile('non-existing-id')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should never expose passwordHash and ensure field sanitization', async () => {
+      const user = {
+        id: 'user-1',
+        email: 'test@uchile.cl',
+        firstName: 'Test',
+        lastName: 'User',
+        phone: null,
+        avatarUrl: null,
+        role: Role.STUDENT,
+        isEmailVerified: true,
+        universityId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+
+      const profile = await service.getProfile('user-1');
+      expect(profile).not.toHaveProperty('passwordHash');
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'user-1', deletedAt: null },
+        select: expect.objectContaining({
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+        }),
+      });
+    });
+
+    it('should throw NotFoundException if user account is deactivated/deleted', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.getProfile('deactivated-user-id')).rejects.toThrow(NotFoundException);
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'deactivated-user-id', deletedAt: null },
+        select: expect.any(Object),
+      });
     });
   });
 });

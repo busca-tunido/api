@@ -8,6 +8,7 @@ import {
   type StayDurationCategory,
   type VerificationStatus,
 } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import {
   AMENITY_DEFINITIONS,
   assignCityToUniversity,
@@ -90,7 +91,7 @@ const main = async (): Promise<void> => {
     amenityRecords.push(record);
   }
 
-  const defaultPasswordHash = '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6x8ekEY58Eb67980EbGO';
+  const defaultPasswordHash = bcrypt.hashSync('Password123!', 10);
 
   await prisma.user.create({
     data: {
@@ -151,7 +152,21 @@ const main = async (): Promise<void> => {
   }
 
   console.log('--- Step 5: Seeding hundreds of landlord users ---');
-  const landlordUsers = [];
+  const landlordDemo = await prisma.user.create({
+    data: {
+      email: 'propietario.demo@buscatunido.cl',
+      passwordHash: defaultPasswordHash,
+      firstName: 'Propietario',
+      lastName: 'Demo',
+      phone: '+56987654321',
+      role: 'LANDLORD' as Role,
+      isEmailVerified: true,
+      avatarUrl:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+    },
+  });
+
+  const landlordUsers = [landlordDemo];
   const TOTAL_LANDLORDS = 120;
   for (let i = 1; i <= TOTAL_LANDLORDS; i++) {
     const firstName = faker.person.firstName();
@@ -195,7 +210,7 @@ const main = async (): Promise<void> => {
         ? faker.helpers.arrayElement(nearbyUnisInCity)
         : universityRecords[i % universityRecords.length];
 
-    const landlord = landlordUsers[i % landlordUsers.length];
+    const landlord = i < 3 ? landlordDemo : landlordUsers[i % landlordUsers.length];
     const prefix = faker.helpers.arrayElement(PENSION_TITLES_PREFIXES);
     const street = faker.location.street();
     const title = `${prefix} ${targetCity.city} ${street}`;
@@ -333,7 +348,25 @@ const main = async (): Promise<void> => {
   await prisma.room.createMany({ data: allRooms });
 
   console.log('--- Step 7: Seeding thousands of student users ---');
-  const studentUsers = [];
+  const primaryUni =
+    universityRecords.find((u) => u.name.toLowerCase().includes('chile')) || universityRecords[0];
+
+  const studentDemo = await prisma.user.create({
+    data: {
+      email: 'estudiante.demo@uchile.cl',
+      passwordHash: defaultPasswordHash,
+      firstName: 'Estudiante',
+      lastName: 'Demo',
+      phone: '+56912345678',
+      role: 'STUDENT' as Role,
+      isEmailVerified: true,
+      universityId: primaryUni.id,
+      avatarUrl:
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    },
+  });
+
+  const studentUsers = [studentDemo];
   const TOTAL_STUDENTS = 1200;
   for (let i = 1; i <= TOTAL_STUDENTS; i++) {
     const assignedUni = universityRecords[i % universityRecords.length];
@@ -457,6 +490,34 @@ const main = async (): Promise<void> => {
   await prisma.report.createMany({ data: allReports });
 
   console.log('--- Step 10: Validating invariants & assertions ---');
+  const defaultStudent = await prisma.user.findUnique({
+    where: { email: 'estudiante.demo@uchile.cl' },
+  });
+  if (defaultStudent?.role !== 'STUDENT' || !defaultStudent.isEmailVerified) {
+    throw new Error(
+      'Default student assertion failed: estudiante.demo@uchile.cl missing or invalid',
+    );
+  }
+
+  const defaultLandlord = await prisma.user.findUnique({
+    where: { email: 'propietario.demo@buscatunido.cl' },
+    include: { managedPensions: true },
+  });
+  if (defaultLandlord?.role !== 'LANDLORD' || defaultLandlord.managedPensions.length === 0) {
+    throw new Error(
+      'Default landlord assertion failed: propietario.demo@buscatunido.cl missing or has no pensions',
+    );
+  }
+
+  if (
+    !bcrypt.compareSync('Password123!', defaultStudent.passwordHash) ||
+    !bcrypt.compareSync('Password123!', defaultLandlord.passwordHash)
+  ) {
+    throw new Error(
+      'Password hash assertion failed: Password123! does not match seeded test accounts',
+    );
+  }
+
   const favoritesCount = await prisma.favorite.count();
   if (favoritesCount !== 0) {
     throw new Error(`Invariant failed: expected 0 favorites, but found ${favoritesCount}`);

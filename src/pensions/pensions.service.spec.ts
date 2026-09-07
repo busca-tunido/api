@@ -48,6 +48,20 @@ describe('PensionsService', () => {
     updatedAt: new Date(),
   };
 
+  const mockAdmin: SanitizedUser = {
+    id: 'admin-1',
+    email: 'admin@test.cl',
+    firstName: 'Admin',
+    lastName: 'User',
+    phone: null,
+    avatarUrl: null,
+    role: Role.ADMIN,
+    isEmailVerified: true,
+    universityId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(() => {
     mockPrisma = {
       pension: {
@@ -127,6 +141,17 @@ describe('PensionsService', () => {
       expect((result as { title: string }).title).toBe('Updated Title');
     });
 
+    it('should allow ADMIN to update any pension regardless of ownership', async () => {
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: 'landlord-1',
+      });
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1', title: 'Admin Updated' });
+
+      const result = await service.update('pension-1', { title: 'Admin Updated' }, mockAdmin);
+      expect((result as { title: string }).title).toBe('Admin Updated');
+    });
+
     it('should throw ForbiddenException if user does not own the pension', async () => {
       mockPrisma.pension.findUnique.mockResolvedValue({
         id: 'pension-1',
@@ -148,6 +173,17 @@ describe('PensionsService', () => {
       mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1', deletedAt: new Date() });
 
       const result = await service.delete('pension-1', mockLandlord);
+      expect(result.deleted).toBe(true);
+    });
+
+    it('should allow ADMIN to delete any pension regardless of ownership', async () => {
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: 'landlord-1',
+      });
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1', deletedAt: new Date() });
+
+      const result = await service.delete('pension-1', mockAdmin);
       expect(result.deleted).toBe(true);
     });
 
