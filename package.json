@@ -27,6 +27,7 @@
     "db:stop": "pg_ctl -D .data stop",
     "db:status": "pg_isready -h localhost -U postgres",
     "db:seed": "prisma db seed",
+    "db:view": "prisma studio",
 
     "format": "biome format --write .",
     "lint": "biome lint .",
