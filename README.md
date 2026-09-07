@@ -6,7 +6,7 @@ Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and Postgre
 
 - **API (Production)**: [https://buscatunido-api.onrender.com](https://buscatunido-api.onrender.com)
 - **Swagger / OpenAPI Documentation**: [https://buscatunido-api.onrender.com/api/docs](https://buscatunido-api.onrender.com/api/docs)
-- **Official Web App (Frontend)**: [https://web-git-main-joseleivas-projects.vercel.app/](https://web-git-main-joseleivas-projects.vercel.app/)
+- **Official Web App (Frontend)**: [https://buscatunido.vercel.app/](https://buscatunido.vercel.app/)
 
 ## Features
 
@@ -83,4 +83,4 @@ pnpm run start:prod
 - `DATABASE_URL`: Cloud PostgreSQL connection string (with SSL).
 - `JWT_SECRET`: Secret key for signing and verifying JWT tokens.
 - `JWT_EXPIRATION`: Session token duration (e.g., `7d`).
-- `CORS_ORIGIN`: `https://web-git-main-joseleivas-projects.vercel.app` (enables cross-origin communication with the official Vercel web frontend).
+- `CORS_ORIGIN`: `https://buscatunido.vercel.app` (enables cross-origin communication with the official Vercel web frontend).

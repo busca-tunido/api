@@ -40,9 +40,7 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     throw new Error('JWT_EXPIRATION (or JWT_EXPIRES_IN) environment variable is required.');
   }
 
-  const corsOrigin =
-    (config.CORS_ORIGIN as string | undefined) ||
-    'https://web-git-main-joseleivas-projects.vercel.app';
+  const corsOrigin = (config.CORS_ORIGIN as string | undefined) || 'https://buscatunido.vercel.app';
 
   return {
     PORT: port,
