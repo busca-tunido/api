@@ -41,7 +41,8 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
   }
 
   const corsOrigin =
-    (config.CORS_ORIGIN as string | undefined) || 'https://web-theta-three-8zz8it8ws2.vercel.app';
+    (config.CORS_ORIGIN as string | undefined) ||
+    'https://web-git-main-joseleivas-projects.vercel.app';
 
   return {
     PORT: port,

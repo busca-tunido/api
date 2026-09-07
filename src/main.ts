@@ -12,7 +12,7 @@ async function bootstrap(): Promise<void> {
   const configService = app.get(ConfigService);
   const corsOrigin = configService.get<string>('CORS_ORIGIN');
   const allowedOrigins: Array<string | RegExp> = [
-    'https://web-theta-three-8zz8it8ws2.vercel.app',
+    'https://web-git-main-joseleivas-projects.vercel.app',
     /https:\/\/.*\.vercel\.app$/,
     'http://localhost:3000',
     'http://127.0.0.1:3000',
