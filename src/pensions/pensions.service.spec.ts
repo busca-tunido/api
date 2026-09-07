@@ -13,6 +13,7 @@ type MockPrismaService = {
     findUnique: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
+    groupBy: ReturnType<typeof vi.fn>;
   };
 };
 
@@ -71,6 +72,7 @@ describe('PensionsService', () => {
         findUnique: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+        groupBy: vi.fn().mockResolvedValue([{ city: 'Santiago', _count: { id: 5 } }]),
       },
     };
 
@@ -78,9 +80,9 @@ describe('PensionsService', () => {
   });
 
   describe('findAll', () => {
-    it('should return paginated pensions', async () => {
+    it('should return paginated pensions without geo coordinates', async () => {
       mockPrisma.pension.findMany.mockResolvedValue([
-        { id: 'pension-1', title: 'Pensión San Joaquín' },
+        { id: 'pension-1', title: 'Pensión San Joaquín', city: 'Santiago' },
       ]);
       mockPrisma.pension.count.mockResolvedValue(1);
 
@@ -88,6 +90,105 @@ describe('PensionsService', () => {
       expect(result.items).toHaveLength(1);
       expect(result.total).toBe(1);
       expect(result.totalPages).toBe(1);
+      expect(result.pagination.hasMore).toBe(false);
+      expect(result.nearbyCityCounts).toEqual([{ city: 'Santiago', count: 5 }]);
+    });
+
+    it('should filter by radius and calculate relevance score when coordinates are provided', async () => {
+      const closePension = {
+        id: 'pen-close',
+        title: 'Pensión Cercana',
+        city: 'Santiago',
+        latitude: -33.45,
+        longitude: -70.66,
+        baseMonthlyPrice: 250000,
+        ratingAverage: 4.8,
+        ratingCount: 10,
+        verificationStatus: 'OFFICIALLY_VERIFIED',
+        rooms: [{ availableBeds: 2 }],
+        amenities: [{ category: 'BASIC_UTILITY', slug: 'wifi-fibra' }],
+        images: [],
+        nearbyUniversities: [],
+        _count: { rooms: 3, reviews: 10 },
+      };
+
+      const farPension = {
+        id: 'pen-far',
+        title: 'Pensión Lejana',
+        city: 'Rancagua',
+        latitude: -34.17,
+        longitude: -70.74,
+        baseMonthlyPrice: 180000,
+        ratingAverage: 4.0,
+        ratingCount: 2,
+        verificationStatus: 'UNVERIFIED',
+        rooms: [{ availableBeds: 1 }],
+        amenities: [],
+        images: [],
+        nearbyUniversities: [],
+        _count: { rooms: 2, reviews: 2 },
+      };
+
+      mockPrisma.pension.findMany.mockResolvedValue([closePension, farPension]);
+
+      const result = await service.findAll({
+        latitude: -33.4489,
+        longitude: -70.6693,
+        radiusKm: 30,
+        sortBy: 'relevance',
+      });
+
+      expect(result.items).toHaveLength(1);
+      const item = result.items[0] as typeof closePension & {
+        distanceKm: number;
+        relevanceScore: number;
+      };
+      expect(item.id).toBe('pen-close');
+      expect(item.distanceKm).toBeLessThanOrEqual(30);
+      expect(item.relevanceScore).toBeGreaterThan(0);
+      expect(result.nearbyCityCounts.length).toBeGreaterThan(0);
+    });
+
+    it('should sort by distance ascending when sortBy=distance is specified', async () => {
+      const pen1 = {
+        id: 'pen-1',
+        title: 'Pensión 1 km',
+        city: 'Santiago',
+        latitude: -33.44,
+        longitude: -70.66,
+        baseMonthlyPrice: 300000,
+        ratingAverage: 4.0,
+        ratingCount: 5,
+        verificationStatus: 'COMMUNITY_VERIFIED',
+        rooms: [{ availableBeds: 1 }],
+        amenities: [],
+      };
+      const pen2 = {
+        id: 'pen-2',
+        title: 'Pensión 5 km',
+        city: 'Santiago',
+        latitude: -33.4,
+        longitude: -70.6,
+        baseMonthlyPrice: 200000,
+        ratingAverage: 5.0,
+        ratingCount: 20,
+        verificationStatus: 'OFFICIALLY_VERIFIED',
+        rooms: [{ availableBeds: 2 }],
+        amenities: [],
+      };
+
+      mockPrisma.pension.findMany.mockResolvedValue([pen2, pen1]);
+
+      const result = await service.findAll({
+        latitude: -33.4489,
+        longitude: -70.6693,
+        radiusKm: 30,
+        sortBy: 'distance',
+      });
+
+      expect(result.items).toHaveLength(2);
+      const first = result.items[0] as { id: string };
+      expect(first.id).toBe('pen-1');
     });
   });
 

@@ -9,10 +9,65 @@ import type { UpdatePensionDto } from './dto/update-pension.dto.js';
 
 export type PaginatedPensions<T> = {
   items: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+  nearbyCityCounts: Array<{
+    city: string;
+    count: number;
+    distanceKm?: number;
+  }>;
   total: number;
   page: number;
   limit: number;
   totalPages: number;
+};
+
+export const calculateHaversineDistanceKm = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number => {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+};
+
+export const calculateRelevanceScore = (
+  distanceKm: number,
+  radiusKm: number,
+  ratingAverage: number,
+  ratingCount: number,
+  verificationStatus: string,
+  availableBeds: number,
+  hasEssentialUtilities: boolean,
+): number => {
+  const proximityScore = Math.max(0, 100 * (1 - distanceKm / radiusKm));
+  const ratingScore = (ratingAverage / 5.0) * 70 + Math.min(30, ratingCount * 3);
+  const verifScore =
+    verificationStatus === 'OFFICIALLY_VERIFIED'
+      ? 100
+      : verificationStatus === 'COMMUNITY_VERIFIED'
+        ? 75
+        : 30;
+  const availScore = (availableBeds > 0 ? 50 : 0) + (hasEssentialUtilities ? 50 : 0);
+
+  const total = 0.4 * proximityScore + 0.25 * ratingScore + 0.2 * verifScore + 0.15 * availScore;
+
+  return Math.round(total * 10) / 10;
 };
 
 const slugify = (text: string): string => {
@@ -104,12 +159,160 @@ export class PensionsService {
       ]);
     }
 
-    const [items, total] = await Promise.all([
+    const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
+
+    if (hasGeo) {
+      const userLat = filter.latitude as number;
+      const userLng = filter.longitude as number;
+      const radiusKm = Math.max(1, Math.min(100, filter.radiusKm || 30));
+
+      const candidates = await this.prisma.pension.findMany({
+        where,
+        include: {
+          images: {
+            where: { deletedAt: null },
+            orderBy: { sortOrder: 'asc' },
+            take: 3,
+          },
+          amenities: {
+            where: { deletedAt: null },
+            take: 5,
+          },
+          nearbyUniversities: {
+            include: {
+              university: {
+                select: { id: true, name: true, shortName: true },
+              },
+            },
+            take: 2,
+          },
+          rooms: {
+            where: { deletedAt: null, isAvailable: true },
+            select: { availableBeds: true },
+          },
+          _count: {
+            select: {
+              rooms: true,
+              reviews: true,
+            },
+          },
+        },
+      });
+
+      const cityCountsMap = new Map<string, { count: number; minDistance: number }>();
+
+      type ScoredPension = (typeof candidates)[0] & {
+        distanceKm: number;
+        relevanceScore: number;
+      };
+
+      const inRadiusItems: ScoredPension[] = [];
+
+      for (const pension of candidates) {
+        const distanceKm = calculateHaversineDistanceKm(
+          userLat,
+          userLng,
+          pension.latitude,
+          pension.longitude,
+        );
+
+        if (distanceKm <= Math.max(radiusKm, 60)) {
+          const currentCity = cityCountsMap.get(pension.city) || {
+            count: 0,
+            minDistance: distanceKm,
+          };
+          currentCity.count += 1;
+          if (distanceKm < currentCity.minDistance) {
+            currentCity.minDistance = distanceKm;
+          }
+          cityCountsMap.set(pension.city, currentCity);
+        }
+
+        if (distanceKm <= radiusKm) {
+          const totalAvailableBeds = pension.rooms.reduce(
+            (acc, r) => acc + (r.availableBeds || 0),
+            0,
+          );
+          const hasUtilities = pension.amenities.some(
+            (a) =>
+              a.category === 'BASIC_UTILITY' ||
+              a.slug.includes('wifi') ||
+              a.slug.includes('luz') ||
+              a.slug.includes('agua'),
+          );
+
+          const relevanceScore = calculateRelevanceScore(
+            distanceKm,
+            radiusKm,
+            Number(pension.ratingAverage),
+            pension.ratingCount,
+            pension.verificationStatus,
+            totalAvailableBeds,
+            hasUtilities,
+          );
+
+          inRadiusItems.push({
+            ...pension,
+            distanceKm,
+            relevanceScore,
+          });
+        }
+      }
+
+      const sortBy = filter.sortBy || 'relevance';
+      inRadiusItems.sort((a, b) => {
+        if (sortBy === 'distance') return a.distanceKm - b.distanceKm;
+        if (sortBy === 'rating') return Number(b.ratingAverage) - Number(a.ratingAverage);
+        if (sortBy === 'price_asc') return Number(a.baseMonthlyPrice) - Number(b.baseMonthlyPrice);
+        if (sortBy === 'price_desc') return Number(b.baseMonthlyPrice) - Number(a.baseMonthlyPrice);
+        return b.relevanceScore - a.relevanceScore;
+      });
+
+      const total = inRadiusItems.length;
+      const totalPages = Math.ceil(total / limit) || 1;
+      const items = inRadiusItems.slice(skip, skip + limit);
+      const hasMore = skip + limit < total;
+
+      const nearbyCityCounts = Array.from(cityCountsMap.entries())
+        .map(([city, data]) => ({
+          city,
+          count: data.count,
+          distanceKm: data.minDistance,
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      return {
+        items,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasMore,
+        },
+        nearbyCityCounts,
+        total,
+        page,
+        limit,
+        totalPages,
+      };
+    }
+
+    let orderBy: Prisma.PensionOrderByWithRelationInput = { createdAt: 'desc' };
+    if (filter.sortBy === 'rating') {
+      orderBy = { ratingAverage: 'desc' };
+    } else if (filter.sortBy === 'price_asc') {
+      orderBy = { baseMonthlyPrice: 'asc' };
+    } else if (filter.sortBy === 'price_desc') {
+      orderBy = { baseMonthlyPrice: 'desc' };
+    }
+
+    const [items, total, cityGroups] = await Promise.all([
       this.prisma.pension.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: {
           images: {
             where: { deletedAt: null },
@@ -137,14 +340,36 @@ export class PensionsService {
         },
       }),
       this.prisma.pension.count({ where }),
+      this.prisma.pension.groupBy({
+        by: ['city'],
+        where: { deletedAt: null, isActive: true },
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 10,
+      }),
     ]);
+
+    const totalPages = Math.ceil(total / limit) || 1;
+    const hasMore = skip + limit < total;
+    const nearbyCityCounts = cityGroups.map((g) => ({
+      city: g.city,
+      count: g._count.id,
+    }));
 
     return {
       items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasMore,
+      },
+      nearbyCityCounts,
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit) || 1,
+      totalPages,
     };
   }
 

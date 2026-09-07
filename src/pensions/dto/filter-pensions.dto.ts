@@ -70,4 +70,36 @@ export class FilterPensionsDto {
   @Min(1)
   @Max(50)
   limit: number = 12;
+
+  @ApiPropertyOptional({ example: -33.4489, description: 'Latitude coordinate of user location' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-56.0)
+  @Max(-17.0)
+  latitude?: number;
+
+  @ApiPropertyOptional({ example: -70.6693, description: 'Longitude coordinate of user location' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-110.0)
+  @Max(-66.0)
+  longitude?: number;
+
+  @ApiPropertyOptional({ example: 30, default: 30, description: 'Radius in km (1-100)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  radiusKm?: number = 30;
+
+  @ApiPropertyOptional({
+    example: 'relevance',
+    enum: ['relevance', 'distance', 'rating', 'price_asc', 'price_desc'],
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: 'relevance' | 'distance' | 'rating' | 'price_asc' | 'price_desc';
 }
