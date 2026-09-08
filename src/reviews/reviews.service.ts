@@ -18,6 +18,7 @@ export class ReviewsService {
     return this.prisma.review.findMany({
       where: {
         pensionId,
+        isHidden: false,
         deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
@@ -122,10 +123,11 @@ export class ReviewsService {
     return { id, deleted: true };
   }
 
-  private async recalculatePensionRating(pensionId: string): Promise<void> {
+  async recalculatePensionRating(pensionId: string): Promise<void> {
     const reviews = await this.prisma.review.findMany({
       where: {
         pensionId,
+        isHidden: false,
         deletedAt: null,
       },
       select: { overallRating: true },

@@ -29,14 +29,14 @@ Equip moderators with administrative endpoints to moderate reviews (hide/unhide 
 
 ## Checklist
 
-- [ ] Update `Review` model in `prisma/schema.prisma` with `isHidden` and `moderationReason`.
-- [ ] Run `prisma db push` to synchronize local database schema.
-- [ ] Seed a sample moderated/hidden review in `prisma/seed-test.ts` for testing.
-- [ ] Create `ModerationModule` with endpoints for reviews and pensions.
-- [ ] Update `ReviewsService.findByPension()` to automatically filter out reviews where `isHidden: true`.
-- [ ] Add unit tests in `src/moderation/moderation.service.spec.ts`.
-- [ ] Validate code quality with Biome (`pnpm run check && pnpm run review`).
-- [ ] Verify build with `pnpm exec nest build`.
+- [x] Update `Review` model in `prisma/schema.prisma` with `isHidden` and `moderationReason`.
+- [x] Run `prisma db push` to synchronize local database schema.
+- [x] Seed a sample moderated/hidden review in `prisma/seed-test.ts` for testing.
+- [x] Create `ModerationModule` with endpoints for reviews and pensions.
+- [x] Update `ReviewsService.findByPension()` to automatically filter out reviews where `isHidden: true`.
+- [x] Add unit tests in `src/moderation/moderation.service.spec.ts`.
+- [x] Validate code quality with Biome (`pnpm run check && pnpm run review`).
+- [x] Verify build with `pnpm exec nest build`.
 
 ---
 
