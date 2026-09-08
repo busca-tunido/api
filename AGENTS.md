@@ -61,6 +61,10 @@ The backend relies on an isolated local database cluster stored in `.data/` for 
 1. **Conventional Commits (Concise, Single-Line Only)**:
    - All git commit messages must strictly follow the Conventional Commits specification (e.g., `feat`, `fix`, `chore`, `refactor`, `test`, `docs`).
    - Commit messages must be concise, single-line only, and omit any extended body description.
+1. **Strictly for Registered & Authenticated Users (No Guests Allowed)**:
+   - The platform does not permit unauthenticated/guest interactions or guest contributions.
+   - All community actions (publishing reviews, submitting edit proposals, saving favorites, filing reports, uploading photos) strictly require authenticated session JWT tokens (`JwtAuthGuard`).
+   - Anonymous or guest modes are completely prohibited by design.
 1. **Brand Naming Convention**:
    - The brand name must always be formatted as a single PascalCase token: `BuscaTuNido` (never separated as `Busca Tu Nido`).
 

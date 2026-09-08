@@ -1,26 +1,26 @@
 import { type ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type ErrorEnvelope, HttpExceptionFilter } from './http-exception.filter.js';
 
 describe('HttpExceptionFilter', () => {
   let filter: HttpExceptionFilter;
   let mockStatus: ReturnType<typeof vi.fn>;
-  let mockJson: ReturnType<typeof vi.fn>;
-  let mockResponse: Response;
-  let mockRequest: Request;
+  let mockSend: ReturnType<typeof vi.fn>;
+  let mockResponse: FastifyReply;
+  let mockRequest: FastifyRequest;
   let mockHost: ArgumentsHost;
 
   beforeEach(() => {
     filter = new HttpExceptionFilter();
-    mockJson = vi.fn();
-    mockStatus = vi.fn().mockReturnValue({ json: mockJson });
+    mockSend = vi.fn();
+    mockStatus = vi.fn().mockReturnValue({ send: mockSend });
     mockResponse = {
       status: mockStatus,
-    } as unknown as Response;
+    } as unknown as FastifyReply;
     mockRequest = {
       url: '/test-endpoint',
-    } as unknown as Request;
+    } as unknown as FastifyRequest;
 
     mockHost = {
       switchToHttp: () => ({
@@ -35,7 +35,7 @@ describe('HttpExceptionFilter', () => {
     filter.catch(exception, mockHost);
 
     expect(mockStatus).toHaveBeenCalledWith(HttpStatus.FORBIDDEN);
-    expect(mockJson).toHaveBeenCalledWith(
+    expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
         statusCode: HttpStatus.FORBIDDEN,
@@ -55,7 +55,7 @@ describe('HttpExceptionFilter', () => {
     filter.catch(exception, mockHost);
 
     expect(mockStatus).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-    const sentPayload = mockJson.mock.calls[0][0] as ErrorEnvelope;
+    const sentPayload = mockSend.mock.calls[0][0] as ErrorEnvelope;
     expect(sentPayload.success).toBe(false);
     expect(sentPayload.message).toBe('Validation failed');
     expect(sentPayload.errors).toEqual(validationErrors);
@@ -66,7 +66,7 @@ describe('HttpExceptionFilter', () => {
     filter.catch(error, mockHost);
 
     expect(mockStatus).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-    const sentPayload = mockJson.mock.calls[0][0] as ErrorEnvelope;
+    const sentPayload = mockSend.mock.calls[0][0] as ErrorEnvelope;
     expect(sentPayload.success).toBe(false);
     expect(sentPayload.statusCode).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(sentPayload.message).toBe('Database connection failed');
