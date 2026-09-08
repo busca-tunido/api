@@ -42,16 +42,16 @@ Harden API request validation and authentication boundaries:
 
 ## Checklist
 
-- [ ] Update `RegisterDto` in `src/auth/dto/register.dto.ts` to disallow `MODERATOR` and `ADMIN` values.
-- [ ] Add unit tests in `src/auth/auth.service.spec.ts` verifying that `MODERATOR` role registration is rejected.
-- [ ] Implement `pnpm db:seed:mod` script for provisioning moderator accounts independently.
-- [ ] Add `@IsIn` decorator to `sortBy` in `src/pensions/dto/filter-pensions.dto.ts`.
-- [ ] Add 24h time regex validation to curfew and quiet hour fields in `src/pensions/dto/create-pension.dto.ts`.
-- [ ] Verify that all private/mutating routes enforce `JwtAuthGuard` rejecting unauthenticated requests with `401`.
-- [ ] Implement strict ownership verification (`userId === currentUser.id`) across user, review, pension, and favorite operations, rejecting cross-user access with `403 Forbidden`.
-- [ ] Add tests in `src/auth/auth.service.spec.ts` and controller specs validating IDOR prevention (user cannot access or modify resources of another user).
-- [ ] Validate code formatting with Biome (`pnpm run check && pnpm run review`).
-- [ ] Verify build with `pnpm exec nest build`.
+- [x] Update `RegisterDto` in `src/auth/dto/register.dto.ts` to disallow `MODERATOR` and `ADMIN` values.
+- [x] Add unit tests in `src/auth/auth.service.spec.ts` verifying that `MODERATOR` role registration is rejected.
+- [x] Implement `pnpm db:seed:mod` script for provisioning moderator accounts independently.
+- [x] Add `@IsIn` decorator to `sortBy` in `src/pensions/dto/filter-pensions.dto.ts`.
+- [x] Add 24h time regex validation to curfew and quiet hour fields in `src/pensions/dto/create-pension.dto.ts`.
+- [x] Verify that all private/mutating routes enforce `JwtAuthGuard` rejecting unauthenticated requests with `401`.
+- [x] Implement strict ownership verification (`userId === currentUser.id`) across user, review, pension, and favorite operations, rejecting cross-user access with `403 Forbidden`.
+- [x] Add tests in `src/auth/auth.service.spec.ts` and controller specs validating IDOR prevention (user cannot access or modify resources of another user).
+- [x] Validate code formatting with Biome (`pnpm run check && pnpm run review`).
+- [x] Verify build with `pnpm exec nest build`.
 
 ---
 

@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   Min,
 } from 'class-validator';
 
@@ -84,6 +85,7 @@ export class CreatePensionDto {
   @ApiPropertyOptional({ example: '23:00' })
   @IsOptional()
   @IsString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Must be HH:mm 24-hour format' })
   curfewTime?: string;
 
   @ApiPropertyOptional({ example: true, default: false })
@@ -109,17 +111,23 @@ export class CreatePensionDto {
   @ApiPropertyOptional({ example: '23:00' })
   @IsOptional()
   @IsString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Must be HH:mm 24-hour format' })
   quietHoursStart?: string;
 
   @ApiPropertyOptional({ example: '07:00' })
   @IsOptional()
   @IsString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Must be HH:mm 24-hour format' })
   quietHoursEnd?: string;
 
   @ApiPropertyOptional({ example: ['wifi-alta-velocidad', 'bano-privado'] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @Matches(/^[a-z0-9-]+$/, {
+    each: true,
+    message: 'Each amenity slug must contain only lowercase alphanumeric characters and hyphens',
+  })
   amenitySlugs?: string[];
 
   @ApiPropertyOptional({ example: '00000000-0000-0000-0000-000000000000' })

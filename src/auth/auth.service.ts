@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -20,6 +21,10 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
+    if (dto.role && dto.role !== Role.STUDENT && dto.role !== Role.LANDLORD) {
+      throw new BadRequestException('Privileged roles cannot be registered through public signup');
+    }
+
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email.toLowerCase().trim() },
     });

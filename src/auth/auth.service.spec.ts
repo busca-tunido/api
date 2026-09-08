@@ -1,4 +1,9 @@
-import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
@@ -92,6 +97,30 @@ describe('AuthService', () => {
           lastName: 'User',
         }),
       ).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw BadRequestException if registering with MODERATOR role', async () => {
+      await expect(
+        service.register({
+          email: 'mod@buscatunido.cl',
+          password: 'password123',
+          firstName: 'Mod',
+          lastName: 'User',
+          role: Role.MODERATOR as unknown as Role.STUDENT,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if registering with ADMIN role', async () => {
+      await expect(
+        service.register({
+          email: 'admin@buscatunido.cl',
+          password: 'password123',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: Role.ADMIN as unknown as Role.STUDENT,
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

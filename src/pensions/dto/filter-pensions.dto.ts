@@ -1,7 +1,18 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { GenderPreference } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class FilterPensionsDto {
   @ApiPropertyOptional({ example: 'Santiago' })
@@ -49,6 +60,8 @@ export class FilterPensionsDto {
     }
     return value;
   })
+  @IsArray()
+  @IsString({ each: true })
   amenities?: string[];
 
   @ApiPropertyOptional({ example: 'República' })
@@ -100,6 +113,6 @@ export class FilterPensionsDto {
     enum: ['relevance', 'distance', 'rating', 'price_asc', 'price_desc'],
   })
   @IsOptional()
-  @IsString()
+  @IsIn(['relevance', 'distance', 'rating', 'price_asc', 'price_desc'])
   sortBy?: 'relevance' | 'distance' | 'rating' | 'price_asc' | 'price_desc';
 }

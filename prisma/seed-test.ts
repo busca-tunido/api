@@ -1,12 +1,12 @@
 import { fakerES_MX as faker } from '@faker-js/faker';
-import {
-  type GenderPreference,
-  type ReportReason,
-  type ReportStatus,
-  type Role,
-  type RoomType,
-  type StayDurationCategory,
-  type VerificationStatus,
+import type {
+  GenderPreference,
+  ReportReason,
+  ReportStatus,
+  Role,
+  RoomType,
+  StayDurationCategory,
+  VerificationStatus,
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import {
