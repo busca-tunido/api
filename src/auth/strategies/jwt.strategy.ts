@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload): Promise<SanitizedUser> {
     const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub, deletedAt: null },
+      where: { id: payload.sub },
       select: {
         id: true,
         email: true,
@@ -37,13 +37,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         universityId: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
       },
     });
 
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new UnauthorizedException('User account not found or deactivated');
     }
 
-    return user;
+    const { deletedAt, ...sanitized } = user;
+    return sanitized;
   }
 }

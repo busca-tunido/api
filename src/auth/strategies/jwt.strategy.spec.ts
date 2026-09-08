@@ -66,7 +66,7 @@ describe('JwtStrategy', () => {
       expect(result.id).toBe('user-active-1');
       expect(result.email).toBe('estudiante.demo@uchile.cl');
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: 'user-active-1', deletedAt: null },
+        where: { id: 'user-active-1' },
         select: expect.objectContaining({
           id: true,
           email: true,

@@ -34,13 +34,13 @@ Build a comprehensive HTTP-level integration and E2E test suite using Vitest and
 
 ## Checklist
 
-- [ ] Configure `vitest.config.e2e.ts` with test database setup and teardown hooks.
-- [ ] Implement `test/auth.e2e-spec.ts`.
-- [ ] Implement `test/pensions.e2e-spec.ts`.
-- [ ] Implement `test/reviews.e2e-spec.ts`.
-- [ ] Implement `test/proposals.e2e-spec.ts`.
-- [ ] Verify test suite passes with `pnpm run test:e2e`.
-- [ ] Validate code quality with Biome (`pnpm run check && pnpm run review`).
+- [x] Configure `vitest.config.e2e.ts` with test database setup and teardown hooks.
+- [x] Implement `test/auth.e2e-spec.ts`.
+- [x] Implement `test/pensions.e2e-spec.ts`.
+- [x] Implement `test/reviews.e2e-spec.ts`.
+- [x] Implement `test/proposals.e2e-spec.ts`.
+- [x] Verify test suite passes with `pnpm run test:e2e`.
+- [x] Validate code quality with Biome (`pnpm run check && pnpm run review`).
 
 ---
 
