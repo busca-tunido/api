@@ -13,6 +13,7 @@ import { ReportsModule } from './reports/reports.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { RoomsModule } from './rooms/rooms.module.js';
 import { UniversitiesModule } from './universities/universities.module.js';
+import { UploadsModule } from './uploads/uploads.module.js';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UniversitiesModule } from './universities/universities.module.js';
     FavoritesModule,
     ProposalsModule,
     ModerationModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

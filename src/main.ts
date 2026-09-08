@@ -1,4 +1,6 @@
+import * as path from 'node:path';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -16,6 +18,11 @@ async function bootstrap(): Promise<void> {
     limits: {
       fileSize: 10 * 1024 * 1024,
     },
+  });
+
+  await app.register(fastifyStatic, {
+    root: path.resolve(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
   });
 
   const configService = app.get(ConfigService);

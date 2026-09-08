@@ -30,13 +30,13 @@ Build a server-side image processing and upload pipeline using `sharp` and `mult
 
 ## Checklist
 
-- [ ] Suggest terminal command to install `sharp` and `@types/multer`.
-- [ ] Create `src/uploads/uploads.module.ts`, `src/uploads/uploads.service.ts`, and `src/uploads/uploads.controller.ts`.
-- [ ] Implement WebP conversion pipeline with metadata stripping and responsive variants in `UploadsService`.
-- [ ] Create E2E / integration tests in `src/uploads/uploads.service.spec.ts` testing format conversion and invalid format rejection.
-- [ ] Ensure Swagger documentation accurately specifies `multipart/form-data` and returns the WebP response envelope.
-- [ ] Validate code quality with Biome (`pnpm run check && pnpm run review`).
-- [ ] Verify build with `pnpm exec nest build`.
+- [x] Suggest terminal command to install `sharp` and `@types/multer`.
+- [x] Create `src/uploads/uploads.module.ts`, `src/uploads/uploads.service.ts`, and `src/uploads/uploads.controller.ts`.
+- [x] Implement WebP conversion pipeline with metadata stripping and responsive variants in `UploadsService`.
+- [x] Create E2E / integration tests in `src/uploads/uploads.service.spec.ts` testing format conversion and invalid format rejection.
+- [x] Ensure Swagger documentation accurately specifies `multipart/form-data` and returns the WebP response envelope.
+- [x] Validate code quality with Biome (`pnpm run check && pnpm run review`).
+- [x] Verify build with `pnpm exec nest build`.
 
 ---
 
