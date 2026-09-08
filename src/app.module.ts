@@ -7,6 +7,7 @@ import { validateEnv } from './common/config/env.validation.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { PensionsModule } from './pensions/pensions.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { ProposalsModule } from './proposals/proposals.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { RoomsModule } from './rooms/rooms.module.js';
@@ -26,6 +27,7 @@ import { UniversitiesModule } from './universities/universities.module.js';
     ReviewsModule,
     ReportsModule,
     FavoritesModule,
+    ProposalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

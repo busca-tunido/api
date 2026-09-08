@@ -1,6 +1,8 @@
 import { fakerES_MX as faker } from '@faker-js/faker';
 import type {
   GenderPreference,
+  ProposalStatus,
+  ProposalType,
   ReportReason,
   ReportStatus,
   Role,
@@ -70,6 +72,7 @@ const main = async (): Promise<void> => {
   console.log('--- Step 2: Cleaning database ---');
   await prisma.$executeRawUnsafe(`
     TRUNCATE TABLE
+      "pension_proposals",
       "favorites",
       "reports",
       "reviews",
@@ -489,7 +492,67 @@ const main = async (): Promise<void> => {
 
   await prisma.report.createMany({ data: allReports });
 
-  console.log('--- Step 10: Validating invariants & assertions ---');
+  console.log('--- Step 10: Seeding sample proposals and moderation states ---');
+  const demoPension = primaryPensions[0];
+  const demoStudent = studentUsers[0];
+  const moderatorUser = await prisma.user.findFirst({ where: { role: 'MODERATOR' as Role } });
+
+  await prisma.pensionProposal.createMany({
+    data: [
+      {
+        pensionId: demoPension.id,
+        submittedById: demoStudent.id,
+        type: 'AMENITIES_UPDATE' as ProposalType,
+        status: 'PENDING' as ProposalStatus,
+        proposedChanges: {
+          amenitiesToAdd: ['wifi-alta-velocidad', 'sala-estudio'],
+          amenitiesToRemove: [],
+        },
+        submissionNotes: 'Instalaron fibra óptica y habilitaron una sala común de estudio.',
+      },
+      {
+        pensionId: demoPension.id,
+        submittedById: demoStudent.id,
+        type: 'BASIC_INFO' as ProposalType,
+        status: 'PENDING' as ProposalStatus,
+        proposedChanges: {
+          curfewTime: '00:00',
+          quietHoursStart: '23:00',
+        },
+        submissionNotes: 'Ampliaron el horario de llegada en fines de semana.',
+      },
+      {
+        pensionId: primaryPensions[1]?.id || demoPension.id,
+        submittedById: demoStudent.id,
+        reviewedById: moderatorUser?.id,
+        type: 'LOCATION_UPDATE' as ProposalType,
+        status: 'APPROVED' as ProposalStatus,
+        proposedChanges: {
+          neighborhood: 'Barrio Universitario Centro',
+        },
+        appliedChanges: {
+          neighborhood: 'Barrio Universitario Centro',
+        },
+        submissionNotes: 'Ajuste de nombre del sector.',
+        reviewNotes: 'Confirmado con mapa comunal.',
+        reviewedAt: new Date(),
+      },
+    ],
+  });
+
+  const firstReview = await prisma.review.findFirst();
+  if (firstReview) {
+    await prisma.review.update({
+      where: { id: firstReview.id },
+      data: {
+        isHidden: true,
+        moderationReason: 'Lenguaje inapropiado detectado en el comentario.',
+        moderatedById: moderatorUser?.id,
+      },
+    });
+  }
+
+  console.log('--- Step 11: Validating invariants & assertions ---');
   const defaultStudent = await prisma.user.findUnique({
     where: { email: 'estudiante.demo@uchile.cl' },
   });

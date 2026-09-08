@@ -162,6 +162,7 @@ const main = async (): Promise<void> => {
   console.log('--- Production Seed: Cleaning database for clean onboarding ---');
   await prisma.$executeRawUnsafe(`
     TRUNCATE TABLE
+      "pension_proposals",
       "favorites",
       "reports",
       "reviews",

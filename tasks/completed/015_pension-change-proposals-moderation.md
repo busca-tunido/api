@@ -62,16 +62,16 @@ model PensionProposal {
 
 ## Checklist
 
-- [ ] Add `PensionProposal` model and enums to `prisma/schema.prisma`.
-- [ ] Run `prisma db push` to synchronize local database.
-- [ ] Update `prisma/seed.ts` and `prisma/seed-test.ts` to include `"pension_proposals"` in the TRUNCATE CASCADE list.
-- [ ] Seed 2-3 sample proposals in `prisma/seed-test.ts` for local moderator development and testing.
-- [ ] Create `ProposalsModule` with controller, service, and DTOs (`CreateProposalDto`, `ReviewProposalDto`).
-- [ ] Implement atomic merge logic inside `prisma.$transaction` in `ProposalsService`.
-- [ ] Restrict review endpoints to `Role.MODERATOR` and `Role.ADMIN`.
-- [ ] Add unit tests in `src/proposals/proposals.service.spec.ts`.
-- [ ] Validate code quality with Biome (`pnpm run check && pnpm run review`).
-- [ ] Verify build with `pnpm exec nest build`.
+- [x] Add `PensionProposal` model and enums to `prisma/schema.prisma`.
+- [x] Run `prisma db push` to synchronize local database.
+- [x] Update `prisma/seed.ts` and `prisma/seed-test.ts` to include `"pension_proposals"` in the TRUNCATE CASCADE list.
+- [x] Seed 2-3 sample proposals in `prisma/seed-test.ts` for local moderator development and testing.
+- [x] Create `ProposalsModule` with controller, service, and DTOs (`CreateProposalDto`, `ReviewProposalDto`).
+- [x] Implement atomic merge logic inside `prisma.$transaction` in `ProposalsService`.
+- [x] Restrict review endpoints to `Role.MODERATOR` and `Role.ADMIN`.
+- [x] Add unit tests in `src/proposals/proposals.service.spec.ts`.
+- [x] Validate code quality with Biome (`pnpm run check && pnpm run review`).
+- [x] Verify build with `pnpm exec nest build`.
 
 ---
 
