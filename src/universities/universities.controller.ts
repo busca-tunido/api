@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -25,6 +25,7 @@ export class UniversitiesController {
 
   @Get()
   @ApiOperation({ summary: 'List all universities with optional city filter' })
+  @ApiQuery({ name: 'city', required: false, type: String })
   @ApiResponse({ status: 200, description: 'List of universities' })
   async findAll(@Query('city') city?: string): Promise<unknown[]> {
     return this.universitiesService.findAll(city);

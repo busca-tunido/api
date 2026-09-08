@@ -8,7 +8,7 @@ import type { JwtPayload, SanitizedUser } from '../types/auth.types.js';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    configService: ConfigService,
+    readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');

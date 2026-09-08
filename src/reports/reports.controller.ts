@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ReportStatus, Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
@@ -20,6 +20,7 @@ export class ReportsController {
   @Roles(Role.ADMIN, Role.MODERATOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all reports (Admin and Moderator only)' })
+  @ApiQuery({ name: 'status', enum: ReportStatus, required: false })
   @ApiResponse({ status: 200, description: 'List of reports' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async findAll(@Query('status') status?: ReportStatus): Promise<unknown[]> {
