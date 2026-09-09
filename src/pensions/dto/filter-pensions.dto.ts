@@ -108,6 +108,30 @@ export class FilterPensionsDto {
   @Max(100)
   radiusKm?: number = 30;
 
+  @ApiPropertyOptional({ example: -33.5, description: 'Minimum latitude boundary (South)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  minLat?: number;
+
+  @ApiPropertyOptional({ example: -33.4, description: 'Maximum latitude boundary (North)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  maxLat?: number;
+
+  @ApiPropertyOptional({ example: -70.7, description: 'Minimum longitude boundary (West)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  minLng?: number;
+
+  @ApiPropertyOptional({ example: -70.6, description: 'Maximum longitude boundary (East)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  maxLng?: number;
+
   @ApiPropertyOptional({
     example: 'relevance',
     enum: ['relevance', 'distance', 'rating', 'price_asc', 'price_desc'],

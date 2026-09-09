@@ -159,6 +159,17 @@ export class PensionsService {
       ]);
     }
 
+    const hasBounds =
+      filter.minLat !== undefined &&
+      filter.maxLat !== undefined &&
+      filter.minLng !== undefined &&
+      filter.maxLng !== undefined;
+
+    if (hasBounds) {
+      where.latitude = { gte: filter.minLat, lte: filter.maxLat };
+      where.longitude = { gte: filter.minLng, lte: filter.maxLng };
+    }
+
     const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
 
     if (hasGeo) {
@@ -228,7 +239,7 @@ export class PensionsService {
           cityCountsMap.set(pension.city, currentCity);
         }
 
-        if (distanceKm <= radiusKm) {
+        if (hasBounds || distanceKm <= radiusKm) {
           const totalAvailableBeds = pension.rooms.reduce(
             (acc, r) => acc + (r.availableBeds || 0),
             0,
