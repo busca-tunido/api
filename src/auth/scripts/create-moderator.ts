@@ -9,10 +9,33 @@ try {
 
 const run = async (): Promise<void> => {
   const args = process.argv.slice(2);
-  const emailArg = args[0] || process.env.MODERATOR_EMAIL || 'moderator@buscatunido.cl';
-  const passwordArg = args[1] || process.env.MODERATOR_PASSWORD || 'Moderator123!';
-  const firstNameArg = args[2] || process.env.MODERATOR_FIRST_NAME || 'Moderator';
-  const lastNameArg = args[3] || process.env.MODERATOR_LAST_NAME || 'Staff';
+  const emailArg = args[0] || process.env.MODERATOR_EMAIL;
+  if (!emailArg) {
+    throw new Error(
+      'Missing env var: MODERATOR_EMAIL must be defined in environment (.env) or passed as argument.',
+    );
+  }
+
+  const passwordArg = args[1] || process.env.MODERATOR_PASSWORD;
+  if (!passwordArg) {
+    throw new Error(
+      'Missing env var: MODERATOR_PASSWORD must be defined in environment (.env) or passed as argument.',
+    );
+  }
+
+  const firstNameArg = args[2] || process.env.MODERATOR_FIRST_NAME;
+  if (!firstNameArg) {
+    throw new Error(
+      'Missing env var: MODERATOR_FIRST_NAME must be defined in environment (.env) or passed as argument.',
+    );
+  }
+
+  const lastNameArg = args[3] || process.env.MODERATOR_LAST_NAME;
+  if (!lastNameArg) {
+    throw new Error(
+      'Missing env var: MODERATOR_LAST_NAME must be defined in environment (.env) or passed as argument.',
+    );
+  }
 
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
