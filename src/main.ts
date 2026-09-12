@@ -14,14 +14,19 @@ async function bootstrap(): Promise<void> {
   const fastifyAdapter = new FastifyAdapter();
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter);
 
-  await app.register(fastifyMultipart, {
+  const registerPlugin = app.register as unknown as (
+    plugin: unknown,
+    opts?: unknown,
+  ) => Promise<unknown>;
+
+  await registerPlugin(fastifyMultipart, {
     limits: {
       fileSize: 15 * 1024 * 1024,
       files: 5,
     },
   });
 
-  await app.register(fastifyStatic, {
+  await registerPlugin(fastifyStatic, {
     root: path.resolve(process.cwd(), 'uploads'),
     prefix: '/uploads/',
   });
