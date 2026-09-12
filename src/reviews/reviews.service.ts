@@ -41,6 +41,127 @@ export class ReviewsService {
     });
   }
 
+  async findUserStays(userId: string): Promise<unknown[]> {
+    const reviews = await this.prisma.review.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        pension: {
+          include: {
+            images: {
+              where: { deletedAt: null },
+              orderBy: { sortOrder: 'asc' },
+            },
+            rooms: {
+              where: { deletedAt: null },
+              orderBy: { monthlyPrice: 'asc' },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            university: {
+              select: {
+                shortName: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return reviews.map((review) => {
+      const pension = review.pension;
+      const featuredImage =
+        pension.images.find((img) => img.isFeatured)?.url ||
+        pension.images[0]?.url ||
+        review.images[0] ||
+        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80';
+
+      const firstRoom = pension.rooms[0];
+      const roomTitle = firstRoom?.title || 'Habitación Individual';
+      const monthlyPaidClp = firstRoom?.monthlyPrice
+        ? Number(firstRoom.monthlyPrice)
+        : Number(pension.baseMonthlyPrice) || 280000;
+
+      let startDateStr: string;
+      let endDateStr: string;
+
+      if (review.stayStartDate && review.stayEndDate) {
+        startDateStr = review.stayStartDate.toISOString();
+        endDateStr = review.stayEndDate.toISOString();
+      } else {
+        const endDate = new Date(review.createdAt);
+        const startDate = new Date(endDate);
+        switch (review.stayDurationCategory) {
+          case 'ONE_YEAR':
+          case 'MORE_THAN_A_YEAR':
+            startDate.setFullYear(startDate.getFullYear() - 1);
+            break;
+          case 'ONE_SEMESTER':
+            startDate.setMonth(startDate.getMonth() - 5);
+            break;
+          case 'FEW_WEEKS':
+            startDate.setDate(startDate.getDate() - 21);
+            break;
+          default:
+            startDate.setDate(startDate.getDate() - 7);
+            break;
+        }
+        startDateStr = startDate.toISOString();
+        endDateStr = endDate.toISOString();
+      }
+
+      return {
+        id: `stay-${review.id}`,
+        pensionId: review.pensionId,
+        pensionTitle: pension.title,
+        pensionCity: pension.city,
+        roomTitle,
+        startDate: startDateStr,
+        endDate: endDateStr,
+        ratingGiven: review.overallRating,
+        hasReview: true,
+        monthlyPaidClp,
+        imageUrl: featuredImage,
+        review: {
+          id: review.id,
+          pensionId: review.pensionId,
+          overallRating: review.overallRating,
+          cleanlinessRating: review.cleanlinessRating ?? undefined,
+          landlordRating: review.landlordRating ?? undefined,
+          quietnessRating: review.quietnessRating ?? undefined,
+          wifiRating: review.wifiRating ?? undefined,
+          comment: review.comment,
+          stayDurationCategory: review.stayDurationCategory ?? undefined,
+          isResidentVerified: review.isResidentVerified,
+          images: review.images.map((url, idx) => ({ id: `rev-img-${idx}`, url })),
+          createdAt: review.createdAt.toISOString(),
+          user: {
+            id: review.user.id,
+            firstName: review.user.firstName,
+            lastName: review.user.lastName,
+            avatarUrl: review.user.avatarUrl ?? undefined,
+            university: review.user.university
+              ? {
+                  shortName: review.user.university.shortName ?? '',
+                  name: review.user.university.name,
+                }
+              : undefined,
+          },
+        },
+      };
+    });
+  }
+
   async create(pensionId: string, dto: CreateReviewDto, user: SanitizedUser): Promise<unknown> {
     const pension = await this.prisma.pension.findUnique({
       where: { id: pensionId, deletedAt: null },
@@ -60,7 +181,7 @@ export class ReviewsService {
     });
 
     if (existing && !existing.deletedAt) {
-      throw new ConflictException('You have already reviewed this pension');
+      throw new ConflictException('Ya has publicado una reseña para esta pensión');
     }
 
     const review = await this.prisma.review.create({

@@ -19,6 +19,17 @@ export class ReviewsController {
     return this.reviewsService.findByPension(pensionId);
   }
 
+  @Get('stays')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get stay history for current authenticated student based on their reviews',
+  })
+  @ApiResponse({ status: 200, description: 'List of student stays' })
+  async findUserStays(@CurrentUser() user: SanitizedUser): Promise<unknown[]> {
+    return this.reviewsService.findUserStays(user.id);
+  }
+
   @Post('pensions/:pensionId/reviews')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

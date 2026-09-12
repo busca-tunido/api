@@ -169,4 +169,51 @@ describe('ReviewsService', () => {
       await expect(service.delete('rev-1', mockOtherUser)).rejects.toThrow(ForbiddenException);
     });
   });
+
+  describe('findUserStays', () => {
+    it('should return mapped stay history items for a user', async () => {
+      mockPrisma.review.findMany.mockResolvedValue([
+        {
+          id: 'rev-1',
+          pensionId: 'pen-1',
+          overallRating: 5,
+          cleanlinessRating: 4,
+          landlordRating: 5,
+          quietnessRating: 4,
+          wifiRating: 5,
+          comment: 'Muy buena experiencia',
+          pros: 'Cerca del metro',
+          cons: 'Pieza algo fría',
+          stayDurationCategory: 'ONE_SEMESTER',
+          stayStartDate: new Date('2025-03-01T00:00:00.000Z'),
+          stayEndDate: new Date('2025-07-31T00:00:00.000Z'),
+          createdAt: new Date('2025-08-01T00:00:00.000Z'),
+          images: [],
+          pension: {
+            id: 'pen-1',
+            title: 'Residencia Beauchef',
+            address: 'Club Hípico 1234',
+            city: 'Santiago',
+            commune: 'Santiago Centro',
+            images: [{ id: 'img-1', url: 'https://example.com/pen.jpg', isPrimary: true }],
+            rooms: [{ id: 'room-1', name: 'Habitación Individual', price: 250000 }],
+          },
+          user: {
+            id: 'student-1',
+            firstName: 'Matías',
+            lastName: 'Rojas',
+            avatarUrl: null,
+          },
+        },
+      ]);
+
+      const result = await service.findUserStays('student-1');
+      expect(result).toHaveLength(1);
+      expect(result[0].pensionId).toBe('pen-1');
+      expect(result[0].pensionTitle).toBe('Residencia Beauchef');
+      expect(result[0].pensionCity).toBe('Santiago');
+      expect(result[0].review?.stayDurationCategory).toBe('ONE_SEMESTER');
+      expect(result[0].review?.id).toBe('rev-1');
+    });
+  });
 });
