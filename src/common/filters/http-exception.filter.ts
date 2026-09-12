@@ -52,10 +52,33 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
       }
     } else if (exception instanceof Error) {
-      this.logger.error(`Unhandled error: ${exception.message}`, exception.stack);
-      message = 'Internal server error';
+      const err = exception as Error & { code?: string; statusCode?: number };
+
+      if (
+        err.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+        err.code === 'FST_MP_PREMATURE_CLOSE' ||
+        err.message?.toLowerCase().includes('premature close')
+      ) {
+        status = HttpStatus.BAD_REQUEST;
+        message =
+          'La conexión se interrumpió durante la subida de datos. Por favor, intenta nuevamente.';
+      } else if (err.code === 'FST_REQ_FILE_TOO_LARGE' || err.code === 'FST_FILES_LIMIT') {
+        status = HttpStatus.PAYLOAD_TOO_LARGE;
+        message = 'El archivo supera el tamaño máximo permitido de 8MB.';
+      } else if (
+        typeof err.statusCode === 'number' &&
+        err.statusCode >= 400 &&
+        err.statusCode < 500
+      ) {
+        status = err.statusCode;
+        message = err.message || 'Solicitud no válida';
+      } else {
+        this.logger.error(`Unhandled error: ${exception.message}`, exception.stack);
+        message = 'Internal server error';
+      }
     } else {
       this.logger.error('Unknown exception caught', String(exception));
+      message = 'Internal server error';
     }
 
     const errorPayload: ErrorEnvelope = {

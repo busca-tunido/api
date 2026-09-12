@@ -1,5 +1,12 @@
 import type { MultipartFile } from '@fastify/multipart';
-import { BadRequestException, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  PayloadTooLargeException,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -12,9 +19,9 @@ import type { FastifyRequest } from 'fastify';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { type ProcessedImageResult, UploadsService } from './uploads.service.js';
 
-interface FastifyMultipartRequest extends FastifyRequest {
+type FastifyMultipartRequest = FastifyRequest & {
   file: () => Promise<MultipartFile | undefined>;
-}
+};
 
 @ApiTags('Uploads')
 @Controller('uploads')
@@ -56,14 +63,50 @@ export class UploadsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid image or unsupported format' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 413, description: 'File size exceeds limit' })
   async uploadImage(@Req() req: FastifyRequest): Promise<ProcessedImageResult> {
     const multipartReq = req as FastifyMultipartRequest;
-    const file = await multipartReq.file();
+    let file: MultipartFile | undefined;
+
+    try {
+      file = await multipartReq.file();
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      if (error?.code === 'FST_REQ_FILE_TOO_LARGE' || error?.code === 'FST_FILES_LIMIT') {
+        throw new PayloadTooLargeException('El archivo supera el tamaño máximo permitido de 8MB');
+      }
+      if (
+        error?.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+        error?.code === 'FST_MP_PREMATURE_CLOSE' ||
+        error?.message?.toLowerCase().includes('premature close')
+      ) {
+        throw new BadRequestException('La conexión se interrumpió durante la subida de la imagen');
+      }
+      throw new BadRequestException(error?.message || 'Error al procesar el archivo');
+    }
+
     if (!file) {
       throw new BadRequestException('No image file provided in multipart request');
     }
 
-    const buffer = await file.toBuffer();
+    let buffer: Buffer;
+    try {
+      buffer = await file.toBuffer();
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      if (error?.code === 'FST_REQ_FILE_TOO_LARGE' || error?.code === 'FST_FILES_LIMIT') {
+        throw new PayloadTooLargeException('El archivo supera el tamaño máximo permitido de 8MB');
+      }
+      if (
+        error?.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+        error?.code === 'FST_MP_PREMATURE_CLOSE' ||
+        error?.message?.toLowerCase().includes('premature close')
+      ) {
+        throw new BadRequestException('La conexión se interrumpió durante la subida de la imagen');
+      }
+      throw new BadRequestException(error?.message || 'Error al leer el archivo de imagen');
+    }
+
     return this.uploadsService.processImage(buffer, file.filename);
   }
 }
