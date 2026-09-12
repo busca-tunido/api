@@ -69,6 +69,6 @@ describe('HttpExceptionFilter', () => {
     const sentPayload = mockSend.mock.calls[0][0] as ErrorEnvelope;
     expect(sentPayload.success).toBe(false);
     expect(sentPayload.statusCode).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
-    expect(sentPayload.message).toBe('Database connection failed');
+    expect(sentPayload.message).toBe('Internal server error');
   });
 });

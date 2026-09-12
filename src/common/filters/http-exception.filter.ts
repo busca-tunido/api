@@ -53,7 +53,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     } else if (exception instanceof Error) {
       this.logger.error(`Unhandled error: ${exception.message}`, exception.stack);
-      message = exception.message;
+      message = 'Internal server error';
     } else {
       this.logger.error('Unknown exception caught', String(exception));
     }
