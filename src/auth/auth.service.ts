@@ -11,7 +11,12 @@ import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { LoginDto } from './dto/login.dto.js';
 import type { RegisterDto } from './dto/register.dto.js';
-import type { AuthResponse, JwtPayload, SanitizedUser } from './types/auth.types.js';
+import type {
+  AuthResponse,
+  CheckEmailResponse,
+  JwtPayload,
+  SanitizedUser,
+} from './types/auth.types.js';
 
 @Injectable()
 export class AuthService {
@@ -136,6 +141,23 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async checkEmail(email: string): Promise<CheckEmailResponse> {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true, role: true, deletedAt: true },
+    });
+
+    if (!user || user.deletedAt !== null) {
+      return { exists: false };
+    }
+
+    return {
+      exists: true,
+      role: user.role,
+    };
   }
 
   private generateToken(user: SanitizedUser): string {

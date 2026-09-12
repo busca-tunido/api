@@ -252,4 +252,43 @@ describe('AuthService', () => {
       });
     });
   });
+
+  describe('checkEmail', () => {
+    it('should return exists: true and role when email is found', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        role: Role.STUDENT,
+        deletedAt: null,
+      });
+
+      const result = await service.checkEmail('ESTUDIANTE.DEMO@UCHILE.CL ');
+      expect(result).toEqual({ exists: true, role: Role.STUDENT });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'estudiante.demo@uchile.cl' },
+        select: { id: true, role: true, deletedAt: true },
+      });
+    });
+
+    it('should return exists: false when email is not found', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.checkEmail('unregistered@uchile.cl');
+      expect(result).toEqual({ exists: false });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'unregistered@uchile.cl' },
+        select: { id: true, role: true, deletedAt: true },
+      });
+    });
+
+    it('should return exists: false when user is deactivated/deleted', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        role: Role.STUDENT,
+        deletedAt: new Date(),
+      });
+
+      const result = await service.checkEmail('deleted@uchile.cl');
+      expect(result).toEqual({ exists: false });
+    });
+  });
 });

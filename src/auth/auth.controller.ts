@@ -1,11 +1,21 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
+import { CheckEmailDto } from './dto/check-email.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
-import type { AuthResponse, SanitizedUser } from './types/auth.types.js';
+import type { AuthResponse, CheckEmailResponse, SanitizedUser } from './types/auth.types.js';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -27,6 +37,13 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto): Promise<AuthResponse> {
     return this.authService.login(dto);
+  }
+
+  @Get('check-email')
+  @ApiOperation({ summary: 'Check if an email address is already registered' })
+  @ApiResponse({ status: 200, description: 'Check email status returned' })
+  async checkEmail(@Query() query: CheckEmailDto): Promise<CheckEmailResponse> {
+    return this.authService.checkEmail(query.email);
   }
 
   @Get('me')

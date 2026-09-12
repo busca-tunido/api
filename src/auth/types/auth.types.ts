@@ -24,3 +24,8 @@ export type AuthResponse = {
   user: SanitizedUser;
   accessToken: string;
 };
+
+export type CheckEmailResponse = {
+  exists: boolean;
+  role?: Role;
+};

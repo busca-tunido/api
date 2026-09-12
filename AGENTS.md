@@ -76,10 +76,6 @@ Every backend feature, fix, or refactor must strictly adhere to the following wo
 
 ### Code Quality & Biome Scripts Workflow:
 
-The project utilizes [Biome](https://biomejs.dev/) as a unified, ultra-fast toolchain for formatting and linting. Agents must leverage these dedicated scripts throughout the development workflow:
-
-- `pnpm run format`: Formats source files and enforces styling rules (`biome format --write .`).
-- `pnpm run lint`: Scans for code issues and applies safe linter autofixes (`biome lint --write .`).
 - `pnpm run check`: Unified command combining formatting, import organization, and safe lint autofixes (`biome check --write .`). Agents must run this after modifying code.
 - `pnpm run review`: Read-only verification check (`biome check .`) that returns an error exit code if any unresolved formatting or lint errors exist. Mandatory for validation.
 
@@ -89,42 +85,83 @@ The project utilizes [Biome](https://biomejs.dev/) as a unified, ultra-fast tool
 
 ### Execution Cycle:
 
-1. **Task Breakdown by Purpose**:
-   - Read the user request(s) and create a separate `tasks/[task-name].md` file for each request that serves a distinct purpose (omitting any index prefix while active in `tasks/`).
-   - *Example*: Adding a new field to a database model and updating its corresponding DTO/service belong in the same task specification. In contrast, configuring CORS or a global module belongs in a separate task specification.
+1. **Task Breakdown by Purpose & Topology**:
+   - Read the user request(s) and decompose them into structured `tasks/[task-name].md` files (omitting any index prefix while active in `tasks/`).
+   - Act as a **Directed Acyclic Graph (DAG) compiler**, assigning each task an explicit `Execution Profile` (Wave, Mode, Role, Dependencies, Collision Risk).
 2. **Review & Clarification Gate**:
-   - Once all task files are generated, notify the user to review all task specifications in `tasks/`.
-   - Ask clarifying questions if any requirement or detail is ambiguous, and STOP the process so the user can review and approve the tasks.
-3. **Sequential Execution**:
-   - Once the user approves the tasks, execute them one by one until all are completed.
-   - For each task, strictly follow these steps:
-     - **Read Scope**: Inspect `tasks/[task-name].md` before modifying code. Confine all implementation strictly to the active task checklist.
-     - **Track Progress**: Implement checklist items step-by-step, checking off boxes (`- [x]`) as each phase is completed.
-     - **Verify**:
-       1. Run `pnpm run check` to automatically organize imports, fix linter warnings, and format code.
-       2. Run `pnpm run review` to strictly verify that zero linting or formatting diagnostics remain.
-       3. Run application build and test checks (`pnpm run build:local` for fast local development compilation or `pnpm build`). All checks must pass with zero errors before completion.
-     - **User Verification**: Present the completed checklist and verification results to the user for review and explicit approval before archiving.
-     - **Archive as Documentation**: Upon user approval, move/rename the completed `tasks/[task-name].md` into `tasks/completed/[index]_[task-name].md` (e.g., `tasks/completed/001_initialize-nestjs-api.md`), assigning its chronological three-digit index only upon completion. This preserves a lightweight, immutable audit trail of backend development.
-     - **Handoff**: Proceed to the next pending task in the sequence.
+   - Once all task specifications are generated, notify the user to review the DAG and execution waves in `tasks/`.
+   - Ask clarifying questions if any requirement or boundary is ambiguous, and STOP so the user can review and approve the plan.
+3. **Parallel Decomposition & Dependency Rules for the Planner Agent**:
+   When breaking down user requirements into task specifications, the planner agent must evaluate concurrency using the **Disjoint File Sets Rule**:
+   - **Orthogonality Check (Collision Matrix)**:
+     - Compare `Target Files` between all proposed tasks.
+     - **Parallelizable (Disjoint)**: If $Files(Task\_A) \cap Files(Task\_B) = \emptyset$, both tasks must be assigned to the same `Wave` with `Execution Mode: PARALLEL`.
+     - **Sequential (Intersection)**: If two tasks modify the same domain file or internal logic, the dependent task must be assigned to `Wave N+1` with `Execution Mode: SEQUENTIAL` and list its prerequisite in `depends_on`.
+   - **Handling Critical Shared Hubs (`prisma/schema.prisma`, `src/app.module.ts`, lockfiles)**:
+     - Global database schemas and root modules are high-risk collision points.
+     - **Contract-First / Wave 0 Rule**: If multiple tasks require schema changes, the planner must create a **Preparatory Task (Wave 0)** to apply Prisma schema modifications, execute migrations/pushes, and generate client types before launching parallel service tasks.
+     - Workers must NOT edit `src/app.module.ts` during parallel worker tasks; module registration is deferred to the `Integrator Agent` in the Wave Sync Gate.
+   - **Wave Structure (DAG Execution)**:
+     - Organize work into chronological waves:
+       - `Wave 0 (Setup / Contracts)`: Prisma schemas, seeders, shared DTOs, global configuration (Sequential).
+       - `Wave 1 (Workers)`: Feature modules, services, controllers in parallel branches/worktrees (Isolated).
+       - `Wave 1 - Sync Gate`: Merge, resolve `src/app.module.ts` registration, run integrated compilation checks (Sequential).
+
+4. **Agent Role Assignment: Worker Agent vs. Integrator Agent**:
+
+| Rol de Agente                      | Ámbito de Trabajo                                                      | Reglas de Asignación                                                                                                                                                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Worker Agent (N instancias)**    | Ramas/Worktrees independientes (`worktree-task-A`, `worktree-task-B`). | Se le asigna **1 sola tarea paralela**. Solo puede editar sus `Exclusive Target Files`. Verifica localmente (`pnpm run check && pnpm run review` y `pnpm run build:local`). Al terminar, realiza su commit convencional y se detiene.              |
+| **Integrator Agent (1 instancia)** | Rama base de integración (`main` o `staging`).                         | Se asigna a tareas con etiqueta `Assigned Role: Integrator Agent`. No programa lógica de negocio nueva. Realiza merges/rebases, modifica archivos compartidos (`Shared / Integration Points`) como `app.module.ts` y valida la compilación global. |
+
+5. **Wave Sync Gate (`task-sync-wave-N.md`)**:
+   For every batch, the planner agent must automatically include a closing integration task named `task-sync-wave-N.md`. This task:
+   - Unlocks strictly when all checklists for tasks in `Wave N` are marked completed (`- [x]`).
+   - Is formally assigned to the **Integrator Agent**.
+   - Follows the integration checklist:
+     1. Merge or rebase worker branches/worktrees into the base branch.
+     2. Update shared integration hubs (e.g., register new feature modules in `src/app.module.ts`).
+     3. Run global repository verification (`pnpm run check && pnpm run review` and `pnpm run build:local` / `pnpm build`).
+     4. Resolve any interoperability or type conflicts as the sole authorized agent.
+     5. Teardown temporary worktrees (`git worktree remove`).
+
+6. **Archive as Documentation**:
+   - Upon user approval and successful Wave integration, move/rename completed `tasks/[task-name].md` into `tasks/completed/[index]_[task-name].md` (e.g., `tasks/completed/001_initialize-nestjs-api.md`), assigning its chronological three-digit index only upon completion to preserve an immutable audit trail.
 
 ### Standard `[task-name].md` Template:
 
 ```markdown
 # Task: [Descriptive Title]
 
+## Execution Profile
+
+- **Wave / Batch**: Wave 1 | Wave 2 | Wave 3
+- **Execution Mode**: `PARALLEL` | `SEQUENTIAL`
+- **Assigned Role**: `Worker Agent` | `Integrator Agent`
+- **Dependencies (`depends_on`)**: None | `[task-name-a.md, task-name-b.md]`
+- **Collision Risk**: `LOW (Isolated files)` | `HIGH (Shared core files)`
+
+## Target Files
+
+- **Exclusive**:
+  - `src/modules/uploads/uploads.service.ts`
+  - `src/modules/uploads/uploads.controller.ts`
+- **Shared / Integration Points**:
+  - `src/app.module.ts` (Requiere Merge Gate)
+  - `prisma/schema.prisma` (Bloqueante si hay cambios DDL concurrentes)
+
 ## Objective
 
 [1-2 sentences describing backend goal and boundary]
+
+## Technical Specifications
+
+[Key technical details, DTO schemas, endpoints, business rules]
 
 ## Checklist
 
 - [ ] [Step 1]
 - [ ] [Step 2]
-
-## Target Files
-
-- `src/modules/...`
 
 ## Verification
 

@@ -45,7 +45,12 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
         },
         async findUnique({ model, args, query }) {
           const result = (await query(args)) as SoftDeleteRecord | null;
-          if (SOFT_DELETE_MODELS.has(model) && result && result.deletedAt !== null) {
+          if (
+            SOFT_DELETE_MODELS.has(model) &&
+            result &&
+            'deletedAt' in result &&
+            result.deletedAt !== null
+          ) {
             return null;
           }
           return result;
