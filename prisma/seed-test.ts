@@ -45,16 +45,112 @@ const PENSION_TITLES_PREFIXES = [
   'Campus Living',
 ];
 
-const REVIEW_COMMENTS = [
-  'Excelente ubicación, a pasos de la universidad. El ambiente es muy tranquilo y propicio para estudiar. Los gastos comunes siempre fueron respetados y el internet nunca falló.',
-  'Muy buena experiencia durante mi semestre académico. La dueña es muy amable y siempre atenta a cualquier necesidad. Las áreas comunes siempre limpias.',
-  'La pensión está muy bien equipada, con cocina amplia y buena calefacción para el invierno. El barrio es seguro de noche para volver caminando.',
-  'Lugar acogedor y ordenado. La convivencia entre compañeros fue excelente. Recomiendo totalmente las piezas con baño privado.',
-  'Buena relación calidad-precio. El internet de alta velocidad es real y funcionó perfecto para clases online y proyectos.',
-  'Instalaciones limpias, ambiente silencioso en horarios de estudio. Muy conforme con la estadía durante todo el año.',
-  'Aceptable, aunque a veces el agua caliente tardaba en salir en la mañana. En general buena pensión y anfitrión cordial.',
-  'Muy cerca del metro y del campus. Barrio con muchos servicios, supermercados y farmacias a mano.',
+const REVIEW_OPENERS_HIGH = [
+  'Mi experiencia viviendo aquí durante mi año universitario fue excelente.',
+  'Estuve alojando este semestre y la verdad superó todas mis expectativas.',
+  'Un lugar muy acogedor y perfecto para enfocarse en la carrera.',
+  'Bastante conforme con la estadía, cumplió con todo lo que buscaba al llegar de región.',
+  'Recomiendo totalmente esta pensión para cualquier estudiante.',
+  'Fue una estancia muy grata y tranquila durante todo el periodo académico.',
+  'Muy buena pensión, se nota la preocupación por mantener un ambiente grato.',
+  'Llegué como mechón a la ciudad y este lugar me facilitó un montón la adaptación.',
+  'Excelente opción para vivir cerca de la universidad sin pagar de más.',
+  'Viví aquí prácticamente todo el año y no tengo quejas.',
+  'Una residencia estudiantil de primer nivel, volvería a quedarme feliz.',
+  'Muy grato ambiente desde el primer día que me instalé.',
 ];
+
+const REVIEW_OPENERS_MID = [
+  'En general es una pensión correcta que cumple con lo básico para el año.',
+  'Mi experiencia fue aceptable durante el semestre que me quedé.',
+  'Buena pensión para estudiantes, aunque con algunos detalles a considerar.',
+  'Cumple con lo necesario para cursar el semestre académico.',
+  'Es un lugar piola para estudiar, aunque tiene cosas que podrían mejorar.',
+  'La estadía estuvo bien en líneas generales, acorde al precio que se paga.',
+];
+
+const REVIEW_LOCATION = [
+  'La ubicación es inmejorable, a solo unos minutos caminando de las facultades.',
+  'Tiene excelente conectividad, el paradero de micros y metro quedan prácticamente a la vuelta.',
+  'El barrio es muy tranquilo y seguro, incluso cuando toca volver tarde de la biblioteca.',
+  'Se puede llegar a pie al campus todos los días, lo que ahorra mucho tiempo y pasajes.',
+  'El sector cuenta con almacenes, farmacias y lugares accesibles para almorzar.',
+  'Muy bien ubicada en una zona residencial silenciosa pero con locomoción directa.',
+  'Queda cerca de centros de fotocopiado, supermercados y las principales sedes universitarias.',
+  'La cercanía con el campus hace que sea muy cómodo volver en los bloques libres.',
+];
+
+const REVIEW_FACILITIES = [
+  'La habitación es iluminada, con un escritorio espacioso para el computador y apuntes.',
+  'La cocina compartida es amplia y cada estudiante cuenta con su espacio en el refrigerador y estantes.',
+  'El agua caliente funciona perfecto y la presión de la ducha es muy buena en las mañanas.',
+  'Las piezas son abrigadas y la calefacción ayuda bastante en los meses más helados.',
+  'Las camas son cómodas y los clósets tienen suficiente espacio para guardar todo.',
+  'Las zonas comunes se mantienen muy limpias y la lavandería funciona sin inconvenientes.',
+  'El baño siempre limpio y con buena ventilación.',
+  'Espacios comunes cómodos para comer y descansar entre clases.',
+];
+
+const REVIEW_WIFI_STUDY = [
+  'El internet por fibra vuela, nunca tuve caídas ni lag durante certámenes online.',
+  'La conexión WiFi es estable y rápida en todas las habitaciones.',
+  'El ambiente para estudiar es óptimo; se respetan los horarios de silencio rigurosamente.',
+  'Durante semanas de certámenes el silencio en la casa se agradece un montón.',
+  'Hay buen aislamiento en las piezas, lo que permite concentrarse sin distracciones.',
+  'El internet funcionó impecable para streaming, videollamadas y descargar material pesado.',
+];
+
+const REVIEW_LANDLORD_COMMUNITY = [
+  'El dueño es sumamente amable y resuelve cualquier duda o inconveniente en minutos.',
+  'La administración es muy cordial y respetuosa con los tiempos de los estudiantes.',
+  'La convivencia con los demás compañeros fue excelente, de mucho respeto y buena onda.',
+  'Se genera un ambiente muy familiar que hace sentir a uno como en casa.',
+  'Muy buena disposición de los anfitriones, siempre atentos a que no falte nada.',
+  'El trato siempre fue transparente y los gastos comunes claros desde el inicio.',
+];
+
+const REVIEW_NUANCES_MID = [
+  'A veces en las mañanas hay que coordinar bien el uso de la ducha porque baja un poco la presión.',
+  'El único punto a mejorar es que en la cocina a veces se juntan varios a la hora de almuerzo.',
+  'El WiFi en las piezas del fondo a ratos baja la señal cuando todos están conectados.',
+  'El refrigerador común a veces queda medio justo si todos cocinan mucho.',
+  'Se escuchan un poco los ruidos de la calle los viernes, pero nada que impida descansar.',
+];
+
+const REVIEW_CONCLUSIONS_HIGH = [
+  'Totalmente recomendada para quienes buscan tranquilidad y comodidad.',
+  'Sin duda la mejor opción precio-calidad del sector.',
+  '100% recomendada para estudiantes que vienen de otras regiones.',
+  'Me voy muy contento y con excelentes recuerdos de este periodo.',
+  'Si buscas un lugar ordenado para rendir bien en la U, este es.',
+];
+
+const generateRandomCredibleReview = (overallRating: number): string => {
+  const parts: string[] = [];
+  if (overallRating >= 4) {
+    parts.push(faker.helpers.arrayElement(REVIEW_OPENERS_HIGH));
+    parts.push(faker.helpers.arrayElement(REVIEW_LOCATION));
+    parts.push(
+      faker.helpers.arrayElement(faker.datatype.boolean() ? REVIEW_FACILITIES : REVIEW_WIFI_STUDY),
+    );
+    if (faker.datatype.boolean(0.6)) {
+      parts.push(faker.helpers.arrayElement(REVIEW_LANDLORD_COMMUNITY));
+    }
+    if (faker.datatype.boolean(0.5)) {
+      parts.push(faker.helpers.arrayElement(REVIEW_CONCLUSIONS_HIGH));
+    }
+  } else {
+    parts.push(faker.helpers.arrayElement(REVIEW_OPENERS_MID));
+    parts.push(
+      faker.helpers.arrayElement(faker.datatype.boolean() ? REVIEW_LOCATION : REVIEW_FACILITIES),
+    );
+    parts.push(faker.helpers.arrayElement(REVIEW_NUANCES_MID));
+    if (faker.datatype.boolean(0.6)) {
+      parts.push(faker.helpers.arrayElement(REVIEW_LANDLORD_COMMUNITY));
+    }
+  }
+  return parts.join(' ');
+};
 
 const main = async (): Promise<void> => {
   const { prisma, pool } = createPrismaClient();
@@ -126,7 +222,7 @@ const main = async (): Promise<void> => {
 
   console.log('--- Step 4: Seeding universities ---');
   const universityRecords = [];
-  const selectedUnis = rawUniversities.slice(0, 35);
+  const selectedUnis = rawUniversities;
   for (let idx = 0; idx < selectedUnis.length; idx++) {
     const uni = selectedUnis[idx];
     const assignedCity = assignCityToUniversity(uni.name, validCities);
@@ -440,7 +536,7 @@ const main = async (): Promise<void> => {
         landlordRating: landlordRat,
         quietnessRating: quietness,
         wifiRating: wifi,
-        comment: faker.helpers.arrayElement(REVIEW_COMMENTS),
+        comment: generateRandomCredibleReview(overall),
         stayDurationCategory: stayDuration,
         stayStartDate: new Date('2025-03-01'),
         stayEndDate: new Date('2025-12-15'),
