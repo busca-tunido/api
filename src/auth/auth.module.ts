@@ -23,10 +23,14 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
           throw new Error('JWT_SECRET environment variable is required.');
         }
         const expiresIn =
+          configService.get<string>('PUBLIC_JWT_EXPIRATION') ||
+          configService.get<string>('PUBLIC_JWT_EXPIRES_IN') ||
           configService.get<string>('JWT_EXPIRES_IN') ||
           configService.get<string>('JWT_EXPIRATION');
         if (!expiresIn) {
-          throw new Error('JWT_EXPIRATION (or JWT_EXPIRES_IN) environment variable is required.');
+          throw new Error(
+            'PUBLIC_JWT_EXPIRATION (or JWT_EXPIRATION / JWT_EXPIRES_IN) environment variable is required.',
+          );
         }
         return {
           secret,

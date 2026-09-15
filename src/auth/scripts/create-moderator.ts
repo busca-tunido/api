@@ -9,10 +9,10 @@ try {
 
 const run = async (): Promise<void> => {
   const args = process.argv.slice(2);
-  const emailArg = args[0] || process.env.MODERATOR_EMAIL;
+  const emailArg = args[0] || process.env.PUBLIC_MODERATOR_EMAIL || process.env.MODERATOR_EMAIL;
   if (!emailArg) {
     throw new Error(
-      'Missing env var: MODERATOR_EMAIL must be defined in environment (.env) or passed as argument.',
+      'Missing env var: PUBLIC_MODERATOR_EMAIL (or MODERATOR_EMAIL) must be defined in environment (.env) or passed as argument.',
     );
   }
 
@@ -23,17 +23,19 @@ const run = async (): Promise<void> => {
     );
   }
 
-  const firstNameArg = args[2] || process.env.MODERATOR_FIRST_NAME;
+  const firstNameArg =
+    args[2] || process.env.PUBLIC_MODERATOR_FIRST_NAME || process.env.MODERATOR_FIRST_NAME;
   if (!firstNameArg) {
     throw new Error(
-      'Missing env var: MODERATOR_FIRST_NAME must be defined in environment (.env) or passed as argument.',
+      'Missing env var: PUBLIC_MODERATOR_FIRST_NAME (or MODERATOR_FIRST_NAME) must be defined in environment (.env) or passed as argument.',
     );
   }
 
-  const lastNameArg = args[3] || process.env.MODERATOR_LAST_NAME;
+  const lastNameArg =
+    args[3] || process.env.PUBLIC_MODERATOR_LAST_NAME || process.env.MODERATOR_LAST_NAME;
   if (!lastNameArg) {
     throw new Error(
-      'Missing env var: MODERATOR_LAST_NAME must be defined in environment (.env) or passed as argument.',
+      'Missing env var: PUBLIC_MODERATOR_LAST_NAME (or MODERATOR_LAST_NAME) must be defined in environment (.env) or passed as argument.',
     );
   }
 
