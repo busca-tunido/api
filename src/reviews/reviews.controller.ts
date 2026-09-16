@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { CreateReviewDto } from './dto/create-review.dto.js';
+import { FilterReviewsDto } from './dto/filter-reviews.dto.js';
 import { UpdateReviewDto } from './dto/update-review.dto.js';
-import { ReviewsService } from './reviews.service.js';
+import { type PaginatedReviews, ReviewsService } from './reviews.service.js';
 
 @ApiTags('Reviews')
 @Controller()
@@ -13,10 +14,13 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Get('pensions/:pensionId/reviews')
-  @ApiOperation({ summary: 'Get all reviews for a pension' })
-  @ApiResponse({ status: 200, description: 'List of reviews' })
-  async findByPension(@Param('pensionId') pensionId: string): Promise<unknown[]> {
-    return this.reviewsService.findByPension(pensionId);
+  @ApiOperation({ summary: 'Get paginated reviews for a pension with optional rating filter and sorting' })
+  @ApiResponse({ status: 200, description: 'Paginated reviews response' })
+  async findByPension(
+    @Param('pensionId') pensionId: string,
+    @Query() filter: FilterReviewsDto,
+  ): Promise<PaginatedReviews> {
+    return this.reviewsService.findByPension(pensionId, filter);
   }
 
   @Get('stays')

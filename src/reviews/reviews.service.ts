@@ -4,41 +4,101 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateReviewDto } from './dto/create-review.dto.js';
+import { FilterReviewsDto } from './dto/filter-reviews.dto.js';
 import type { UpdateReviewDto } from './dto/update-review.dto.js';
+
+export interface PaginatedReviews<T = unknown> {
+  items: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasMore: boolean;
+}
 
 @Injectable()
 export class ReviewsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByPension(pensionId: string): Promise<unknown[]> {
-    return this.prisma.review.findMany({
-      where: {
-        pensionId,
-        isHidden: false,
-        deletedAt: null,
-      },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            university: {
-              select: {
-                shortName: true,
-                name: true,
+  async findByPension(
+    pensionId: string,
+    filter: FilterReviewsDto = new FilterReviewsDto(),
+  ): Promise<PaginatedReviews> {
+    const page = Math.max(1, Number(filter.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(filter.limit) || 10));
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.ReviewWhereInput = {
+      pensionId,
+      isHidden: false,
+      deletedAt: null,
+      ...(filter.rating ? { overallRating: filter.rating } : {}),
+    };
+
+    let orderBy: Prisma.ReviewOrderByWithRelationInput = { createdAt: 'desc' };
+    if (filter.sortBy === 'oldest') {
+      orderBy = { createdAt: 'asc' };
+    } else if (filter.sortBy === 'rating_desc') {
+      orderBy = { overallRating: 'desc' };
+    } else if (filter.sortBy === 'rating_asc') {
+      orderBy = { overallRating: 'asc' };
+    }
+
+    const [total, items] = await Promise.all([
+      this.prisma.review.count({ where }),
+      this.prisma.review.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+              university: {
+                select: {
+                  shortName: true,
+                  name: true,
+                },
               },
             },
           },
         },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit) || 1;
+    const hasMore = skip + limit < total;
+
+    return {
+      items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasMore,
       },
-    });
+      total,
+      page,
+      limit,
+      totalPages,
+      hasMore,
+    };
   }
 
   async findUserStays(userId: string): Promise<unknown[]> {
