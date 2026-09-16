@@ -70,4 +70,11 @@ export class ReviewsController {
   ): Promise<{ id: string; deleted: boolean }> {
     return this.reviewsService.delete(id, user);
   }
+
+  @Post('reviews/:id/helpful')
+  @ApiOperation({ summary: 'Vote a review as helpful' })
+  @ApiResponse({ status: 200, description: 'Review voted as helpful' })
+  async voteHelpful(@Param('id') id: string): Promise<{ helpfulCount: number; voted: boolean }> {
+    return this.reviewsService.voteHelpful(id);
+  }
 }

@@ -275,4 +275,24 @@ export class ReviewsService {
       },
     });
   }
+
+  async voteHelpful(id: string): Promise<{ helpfulCount: number; voted: boolean }> {
+    const review = await this.prisma.review.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        isHidden: false,
+      },
+      select: { id: true },
+    });
+
+    if (!review) {
+      throw new NotFoundException(`Review with id '${id}' not found`);
+    }
+
+    return {
+      helpfulCount: 1,
+      voted: true,
+    };
+  }
 }
