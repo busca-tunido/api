@@ -7,6 +7,7 @@ import { ReviewsService } from './reviews.service.js';
 
 type MockPrismaService = {
   review: {
+    count: ReturnType<typeof vi.fn>;
     findMany: ReturnType<typeof vi.fn>;
     findUnique: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -53,6 +54,7 @@ describe('ReviewsService', () => {
   beforeEach(() => {
     mockPrisma = {
       review: {
+        count: vi.fn(),
         findMany: vi.fn(),
         findUnique: vi.fn(),
         create: vi.fn(),
@@ -69,10 +71,12 @@ describe('ReviewsService', () => {
 
   describe('findByPension', () => {
     it('should return list of reviews', async () => {
+      mockPrisma.review.count.mockResolvedValue(1);
       mockPrisma.review.findMany.mockResolvedValue([{ id: 'rev-1', overallRating: 5 }]);
 
       const result = await service.findByPension('pension-1');
-      expect(result).toHaveLength(1);
+      expect(result.items).toHaveLength(1);
+      expect(result.pagination.total).toBe(1);
     });
   });
 
@@ -207,7 +211,12 @@ describe('ReviewsService', () => {
         },
       ]);
 
-      const result = await service.findUserStays('student-1');
+      const result = (await service.findUserStays('student-1')) as Array<{
+        pensionId: string;
+        pensionTitle: string;
+        pensionCity: string;
+        review?: { stayDurationCategory: string; id: string };
+      }>;
       expect(result).toHaveLength(1);
       expect(result[0].pensionId).toBe('pen-1');
       expect(result[0].pensionTitle).toBe('Residencia Beauchef');

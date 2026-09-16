@@ -115,10 +115,10 @@ export class CacheControlInterceptor implements NestInterceptor {
       if (typeof response.header === 'function') {
         response.header('Cache-Control', headerValue);
       } else if (
-        typeof (response as { setHeader?: (name: string, value: string) => void }).setHeader ===
-        'function'
+        typeof (response as unknown as { setHeader?: (name: string, value: string) => void })
+          .setHeader === 'function'
       ) {
-        (response as { setHeader: (name: string, value: string) => void }).setHeader(
+        (response as unknown as { setHeader: (name: string, value: string) => void }).setHeader(
           'Cache-Control',
           headerValue,
         );

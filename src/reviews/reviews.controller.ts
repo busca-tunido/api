@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -14,7 +24,9 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Get('pensions/:pensionId/reviews')
-  @ApiOperation({ summary: 'Get paginated reviews for a pension with optional rating filter and sorting' })
+  @ApiOperation({
+    summary: 'Get paginated reviews for a pension with optional rating filter and sorting',
+  })
   @ApiResponse({ status: 200, description: 'Paginated reviews response' })
   async findByPension(
     @Param('pensionId') pensionId: string,

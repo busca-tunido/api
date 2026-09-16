@@ -18,7 +18,12 @@ export class FilterReviewsDto {
   @Max(50)
   limit: number = 10;
 
-  @ApiPropertyOptional({ example: 5, minimum: 1, maximum: 5, description: 'Filter by exact overall rating' })
+  @ApiPropertyOptional({
+    example: 5,
+    minimum: 1,
+    maximum: 5,
+    description: 'Filter by exact overall rating',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
