@@ -25,14 +25,14 @@ type ImageEntry = {
 };
 
 const IMAGES: ImageEntry[] = [
-  { file: 'pension_facade_exterior_1789518008515.jpg', key: 'pension-facade-exterior.webp' },
-  { file: 'student_single_room_1789518061517.jpg', key: 'student-single-room.webp' },
-  { file: 'student_shared_room_1789518203984.jpg', key: 'student-shared-room.webp' },
-  { file: 'pension_study_room_1789518318621.jpg', key: 'pension-study-room.webp' },
-  { file: 'pension_shared_kitchen_1789518397894.jpg', key: 'pension-shared-kitchen.webp' },
-  { file: 'student_studio_room_1789518824165.jpg', key: 'student-studio-room.webp' },
-  { file: 'pension_patio_garden_1789518869991.jpg', key: 'pension-patio-garden.webp' },
-  { file: 'student_room_attic_1789518928663.jpg', key: 'student-room-attic.webp' },
+  { file: 'room_single_classic_1789520147947.jpg', key: 'room-single-classic.webp' },
+  { file: 'room_shared_double_1789520203689.jpg', key: 'room-shared-double.webp' },
+  { file: 'room_single_minimalist_1789520285669.jpg', key: 'room-single-minimalist.webp' },
+  { file: 'room_studio_compact_1789520359014.jpg', key: 'room-studio-compact.webp' },
+  { file: 'room_attic_cozy_1789520435918.jpg', key: 'room-attic-cozy.webp' },
+  { file: 'room_spacious_balcony_1789520451934.jpg', key: 'room-spacious-balcony.webp' },
+  { file: 'student_studio_room_1789518824165.jpg', key: 'room-studio-modern.webp' },
+  { file: 'student_single_room_1789518061517.jpg', key: 'room-single-cozy.webp' },
 ];
 
 const BASE_DIR = 'C:\\Users\\tkdgi\\.gemini\\antigravity-ide\\brain\\4c552b6b-ceea-487c-a9a5-3eb572342a90';
