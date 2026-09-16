@@ -71,7 +71,7 @@ describe('validateEnv', () => {
         JWT_SECRET: 'secret',
         JWT_EXPIRATION: '7d',
       }),
-    ).toThrow('PORT environment variable is required.');
+    ).toThrow('PUBLIC_PORT (or PORT) environment variable is required.');
 
     expect(() =>
       validateEnv({
