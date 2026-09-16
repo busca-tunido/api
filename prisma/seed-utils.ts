@@ -329,3 +329,11 @@ export const createPrismaClient = (): { prisma: PrismaClient; pool: Pool } => {
   const prisma = new PrismaClient({ adapter });
   return { prisma, pool };
 };
+
+export const chunkArray = <T>(array: readonly T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+};

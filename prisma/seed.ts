@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   AMENITY_DEFINITIONS,
   assignCityToUniversity,
@@ -178,130 +179,120 @@ const main = async (): Promise<void> => {
   `);
 
   console.log('--- Production Seed: Upserting core catalog amenities ---');
-  for (const item of AMENITY_DEFINITIONS) {
-    await prisma.amenity.upsert({
-      where: { slug: item.slug },
-      update: {
-        name: item.name,
-        category: item.category,
-        iconKey: item.iconKey,
-      },
-      create: {
-        slug: item.slug,
-        name: item.name,
-        category: item.category,
-        iconKey: item.iconKey,
-      },
-    });
-  }
+  const amenityRecords = AMENITY_DEFINITIONS.map((item) => ({
+    id: randomUUID(),
+    slug: item.slug,
+    name: item.name,
+    category: item.category,
+    iconKey: item.iconKey,
+  }));
+  await prisma.amenity.createMany({ data: amenityRecords });
+
+  const defaultAmenitySlugs = new Set([
+    'wifi-alta-velocidad',
+    'agua-caliente',
+    'luz-incluida',
+    'cocina-equipada',
+  ]);
+  const defaultAmenities = amenityRecords.filter((a) => defaultAmenitySlugs.has(a.slug));
 
   console.log('--- Production Seed: Upserting official universities ---');
-  const seededUniversities = [];
-  for (let idx = 0; idx < universitiesData.length; idx++) {
-    const uni = universitiesData[idx];
+  const seededUniversities = universitiesData.map((uni) => {
     const assignedCity = assignCityToUniversity(uni.name, citiesData);
     const shortName = generateShortName(uni.name);
-
-    const existingUni = await prisma.university.findFirst({ where: { name: uni.name } });
-    const record = existingUni
-      ? await prisma.university.update({
-          where: { id: existingUni.id },
-          data: {
-            shortName,
-            emailDomains: uni.domains,
-            city: assignedCity.city,
-            address: `${assignedCity.city}, Chile`,
-            latitude: assignedCity.latitude,
-            longitude: assignedCity.longitude,
-          },
-        })
-      : await prisma.university.create({
-          data: {
-            name: uni.name,
-            shortName,
-            emailDomains: uni.domains,
-            city: assignedCity.city,
-            address: `${assignedCity.city}, Chile`,
-            latitude: assignedCity.latitude,
-            longitude: assignedCity.longitude,
-          },
-        });
-    seededUniversities.push(record);
-  }
+    return {
+      id: randomUUID(),
+      name: uni.name,
+      shortName,
+      emailDomains: uni.domains,
+      city: assignedCity.city,
+      address: `${assignedCity.city}, Chile`,
+      latitude: assignedCity.latitude,
+      longitude: assignedCity.longitude,
+    };
+  });
+  await prisma.university.createMany({ data: seededUniversities });
 
   console.log('--- Production Seed: Ingesting unclaimed public directory pensions ---');
+  const pensionRecords = [];
+  const allRooms = [];
+  const allPensionUnis = [];
+  const amenityJoinTuples: Array<{ A: string; B: string }> = [];
+
   for (const listing of PUBLIC_PENSION_DIRECTORY) {
     const slug = slugify(listing.title);
-    const existing = await prisma.pension.findUnique({ where: { slug } });
+    const pensionId = randomUUID();
 
-    if (!existing) {
-      const createdPension = await prisma.pension.create({
-        data: {
-          slug,
-          title: listing.title,
-          description: listing.description,
-          address: listing.address,
-          city: listing.city,
-          neighborhood: listing.neighborhood,
-          latitude: listing.latitude,
-          longitude: listing.longitude,
-          baseMonthlyPrice: listing.baseMonthlyPrice,
-          currency: 'CLP',
-          waterIncluded: true,
-          electricityIncluded: true,
-          gasIncluded: true,
-          internetIncluded: true,
-          verificationStatus: 'UNVERIFIED',
-          ratingAverage: 0,
-          ratingCount: 0,
-          isActive: true,
-          landlordId: null,
-          submittedById: null,
-          amenities: {
-            connect: [
-              { slug: 'wifi-alta-velocidad' },
-              { slug: 'agua-caliente' },
-              { slug: 'luz-incluida' },
-              { slug: 'cocina-equipada' },
-            ],
-          },
-        },
+    pensionRecords.push({
+      id: pensionId,
+      slug,
+      title: listing.title,
+      description: listing.description,
+      address: listing.address,
+      city: listing.city,
+      neighborhood: listing.neighborhood,
+      latitude: listing.latitude,
+      longitude: listing.longitude,
+      baseMonthlyPrice: listing.baseMonthlyPrice,
+      currency: 'CLP',
+      waterIncluded: true,
+      electricityIncluded: true,
+      gasIncluded: true,
+      internetIncluded: true,
+      verificationStatus: 'UNVERIFIED' as const,
+      ratingAverage: 0,
+      ratingCount: 0,
+      isActive: true,
+      landlordId: null,
+      submittedById: null,
+    });
+
+    for (const a of defaultAmenities) {
+      amenityJoinTuples.push({ A: a.id, B: pensionId });
+    }
+
+    for (const r of listing.rooms) {
+      allRooms.push({
+        id: randomUUID(),
+        pensionId,
+        roomNumber: r.roomNumber,
+        title: r.title,
+        description: `${r.title} en ${listing.title}.`,
+        type: r.type,
+        monthlyPrice: r.monthlyPrice,
+        hasPrivateBathroom: r.hasPrivateBathroom,
+        totalBeds: r.totalBeds,
+        availableBeds: r.availableBeds,
+        isAvailable: true,
+        images: [],
       });
+    }
 
-      for (const r of listing.rooms) {
-        await prisma.room.create({
-          data: {
-            pensionId: createdPension.id,
-            roomNumber: r.roomNumber,
-            title: r.title,
-            description: `${r.title} en ${listing.title}.`,
-            type: r.type,
-            monthlyPrice: r.monthlyPrice,
-            hasPrivateBathroom: r.hasPrivateBathroom,
-            totalBeds: r.totalBeds,
-            availableBeds: r.availableBeds,
-            isAvailable: true,
-            images: [],
-          },
-        });
-      }
-
-      const matchingUni = seededUniversities.find(
-        (u) => u.city.toLowerCase() === listing.city.toLowerCase(),
-      );
-      if (matchingUni) {
-        await prisma.pensionUniversity.create({
-          data: {
-            pensionId: createdPension.id,
-            universityId: matchingUni.id,
-            distanceMeters: 600,
-            walkingMinutes: 8,
-            transitMinutes: 4,
-          },
-        });
-      }
+    const matchingUni = seededUniversities.find(
+      (u) => u.city.toLowerCase() === listing.city.toLowerCase(),
+    );
+    if (matchingUni) {
+      allPensionUnis.push({
+        pensionId,
+        universityId: matchingUni.id,
+        distanceMeters: 600,
+        walkingMinutes: 8,
+        transitMinutes: 4,
+      });
     }
   }
+
+  await prisma.pension.createMany({ data: pensionRecords });
+
+  if (amenityJoinTuples.length > 0) {
+    const values = amenityJoinTuples.map((t) => `('${t.A}', '${t.B}')`).join(',');
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO "_AmenityToPension" ("A", "B") VALUES ${values} ON CONFLICT DO NOTHING;`,
+    );
+  }
+
+  await prisma.room.createMany({ data: allRooms });
+  await prisma.pensionUniversity.createMany({ data: allPensionUnis });
 
   console.log('--- Production Seed: Verifying strict absence of synthetic data ---');
   const userCount = await prisma.user.count();

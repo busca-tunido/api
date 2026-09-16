@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { fakerES_MX as faker } from '@faker-js/faker';
 import type {
   GenderPreference,
@@ -14,6 +15,7 @@ import bcrypt from 'bcryptjs';
 import {
   AMENITY_DEFINITIONS,
   assignCityToUniversity,
+  chunkArray,
   createPrismaClient,
   fetchAndValidateChileCities,
   fetchAndValidateUniversities,
@@ -184,64 +186,67 @@ const main = async (): Promise<void> => {
   `);
 
   console.log('--- Step 3: Seeding amenities & administrative accounts ---');
-  const amenityRecords = [];
-  for (const item of AMENITY_DEFINITIONS) {
-    const record = await prisma.amenity.create({ data: item });
-    amenityRecords.push(record);
-  }
+  const amenityRecords = AMENITY_DEFINITIONS.map((item) => ({
+    id: randomUUID(),
+    slug: item.slug,
+    name: item.name,
+    category: item.category,
+    iconKey: item.iconKey,
+  }));
+  await prisma.amenity.createMany({ data: amenityRecords });
 
   const defaultPasswordHash = bcrypt.hashSync('Password123!', 10);
+  const adminId = randomUUID();
+  const moderatorId = randomUUID();
 
-  await prisma.user.create({
-    data: {
-      email: 'admin@buscatunido.cl',
-      passwordHash: defaultPasswordHash,
-      firstName: 'Administrador',
-      lastName: 'General',
-      phone: '+56911223344',
-      role: 'ADMIN' as Role,
-      isEmailVerified: true,
-      avatarUrl:
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-    },
-  });
-
-  await prisma.user.create({
-    data: {
-      email: 'moderador@buscatunido.cl',
-      passwordHash: defaultPasswordHash,
-      firstName: 'Moderador',
-      lastName: 'Comunidad',
-      phone: '+56922334455',
-      role: 'MODERATOR' as Role,
-      isEmailVerified: true,
-      avatarUrl:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
-    },
+  await prisma.user.createMany({
+    data: [
+      {
+        id: adminId,
+        email: 'admin@buscatunido.cl',
+        passwordHash: defaultPasswordHash,
+        firstName: 'Administrador',
+        lastName: 'General',
+        phone: '+56911223344',
+        role: 'ADMIN' as Role,
+        isEmailVerified: true,
+        avatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      },
+      {
+        id: moderatorId,
+        email: 'moderador@buscatunido.cl',
+        passwordHash: defaultPasswordHash,
+        firstName: 'Moderador',
+        lastName: 'Comunidad',
+        phone: '+56922334455',
+        role: 'MODERATOR' as Role,
+        isEmailVerified: true,
+        avatarUrl:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+      },
+    ],
   });
 
   console.log('--- Step 4: Seeding universities ---');
-  const universityRecords = [];
   const selectedUnis = rawUniversities;
-  for (let idx = 0; idx < selectedUnis.length; idx++) {
-    const uni = selectedUnis[idx];
+  const universityRecords = selectedUnis.map((uni, idx) => {
     const assignedCity = assignCityToUniversity(uni.name, validCities);
     const jitterLat = (Math.random() - 0.5) * 0.02;
     const jitterLng = (Math.random() - 0.5) * 0.02;
+    return {
+      id: randomUUID(),
+      name: uni.name,
+      shortName: generateShortName(uni.name),
+      emailDomains: uni.domains.length > 0 ? uni.domains : [`uni${idx + 1}.cl`],
+      city: assignedCity.city,
+      address: `${faker.location.street()}, ${assignedCity.city}`,
+      latitude: assignedCity.latitude + jitterLat,
+      longitude: assignedCity.longitude + jitterLng,
+    };
+  });
 
-    const createdUni = await prisma.university.create({
-      data: {
-        name: uni.name,
-        shortName: generateShortName(uni.name),
-        emailDomains: uni.domains.length > 0 ? uni.domains : [`uni${idx + 1}.cl`],
-        city: assignedCity.city,
-        address: `${faker.location.street()}, ${assignedCity.city}`,
-        latitude: assignedCity.latitude + jitterLat,
-        longitude: assignedCity.longitude + jitterLng,
-      },
-    });
-    universityRecords.push(createdUni);
-  }
+  await prisma.university.createMany({ data: universityRecords });
 
   const uniCount = await prisma.university.count();
   if (uniCount < selectedUnis.length) {
@@ -251,38 +256,39 @@ const main = async (): Promise<void> => {
   }
 
   console.log('--- Step 5: Seeding hundreds of landlord users ---');
-  const landlordDemo = await prisma.user.create({
-    data: {
-      email: 'propietario.demo@buscatunido.cl',
-      passwordHash: defaultPasswordHash,
-      firstName: 'Propietario',
-      lastName: 'Demo',
-      phone: '+56987654321',
-      role: 'LANDLORD' as Role,
-      isEmailVerified: true,
-      avatarUrl:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
-    },
-  });
+  const landlordDemo = {
+    id: randomUUID(),
+    email: 'propietario.demo@buscatunido.cl',
+    passwordHash: defaultPasswordHash,
+    firstName: 'Propietario',
+    lastName: 'Demo',
+    phone: '+56987654321',
+    role: 'LANDLORD' as Role,
+    isEmailVerified: true,
+    avatarUrl:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+  };
 
   const landlordUsers = [landlordDemo];
   const TOTAL_LANDLORDS = 120;
   for (let i = 1; i <= TOTAL_LANDLORDS; i++) {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
-    const landlord = await prisma.user.create({
-      data: {
-        email: `arrendador${i}@buscatunido.cl`,
-        passwordHash: defaultPasswordHash,
-        firstName,
-        lastName,
-        phone: `+569${faker.string.numeric(8)}`,
-        role: 'LANDLORD' as Role,
-        isEmailVerified: true,
-        avatarUrl: `https://images.unsplash.com/photo-${1500000000000 + i * 45000000}?auto=format&fit=crop&w=300&q=80`,
-      },
+    landlordUsers.push({
+      id: randomUUID(),
+      email: `arrendador${i}@buscatunido.cl`,
+      passwordHash: defaultPasswordHash,
+      firstName,
+      lastName,
+      phone: `+569${faker.string.numeric(8)}`,
+      role: 'LANDLORD' as Role,
+      isEmailVerified: true,
+      avatarUrl: `https://images.unsplash.com/photo-${1500000000000 + i * 45000000}?auto=format&fit=crop&w=300&q=80`,
     });
-    landlordUsers.push(landlord);
+  }
+
+  for (const chunk of chunkArray(landlordUsers, 500)) {
+    await prisma.user.createMany({ data: chunk });
   }
 
   console.log('--- Step 6: Seeding pensions concentrated in primary cities ---');
@@ -291,9 +297,11 @@ const main = async (): Promise<void> => {
 
   const TOTAL_PENSIONS = 280;
   const pensionRecords = [];
+  const allPensions = [];
   const allRooms = [];
   const allImages = [];
   const allPensionUnis = [];
+  const amenityJoinTuples: Array<{ A: string; B: string }> = [];
 
   for (let i = 0; i < TOTAL_PENSIONS; i++) {
     const isPrimaryTarget = i < Math.floor(TOTAL_PENSIONS * 0.85);
@@ -342,50 +350,50 @@ const main = async (): Promise<void> => {
     ]) as VerificationStatus;
 
     const selectedAmenities = faker.helpers.arrayElements(amenityRecords, { min: 4, max: 10 });
-    const pensionId = faker.string.uuid();
+    const pensionId = randomUUID();
 
-    const createdPension = await prisma.pension.create({
-      data: {
-        id: pensionId,
-        slug,
-        title,
-        description: `Excelente pensión para estudiantes ubicada en ${targetCity.city}, con conectividad directa a centros de estudio. Cuenta con grato ambiente de estudio, cocina completamente equipada, dormitorios iluminados y servicios básicos incluidos en la renta. Barrio seguro y locomoción expedita.`,
-        address: `${street} ${faker.number.int({ min: 100, max: 2900 })}`,
-        city: targetCity.city,
-        neighborhood: targetCity.city,
-        latitude: pLat,
-        longitude: pLng,
-        contactName: `${landlord.firstName} ${landlord.lastName}`,
-        contactPhone: landlord.phone,
-        contactWhatsapp: landlord.phone,
-        contactEmail: landlord.email,
-        baseMonthlyPrice: basePrice,
-        deposit: depositAmount,
-        currency: 'CLP',
-        waterIncluded: true,
-        electricityIncluded: true,
-        gasIncluded: faker.datatype.boolean(0.85),
-        internetIncluded: true,
-        curfewTime: faker.helpers.arrayElement([null, null, '23:00', '00:00', '01:00']),
-        guestsAllowed: faker.datatype.boolean(0.6),
-        smokingAllowed: faker.datatype.boolean(0.15),
-        petsAllowed: faker.datatype.boolean(0.2),
-        genderPreference: genderPref,
-        quietHoursStart: '23:00',
-        quietHoursEnd: '07:00',
-        verificationStatus: verification,
-        ratingAverage: 0,
-        ratingCount: 0,
-        isActive: true,
-        landlordId: landlord.id,
-        submittedById: landlord.id,
-        amenities: {
-          connect: selectedAmenities.map((a) => ({ id: a.id })),
-        },
-      },
-    });
+    const pensionItem = {
+      id: pensionId,
+      slug,
+      title,
+      description: `Excelente pensión para estudiantes ubicada en ${targetCity.city}, con conectividad directa a centros de estudio. Cuenta con grato ambiente de estudio, cocina completamente equipada, dormitorios iluminados y servicios básicos incluidos en la renta. Barrio seguro y locomoción expedita.`,
+      address: `${street} ${faker.number.int({ min: 100, max: 2900 })}`,
+      city: targetCity.city,
+      neighborhood: targetCity.city,
+      latitude: pLat,
+      longitude: pLng,
+      contactName: `${landlord.firstName} ${landlord.lastName}`,
+      contactPhone: landlord.phone,
+      contactWhatsapp: landlord.phone,
+      contactEmail: landlord.email,
+      baseMonthlyPrice: basePrice,
+      deposit: depositAmount,
+      currency: 'CLP',
+      waterIncluded: true,
+      electricityIncluded: true,
+      gasIncluded: faker.datatype.boolean(0.85),
+      internetIncluded: true,
+      curfewTime: faker.helpers.arrayElement([null, null, '23:00', '00:00', '01:00']),
+      guestsAllowed: faker.datatype.boolean(0.6),
+      smokingAllowed: faker.datatype.boolean(0.15),
+      petsAllowed: faker.datatype.boolean(0.2),
+      genderPreference: genderPref,
+      quietHoursStart: '23:00',
+      quietHoursEnd: '07:00',
+      verificationStatus: verification,
+      ratingAverage: 0,
+      ratingCount: 0,
+      isActive: true,
+      landlordId: landlord.id,
+      submittedById: landlord.id,
+    };
 
-    pensionRecords.push({ ...createdPension, isPrimary: isPrimaryTarget });
+    allPensions.push(pensionItem);
+    pensionRecords.push({ ...pensionItem, isPrimary: isPrimaryTarget });
+
+    for (const a of selectedAmenities) {
+      amenityJoinTuples.push({ A: a.id, B: pensionId });
+    }
 
     if (isPrimaryTarget) {
       const distMeters = faker.number.int({ min: 250, max: 2400 });
@@ -393,7 +401,7 @@ const main = async (): Promise<void> => {
       const transMin = Math.round(distMeters / 250) + 4;
 
       allPensionUnis.push({
-        pensionId: createdPension.id,
+        pensionId,
         universityId: assignedUni.id,
         distanceMeters: distMeters,
         walkingMinutes: walkMin,
@@ -405,7 +413,8 @@ const main = async (): Promise<void> => {
     const pickedImages = faker.helpers.arrayElements(ROOM_PHOTOS, numImages);
     for (let imgIndex = 0; imgIndex < pickedImages.length; imgIndex++) {
       allImages.push({
-        pensionId: createdPension.id,
+        id: randomUUID(),
+        pensionId,
         url: pickedImages[imgIndex],
         caption: imgIndex === 0 ? 'Fachada y vista general' : `Área interior ${imgIndex}`,
         isFeatured: imgIndex === 0,
@@ -426,7 +435,8 @@ const main = async (): Promise<void> => {
       const roomPrice = Math.max(150000, basePrice + modifier);
 
       allRooms.push({
-        pensionId: createdPension.id,
+        id: randomUUID(),
+        pensionId,
         roomNumber: `Hab ${r * 10 + r}`,
         title: `Habitación ${roomType === 'SINGLE' ? 'Individual' : roomType === 'SHARED' ? 'Compartida' : 'Estudio'} #${r}`,
         description: `Habitación amoblada para estudiantes con cama, escritorio y clóset. ${hasPrivateBath ? 'Baño privado.' : 'Baño compartido.'}`,
@@ -442,28 +452,48 @@ const main = async (): Promise<void> => {
     }
   }
 
-  await prisma.pensionUniversity.createMany({ data: allPensionUnis });
-  await prisma.pensionImage.createMany({ data: allImages });
-  await prisma.room.createMany({ data: allRooms });
+  for (const chunk of chunkArray(allPensions, 500)) {
+    await prisma.pension.createMany({ data: chunk });
+  }
+
+  if (amenityJoinTuples.length > 0) {
+    for (const chunk of chunkArray(amenityJoinTuples, 1000)) {
+      const values = chunk.map((t) => `('${t.A}', '${t.B}')`).join(',');
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO "_AmenityToPension" ("A", "B") VALUES ${values} ON CONFLICT DO NOTHING;`,
+      );
+    }
+  }
+
+  for (const chunk of chunkArray(allPensionUnis, 500)) {
+    await prisma.pensionUniversity.createMany({ data: chunk });
+  }
+
+  for (const chunk of chunkArray(allImages, 500)) {
+    await prisma.pensionImage.createMany({ data: chunk });
+  }
+
+  for (const chunk of chunkArray(allRooms, 500)) {
+    await prisma.room.createMany({ data: chunk });
+  }
 
   console.log('--- Step 7: Seeding thousands of student users ---');
   const primaryUni =
     universityRecords.find((u) => u.name.toLowerCase().includes('chile')) || universityRecords[0];
 
-  const studentDemo = await prisma.user.create({
-    data: {
-      email: 'estudiante.demo@uchile.cl',
-      passwordHash: defaultPasswordHash,
-      firstName: 'Estudiante',
-      lastName: 'Demo',
-      phone: '+56912345678',
-      role: 'STUDENT' as Role,
-      isEmailVerified: true,
-      universityId: primaryUni.id,
-      avatarUrl:
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-    },
-  });
+  const studentDemo = {
+    id: randomUUID(),
+    email: 'estudiante.demo@uchile.cl',
+    passwordHash: defaultPasswordHash,
+    firstName: 'Estudiante',
+    lastName: 'Demo',
+    phone: '+56912345678',
+    role: 'STUDENT' as Role,
+    isEmailVerified: true,
+    universityId: primaryUni.id,
+    avatarUrl:
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+  };
 
   const studentUsers = [studentDemo];
   const TOTAL_STUDENTS = 1200;
@@ -474,25 +504,26 @@ const main = async (): Promise<void> => {
     const lastName = faker.person.lastName();
     const cleanEmail = slugify(`${firstName}.${lastName}.${i}`);
 
-    const student = await prisma.user.create({
-      data: {
-        email: `${cleanEmail}@${uniDomain}`,
-        passwordHash: defaultPasswordHash,
-        firstName,
-        lastName,
-        phone: `+569${faker.string.numeric(8)}`,
-        role: 'STUDENT' as Role,
-        isEmailVerified: faker.datatype.boolean(0.85),
-        universityId: assignedUni.id,
-        avatarUrl: `https://images.unsplash.com/photo-${1530000000000 + (i % 30) * 35000000}?auto=format&fit=crop&w=300&q=80`,
-      },
+    studentUsers.push({
+      id: randomUUID(),
+      email: `${cleanEmail}@${uniDomain}`,
+      passwordHash: defaultPasswordHash,
+      firstName,
+      lastName,
+      phone: `+569${faker.string.numeric(8)}`,
+      role: 'STUDENT' as Role,
+      isEmailVerified: faker.datatype.boolean(0.85),
+      universityId: assignedUni.id,
+      avatarUrl: `https://images.unsplash.com/photo-${1530000000000 + (i % 30) * 35000000}?auto=format&fit=crop&w=300&q=80`,
     });
-    studentUsers.push(student);
+  }
+
+  for (const chunk of chunkArray(studentUsers, 500)) {
+    await prisma.user.createMany({ data: chunk });
   }
 
   console.log('--- Step 8: Seeding reviews with fixed-url image in primary cities ---');
   const allReviews = [];
-  const pensionRatingsMap = new Map<string, { sum: number; count: number }>();
 
   for (const pension of pensionRecords) {
     const numReviews = pension.isPrimary
@@ -502,11 +533,9 @@ const main = async (): Promise<void> => {
     if (numReviews === 0) continue;
 
     const reviewingStudents = faker.helpers.arrayElements(studentUsers, numReviews);
-    let sum = 0;
 
     for (const student of reviewingStudents) {
       const overall = faker.helpers.arrayElement([4, 5, 4, 5, 3, 5, 4]);
-      sum += overall;
       const cleanliness = Math.min(
         5,
         Math.max(1, overall + faker.helpers.arrayElement([-1, 0, 1])),
@@ -529,6 +558,7 @@ const main = async (): Promise<void> => {
       const images = hasImage ? [FIXED_REVIEW_IMAGE_URL] : [];
 
       allReviews.push({
+        id: randomUUID(),
         pensionId: pension.id,
         userId: student.id,
         overallRating: overall,
@@ -545,22 +575,26 @@ const main = async (): Promise<void> => {
         images,
       });
     }
-
-    pensionRatingsMap.set(pension.id, { sum, count: numReviews });
   }
 
-  await prisma.review.createMany({ data: allReviews });
-
-  for (const [pensionId, stats] of pensionRatingsMap.entries()) {
-    const avg = Number((stats.sum / stats.count).toFixed(2));
-    await prisma.pension.update({
-      where: { id: pensionId },
-      data: {
-        ratingAverage: avg,
-        ratingCount: stats.count,
-      },
-    });
+  for (const chunk of chunkArray(allReviews, 500)) {
+    await prisma.review.createMany({ data: chunk });
   }
+
+  await prisma.$executeRawUnsafe(`
+    UPDATE "pensions" p
+    SET "ratingAverage" = sub.avg,
+        "ratingCount" = sub.cnt
+    FROM (
+      SELECT
+        "pensionId",
+        ROUND(AVG("overallRating")::numeric, 2) AS avg,
+        COUNT(*)::int AS cnt
+      FROM "reviews"
+      GROUP BY "pensionId"
+    ) sub
+    WHERE p.id = sub."pensionId";
+  `);
 
   console.log('--- Step 9: Seeding moderation reports strictly for primary cities ---');
   const primaryPensions = pensionRecords.filter((p) => p.isPrimary);
@@ -591,7 +625,6 @@ const main = async (): Promise<void> => {
   console.log('--- Step 10: Seeding sample proposals and moderation states ---');
   const demoPension = primaryPensions[0];
   const demoStudent = studentUsers[0];
-  const moderatorUser = await prisma.user.findFirst({ where: { role: 'MODERATOR' as Role } });
 
   await prisma.pensionProposal.createMany({
     data: [
@@ -620,7 +653,7 @@ const main = async (): Promise<void> => {
       {
         pensionId: primaryPensions[1]?.id || demoPension.id,
         submittedById: demoStudent.id,
-        reviewedById: moderatorUser?.id,
+        reviewedById: moderatorId,
         type: 'LOCATION_UPDATE' as ProposalType,
         status: 'APPROVED' as ProposalStatus,
         proposedChanges: {
@@ -636,14 +669,13 @@ const main = async (): Promise<void> => {
     ],
   });
 
-  const firstReview = await prisma.review.findFirst();
-  if (firstReview) {
+  if (allReviews.length > 0) {
     await prisma.review.update({
-      where: { id: firstReview.id },
+      where: { id: allReviews[0].id },
       data: {
         isHidden: true,
         moderationReason: 'Lenguaje inapropiado detectado en el comentario.',
-        moderatedById: moderatorUser?.id,
+        moderatedById: moderatorId,
       },
     });
   }
