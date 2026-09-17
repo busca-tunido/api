@@ -97,6 +97,7 @@ model User {
   managedPensions    Pension[]         @relation("LandlordPensions")
   submittedPensions  Pension[]         @relation("SubmittedPensions")
   reviews            Review[]
+  helpfulVotes       ReviewHelpfulVote[]
   reports            Report[]
   favorites          Favorite[]
   submittedProposals PensionProposal[] @relation("SubmittedProposals")
@@ -292,6 +293,7 @@ model Review {
 
   pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  helpfulVotes ReviewHelpfulVote[]
 
   @@unique([pensionId, userId])
   @@index([pensionId])
@@ -299,6 +301,20 @@ model Review {
   @@index([isHidden])
   @@index([deletedAt])
   @@map("reviews")
+}
+
+model ReviewHelpfulVote {
+  userId    String
+  reviewId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@id([userId, reviewId])
+  @@index([reviewId])
+  @@index([userId])
+  @@map("review_helpful_votes")
 }
 
 model Report {

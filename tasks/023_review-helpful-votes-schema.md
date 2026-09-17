@@ -53,7 +53,7 @@ Add the database schema definition for user helpful votes on reviews (`ReviewHel
 
 ## Checklist
 
-- [ ] Add `ReviewHelpfulVote` model to `prisma/schema.prisma`.
-- [ ] Add `helpfulVotes` relation to `User` and `Review` models.
-- [ ] Run Prisma generation and schema push.
-- [ ] Stage exclusively target files and commit with `feat(prisma): add review helpful vote model and relations`.
+- [x] Add `ReviewHelpfulVote` model to `prisma/schema.prisma`.
+- [x] Add `helpfulVotes` relation to `User` and `Review` models.
+- [x] Run Prisma generation and schema push.
+- [x] Stage exclusively target files and commit with `feat(prisma): add review helpful vote model and relations`.
