@@ -50,9 +50,9 @@ Implement persistent helpful voting logic in `ReviewsService` and `ReviewsContro
 
 ## Checklist
 
-- [ ] Implement `voteHelpful(id, userId)` with database toggle logic in `ReviewsService`.
-- [ ] Implement `findUserHelpfulVotes(userId)` in `ReviewsService`.
-- [ ] Update `findByPension` to include `_count.helpfulVotes` in `ReviewsService`.
-- [ ] Protect `POST /reviews/:id/helpful` with `JwtAuthGuard` in `ReviewsController`.
-- [ ] Add `GET /reviews/helpful/voted` route in `ReviewsController`.
-- [ ] Stage exclusively target files and commit with `feat(reviews): implement persistent helpful voting endpoints`.
+- [x] Implement `voteHelpful(id, userId)` with database toggle logic in `ReviewsService`.
+- [x] Implement `findUserHelpfulVotes(userId)` in `ReviewsService`.
+- [x] Update `findByPension` to include `_count.helpfulVotes` in `ReviewsService`.
+- [x] Protect `POST /reviews/:id/helpful` with `JwtAuthGuard` in `ReviewsController`.
+- [x] Add `GET /reviews/helpful/voted` route in `ReviewsController`.
+- [x] Stage exclusively target files and commit with `feat(reviews): implement persistent helpful voting endpoints`.

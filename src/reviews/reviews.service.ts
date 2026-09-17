@@ -77,15 +77,30 @@ export class ReviewsService {
               },
             },
           },
+          _count: {
+            select: {
+              helpfulVotes: true,
+            },
+          },
         },
       }),
     ]);
+
+    const mappedItems = items.map((review) => {
+      const reviewWithCount = review as typeof review & {
+        _count?: { helpfulVotes?: number };
+      };
+      return {
+        ...review,
+        helpfulCount: reviewWithCount._count?.helpfulVotes ?? 0,
+      };
+    });
 
     const totalPages = Math.ceil(total / limit) || 1;
     const hasMore = skip + limit < total;
 
     return {
-      items,
+      items: mappedItems,
       pagination: {
         page,
         limit,
@@ -336,7 +351,7 @@ export class ReviewsService {
     });
   }
 
-  async voteHelpful(id: string): Promise<{ helpfulCount: number; voted: boolean }> {
+  async voteHelpful(id: string, userId: string): Promise<{ helpfulCount: number; voted: boolean }> {
     const review = await this.prisma.review.findFirst({
       where: {
         id,
@@ -350,9 +365,56 @@ export class ReviewsService {
       throw new NotFoundException(`Review with id '${id}' not found`);
     }
 
+    const existingVote = await this.prisma.reviewHelpfulVote.findUnique({
+      where: {
+        userId_reviewId: {
+          userId,
+          reviewId: id,
+        },
+      },
+    });
+
+    let voted: boolean;
+    if (existingVote) {
+      await this.prisma.reviewHelpfulVote.delete({
+        where: {
+          userId_reviewId: {
+            userId,
+            reviewId: id,
+          },
+        },
+      });
+      voted = false;
+    } else {
+      await this.prisma.reviewHelpfulVote.create({
+        data: {
+          userId,
+          reviewId: id,
+        },
+      });
+      voted = true;
+    }
+
+    const helpfulCount = await this.prisma.reviewHelpfulVote.count({
+      where: {
+        reviewId: id,
+      },
+    });
+
     return {
-      helpfulCount: 1,
-      voted: true,
+      helpfulCount,
+      voted,
+    };
+  }
+
+  async findUserHelpfulVotes(userId: string): Promise<{ reviewIds: string[] }> {
+    const votes = await this.prisma.reviewHelpfulVote.findMany({
+      where: { userId },
+      select: { reviewId: true },
+    });
+
+    return {
+      reviewIds: votes.map((v) => v.reviewId),
     };
   }
 }

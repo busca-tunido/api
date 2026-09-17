@@ -87,10 +87,24 @@ export class ReviewsController {
     return this.reviewsService.delete(id, user);
   }
 
+  @Get('reviews/helpful/voted')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List review IDs the current user has voted as helpful' })
+  @ApiResponse({ status: 200, description: 'List of review IDs voted helpful' })
+  async findUserHelpfulVotes(@CurrentUser() user: SanitizedUser): Promise<{ reviewIds: string[] }> {
+    return this.reviewsService.findUserHelpfulVotes(user.id);
+  }
+
   @Post('reviews/:id/helpful')
-  @ApiOperation({ summary: 'Vote a review as helpful' })
-  @ApiResponse({ status: 200, description: 'Review voted as helpful' })
-  async voteHelpful(@Param('id') id: string): Promise<{ helpfulCount: number; voted: boolean }> {
-    return this.reviewsService.voteHelpful(id);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Vote a review as helpful (toggle)' })
+  @ApiResponse({ status: 200, description: 'Review vote toggled successfully' })
+  async voteHelpful(
+    @Param('id') id: string,
+    @CurrentUser() user: SanitizedUser,
+  ): Promise<{ helpfulCount: number; voted: boolean }> {
+    return this.reviewsService.voteHelpful(id, user.id);
   }
 }

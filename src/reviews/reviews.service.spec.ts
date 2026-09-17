@@ -9,9 +9,17 @@ type MockPrismaService = {
   review: {
     count: ReturnType<typeof vi.fn>;
     findMany: ReturnType<typeof vi.fn>;
+    findFirst: ReturnType<typeof vi.fn>;
     findUnique: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
+  };
+  reviewHelpfulVote: {
+    findUnique: ReturnType<typeof vi.fn>;
+    findMany: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+    count: ReturnType<typeof vi.fn>;
   };
   pension: {
     findUnique: ReturnType<typeof vi.fn>;
@@ -56,9 +64,17 @@ describe('ReviewsService', () => {
       review: {
         count: vi.fn(),
         findMany: vi.fn(),
+        findFirst: vi.fn(),
         findUnique: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+      },
+      reviewHelpfulVote: {
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        create: vi.fn(),
+        delete: vi.fn(),
+        count: vi.fn(),
       },
       pension: {
         findUnique: vi.fn(),
@@ -223,6 +239,60 @@ describe('ReviewsService', () => {
       expect(result[0].pensionCity).toBe('Santiago');
       expect(result[0].review?.stayDurationCategory).toBe('ONE_SEMESTER');
       expect(result[0].review?.id).toBe('rev-1');
+    });
+  });
+
+  describe('voteHelpful', () => {
+    it('should add vote when not previously voted', async () => {
+      mockPrisma.review.findFirst.mockResolvedValue({ id: 'rev-1' });
+      mockPrisma.reviewHelpfulVote.findUnique.mockResolvedValue(null);
+      mockPrisma.reviewHelpfulVote.create.mockResolvedValue({
+        userId: 'student-1',
+        reviewId: 'rev-1',
+      });
+      mockPrisma.reviewHelpfulVote.count.mockResolvedValue(1);
+
+      const result = await service.voteHelpful('rev-1', 'student-1');
+      expect(result).toEqual({ helpfulCount: 1, voted: true });
+      expect(mockPrisma.reviewHelpfulVote.create).toHaveBeenCalledWith({
+        data: { userId: 'student-1', reviewId: 'rev-1' },
+      });
+    });
+
+    it('should remove vote when already voted', async () => {
+      mockPrisma.review.findFirst.mockResolvedValue({ id: 'rev-1' });
+      mockPrisma.reviewHelpfulVote.findUnique.mockResolvedValue({
+        userId: 'student-1',
+        reviewId: 'rev-1',
+      });
+      mockPrisma.reviewHelpfulVote.delete.mockResolvedValue({
+        userId: 'student-1',
+        reviewId: 'rev-1',
+      });
+      mockPrisma.reviewHelpfulVote.count.mockResolvedValue(0);
+
+      const result = await service.voteHelpful('rev-1', 'student-1');
+      expect(result).toEqual({ helpfulCount: 0, voted: false });
+      expect(mockPrisma.reviewHelpfulVote.delete).toHaveBeenCalledWith({
+        where: {
+          userId_reviewId: {
+            userId: 'student-1',
+            reviewId: 'rev-1',
+          },
+        },
+      });
+    });
+  });
+
+  describe('findUserHelpfulVotes', () => {
+    it('should return list of reviewIds voted by user', async () => {
+      mockPrisma.reviewHelpfulVote.findMany.mockResolvedValue([
+        { reviewId: 'rev-1' },
+        { reviewId: 'rev-2' },
+      ]);
+
+      const result = await service.findUserHelpfulVotes('student-1');
+      expect(result).toEqual({ reviewIds: ['rev-1', 'rev-2'] });
     });
   });
 });
