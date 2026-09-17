@@ -1,4 +1,7 @@
-export type Environment = 'development' | 'production' | 'test';
+import { z } from 'zod';
+
+export const environmentSchema = z.enum(['development', 'production', 'test']);
+export type Environment = z.infer<typeof environmentSchema>;
 
 export type EnvironmentConfig = {
   PORT: number;
@@ -26,119 +29,176 @@ export type EnvironmentConfig = {
   NEON_STORAGE_PUBLIC_BASE_URL?: string;
 };
 
+const envSchema = z
+  .object({
+    NODE_ENV: z
+      .unknown()
+      .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {
+        message: 'NODE_ENV environment variable is required.',
+      })
+      .refine((val): val is Environment => ['development', 'production', 'test'].includes(val), {
+        message: 'Invalid NODE_ENV. Must be one of development, production, test.',
+      }),
+    PORT: z
+      .unknown()
+      .refine((val) => val !== undefined && val !== null && val !== '', {
+        message: 'PUBLIC_PORT (or PORT) environment variable is required.',
+      })
+      .transform((val, ctx) => {
+        const num = Number(val);
+        if (Number.isNaN(num) || num <= 0 || num > 65535) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Invalid PORT: ${val}. Must be a valid port number.`,
+          });
+          return z.NEVER;
+        }
+        return num;
+      }),
+    DATABASE_URL: z
+      .unknown()
+      .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {
+        message: 'DATABASE_URL environment variable is required.',
+      })
+      .transform((val) => val.trim()),
+    JWT_SECRET: z
+      .unknown()
+      .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {
+        message: 'JWT_SECRET environment variable is required.',
+      })
+      .transform((val) => val.trim()),
+    PUBLIC_JWT_EXPIRATION: z
+      .unknown()
+      .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {
+        message:
+          'PUBLIC_JWT_EXPIRATION (or JWT_EXPIRATION / JWT_EXPIRES_IN) environment variable is required.',
+      })
+      .transform((val) => val.trim()),
+    PUBLIC_CORS_ORIGIN: z
+      .unknown()
+      .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {
+        message: 'PUBLIC_CORS_ORIGIN (or CORS_ORIGIN) environment variable is required.',
+      })
+      .transform((val) => val.trim()),
+    MODERATOR_PASSWORD: z.string().trim().optional(),
+    PUBLIC_MODERATOR_EMAIL: z.string().trim().optional(),
+    PUBLIC_MODERATOR_FIRST_NAME: z.string().trim().optional(),
+    PUBLIC_MODERATOR_LAST_NAME: z.string().trim().optional(),
+    PUBLIC_AWS_ENDPOINT_URL_S3: z.string().trim().optional(),
+    AWS_ACCESS_KEY_ID: z.string().trim().optional(),
+    AWS_SECRET_ACCESS_KEY: z.string().trim().optional(),
+    PUBLIC_AWS_REGION: z.string().trim().optional(),
+    PUBLIC_STORAGE_BUCKET: z.string().trim().optional(),
+    PUBLIC_NEON_STORAGE_BASE_URL: z.string().trim().optional(),
+  })
+
+  .superRefine((data, ctx) => {
+    if (data.NODE_ENV === 'production') {
+      if (!data.PUBLIC_AWS_ENDPOINT_URL_S3) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'PUBLIC_AWS_ENDPOINT_URL_S3 environment variable is required in production.',
+          path: ['PUBLIC_AWS_ENDPOINT_URL_S3'],
+        });
+      }
+      if (!data.AWS_ACCESS_KEY_ID) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'AWS_ACCESS_KEY_ID environment variable is required in production.',
+          path: ['AWS_ACCESS_KEY_ID'],
+        });
+      }
+      if (!data.AWS_SECRET_ACCESS_KEY) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'AWS_SECRET_ACCESS_KEY environment variable is required in production.',
+          path: ['AWS_SECRET_ACCESS_KEY'],
+        });
+      }
+      if (!data.PUBLIC_AWS_REGION) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'PUBLIC_AWS_REGION environment variable is required in production.',
+          path: ['PUBLIC_AWS_REGION'],
+        });
+      }
+      if (!data.PUBLIC_STORAGE_BUCKET) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'PUBLIC_STORAGE_BUCKET environment variable is required in production.',
+          path: ['PUBLIC_STORAGE_BUCKET'],
+        });
+      }
+    }
+  });
+
 export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig => {
-  const nodeEnv = config.NODE_ENV as Environment | undefined;
-  if (!nodeEnv || typeof nodeEnv !== 'string' || !nodeEnv.trim()) {
-    throw new Error('NODE_ENV environment variable is required.');
+  const normalized = {
+    NODE_ENV: config.NODE_ENV,
+    PORT: config.PUBLIC_PORT ?? config.PORT,
+    DATABASE_URL: config.DATABASE_URL,
+    JWT_SECRET: config.JWT_SECRET,
+    PUBLIC_JWT_EXPIRATION:
+      config.PUBLIC_JWT_EXPIRATION ||
+      config.PUBLIC_JWT_EXPIRES_IN ||
+      config.JWT_EXPIRES_IN ||
+      config.JWT_EXPIRATION,
+    PUBLIC_CORS_ORIGIN: config.PUBLIC_CORS_ORIGIN || config.CORS_ORIGIN,
+    MODERATOR_PASSWORD: config.MODERATOR_PASSWORD,
+    PUBLIC_MODERATOR_EMAIL: config.PUBLIC_MODERATOR_EMAIL || config.MODERATOR_EMAIL,
+    PUBLIC_MODERATOR_FIRST_NAME: config.PUBLIC_MODERATOR_FIRST_NAME || config.MODERATOR_FIRST_NAME,
+    PUBLIC_MODERATOR_LAST_NAME: config.PUBLIC_MODERATOR_LAST_NAME || config.MODERATOR_LAST_NAME,
+    PUBLIC_AWS_ENDPOINT_URL_S3: config.PUBLIC_AWS_ENDPOINT_URL_S3 || config.AWS_ENDPOINT_URL_S3,
+    AWS_ACCESS_KEY_ID: config.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: config.AWS_SECRET_ACCESS_KEY,
+    PUBLIC_AWS_REGION: config.PUBLIC_AWS_REGION || config.AWS_REGION,
+    PUBLIC_STORAGE_BUCKET: config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET,
+    PUBLIC_NEON_STORAGE_BASE_URL:
+      config.PUBLIC_NEON_STORAGE_BASE_URL || config.NEON_STORAGE_PUBLIC_BASE_URL,
+  };
+
+  const result = envSchema.safeParse(normalized);
+  if (!result.success) {
+    const errorMessages = result.error.issues.map((issue) => issue.message);
+    const combinedMessage = errorMessages.join('\n');
+    console.error(`[BuscaTuNido env error] Invalid environment variables:\n${combinedMessage}`);
+    throw new Error(errorMessages[0]);
   }
 
-  const allowedEnvs: Environment[] = ['development', 'production', 'test'];
-  if (!allowedEnvs.includes(nodeEnv)) {
-    throw new Error(`Invalid NODE_ENV: ${nodeEnv}. Must be one of ${allowedEnvs.join(', ')}`);
-  }
-
-  const rawPort = config.PUBLIC_PORT ?? config.PORT;
-  if (rawPort === undefined || rawPort === null || rawPort === '') {
-    throw new Error('PUBLIC_PORT (or PORT) environment variable is required.');
-  }
-  const port = Number(rawPort);
-  if (Number.isNaN(port) || port <= 0 || port > 65535) {
-    throw new Error(`Invalid PORT: ${rawPort}. Must be a valid port number.`);
-  }
-
-  const databaseUrl = config.DATABASE_URL as string | undefined;
-  if (!databaseUrl || typeof databaseUrl !== 'string' || !databaseUrl.trim()) {
-    throw new Error('DATABASE_URL environment variable is required.');
-  }
-
-  const jwtSecret = config.JWT_SECRET as string | undefined;
-  if (!jwtSecret || typeof jwtSecret !== 'string' || !jwtSecret.trim()) {
-    throw new Error('JWT_SECRET environment variable is required.');
-  }
-
-  const rawExpiresIn = (config.PUBLIC_JWT_EXPIRATION ||
-    config.PUBLIC_JWT_EXPIRES_IN ||
-    config.JWT_EXPIRES_IN ||
-    config.JWT_EXPIRATION) as string | undefined;
-  if (!rawExpiresIn || typeof rawExpiresIn !== 'string' || !rawExpiresIn.trim()) {
-    throw new Error(
-      'PUBLIC_JWT_EXPIRATION (or JWT_EXPIRATION / JWT_EXPIRES_IN) environment variable is required.',
-    );
-  }
-
-  const rawCorsOrigin = (config.PUBLIC_CORS_ORIGIN || config.CORS_ORIGIN) as string | undefined;
-  if (!rawCorsOrigin || typeof rawCorsOrigin !== 'string' || !rawCorsOrigin.trim()) {
-    throw new Error('PUBLIC_CORS_ORIGIN (or CORS_ORIGIN) environment variable is required.');
-  }
-  const corsOrigin = rawCorsOrigin.trim();
-
-  const awsEndpointUrlS3 = (
-    (config.PUBLIC_AWS_ENDPOINT_URL_S3 || config.AWS_ENDPOINT_URL_S3) as string | undefined
-  )?.trim();
-  const awsAccessKeyId = (config.AWS_ACCESS_KEY_ID as string | undefined)?.trim();
-  const awsSecretAccessKey = (config.AWS_SECRET_ACCESS_KEY as string | undefined)?.trim();
-  const awsRegion = ((config.PUBLIC_AWS_REGION || config.AWS_REGION) as string | undefined)?.trim();
-  const storageBucket = (
-    (config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET) as string | undefined
-  )?.trim();
-  const publicBaseUrl = (
-    (config.PUBLIC_NEON_STORAGE_BASE_URL || config.NEON_STORAGE_PUBLIC_BASE_URL) as
-      | string
-      | undefined
-  )?.trim();
-
-  if (nodeEnv === 'production') {
-    if (!awsEndpointUrlS3) {
-      throw new Error('PUBLIC_AWS_ENDPOINT_URL_S3 environment variable is required in production.');
-    }
-    if (!awsAccessKeyId) {
-      throw new Error('AWS_ACCESS_KEY_ID environment variable is required in production.');
-    }
-    if (!awsSecretAccessKey) {
-      throw new Error('AWS_SECRET_ACCESS_KEY environment variable is required in production.');
-    }
-    if (!awsRegion) {
-      throw new Error('PUBLIC_AWS_REGION environment variable is required in production.');
-    }
-    if (!storageBucket) {
-      throw new Error('PUBLIC_STORAGE_BUCKET environment variable is required in production.');
-    }
-  }
-
-  const moderatorEmail = (
-    (config.PUBLIC_MODERATOR_EMAIL || config.MODERATOR_EMAIL) as string | undefined
-  )?.trim();
-  const moderatorFirstName = (
-    (config.PUBLIC_MODERATOR_FIRST_NAME || config.MODERATOR_FIRST_NAME) as string | undefined
-  )?.trim();
-  const moderatorLastName = (
-    (config.PUBLIC_MODERATOR_LAST_NAME || config.MODERATOR_LAST_NAME) as string | undefined
-  )?.trim();
-  const moderatorPassword = (config.MODERATOR_PASSWORD as string | undefined)?.trim();
+  const data = result.data;
+  const port = data.PORT;
+  const corsOrigin = data.PUBLIC_CORS_ORIGIN;
+  const expiresIn = data.PUBLIC_JWT_EXPIRATION;
+  const awsEndpointUrlS3 = data.PUBLIC_AWS_ENDPOINT_URL_S3 || undefined;
+  const awsAccessKeyId = data.AWS_ACCESS_KEY_ID || undefined;
+  const awsSecretAccessKey = data.AWS_SECRET_ACCESS_KEY || undefined;
+  const awsRegion = data.PUBLIC_AWS_REGION || undefined;
+  const storageBucket = data.PUBLIC_STORAGE_BUCKET || undefined;
+  const publicBaseUrl = data.PUBLIC_NEON_STORAGE_BASE_URL || undefined;
 
   return {
     PORT: port,
     PUBLIC_PORT: port,
-    DATABASE_URL: databaseUrl.trim(),
-    NODE_ENV: nodeEnv,
-    JWT_SECRET: jwtSecret.trim(),
-    JWT_EXPIRES_IN: rawExpiresIn.trim(),
-    PUBLIC_JWT_EXPIRATION: rawExpiresIn.trim(),
+    DATABASE_URL: data.DATABASE_URL,
+    NODE_ENV: data.NODE_ENV,
+    JWT_SECRET: data.JWT_SECRET,
+    JWT_EXPIRES_IN: expiresIn,
+    PUBLIC_JWT_EXPIRATION: expiresIn,
     CORS_ORIGIN: corsOrigin,
     PUBLIC_CORS_ORIGIN: corsOrigin,
-    MODERATOR_PASSWORD: moderatorPassword || undefined,
-    PUBLIC_MODERATOR_EMAIL: moderatorEmail || undefined,
-    PUBLIC_MODERATOR_FIRST_NAME: moderatorFirstName || undefined,
-    PUBLIC_MODERATOR_LAST_NAME: moderatorLastName || undefined,
-    PUBLIC_AWS_ENDPOINT_URL_S3: awsEndpointUrlS3 || undefined,
-    AWS_ENDPOINT_URL_S3: awsEndpointUrlS3 || undefined,
-    AWS_ACCESS_KEY_ID: awsAccessKeyId || undefined,
-    AWS_SECRET_ACCESS_KEY: awsSecretAccessKey || undefined,
-    PUBLIC_AWS_REGION: awsRegion || undefined,
-    AWS_REGION: awsRegion || undefined,
-    PUBLIC_STORAGE_BUCKET: storageBucket || undefined,
-    STORAGE_BUCKET: storageBucket || undefined,
-    PUBLIC_NEON_STORAGE_BASE_URL: publicBaseUrl || undefined,
-    NEON_STORAGE_PUBLIC_BASE_URL: publicBaseUrl || undefined,
+    MODERATOR_PASSWORD: data.MODERATOR_PASSWORD || undefined,
+    PUBLIC_MODERATOR_EMAIL: data.PUBLIC_MODERATOR_EMAIL || undefined,
+    PUBLIC_MODERATOR_FIRST_NAME: data.PUBLIC_MODERATOR_FIRST_NAME || undefined,
+    PUBLIC_MODERATOR_LAST_NAME: data.PUBLIC_MODERATOR_LAST_NAME || undefined,
+    PUBLIC_AWS_ENDPOINT_URL_S3: awsEndpointUrlS3,
+    AWS_ENDPOINT_URL_S3: awsEndpointUrlS3,
+    AWS_ACCESS_KEY_ID: awsAccessKeyId,
+    AWS_SECRET_ACCESS_KEY: awsSecretAccessKey,
+    PUBLIC_AWS_REGION: awsRegion,
+    AWS_REGION: awsRegion,
+    PUBLIC_STORAGE_BUCKET: storageBucket,
+    STORAGE_BUCKET: storageBucket,
+    PUBLIC_NEON_STORAGE_BASE_URL: publicBaseUrl,
+    NEON_STORAGE_PUBLIC_BASE_URL: publicBaseUrl,
   };
 };
