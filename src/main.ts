@@ -32,17 +32,13 @@ async function bootstrap(): Promise<void> {
   });
 
   const configService = app.get(ConfigService);
-  const corsOrigin =
-    configService.get<string>('PUBLIC_CORS_ORIGIN') || configService.get<string>('CORS_ORIGIN');
+  const corsOrigin = configService.getOrThrow<string>('PUBLIC_CORS_ORIGIN');
   const allowedOrigins: Array<string | RegExp> = [
-    'https://buscatunido.vercel.app',
+    corsOrigin,
     /https:\/\/.*\.vercel\.app$/,
     'http://localhost:3000',
     'http://127.0.0.1:3000',
   ];
-  if (corsOrigin && !allowedOrigins.includes(corsOrigin)) {
-    allowedOrigins.unshift(corsOrigin);
-  }
 
   app.enableCors({
     origin: allowedOrigins,
@@ -68,10 +64,7 @@ async function bootstrap(): Promise<void> {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = configService.get<number>('PUBLIC_PORT') || configService.get<number>('PORT');
-  if (!port) {
-    throw new Error('PUBLIC_PORT (or PORT) environment variable is required.');
-  }
+  const port = configService.getOrThrow<number>('PUBLIC_PORT');
   await app.listen(port, '0.0.0.0');
 }
 

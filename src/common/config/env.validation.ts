@@ -10,6 +10,7 @@ export type EnvironmentConfig = {
   PUBLIC_JWT_EXPIRATION: string;
   CORS_ORIGIN: string;
   PUBLIC_CORS_ORIGIN: string;
+  MODERATOR_PASSWORD?: string;
   PUBLIC_MODERATOR_EMAIL?: string;
   PUBLIC_MODERATOR_FIRST_NAME?: string;
   PUBLIC_MODERATOR_LAST_NAME?: string;
@@ -26,7 +27,11 @@ export type EnvironmentConfig = {
 };
 
 export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig => {
-  const nodeEnv = (config.NODE_ENV as Environment) || 'development';
+  const nodeEnv = config.NODE_ENV as Environment | undefined;
+  if (!nodeEnv || typeof nodeEnv !== 'string' || !nodeEnv.trim()) {
+    throw new Error('NODE_ENV environment variable is required.');
+  }
+
   const allowedEnvs: Environment[] = ['development', 'production', 'test'];
   if (!allowedEnvs.includes(nodeEnv)) {
     throw new Error(`Invalid NODE_ENV: ${nodeEnv}. Must be one of ${allowedEnvs.join(', ')}`);
@@ -61,31 +66,55 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     );
   }
 
-  const corsOrigin =
-    ((config.PUBLIC_CORS_ORIGIN || config.CORS_ORIGIN) as string | undefined) ||
-    'https://buscatunido.vercel.app';
+  const rawCorsOrigin = (config.PUBLIC_CORS_ORIGIN || config.CORS_ORIGIN) as string | undefined;
+  if (!rawCorsOrigin || typeof rawCorsOrigin !== 'string' || !rawCorsOrigin.trim()) {
+    throw new Error('PUBLIC_CORS_ORIGIN (or CORS_ORIGIN) environment variable is required.');
+  }
+  const corsOrigin = rawCorsOrigin.trim();
 
-  const awsEndpointUrlS3 = (config.PUBLIC_AWS_ENDPOINT_URL_S3 || config.AWS_ENDPOINT_URL_S3) as
-    | string
-    | undefined;
-  const awsAccessKeyId = config.AWS_ACCESS_KEY_ID as string | undefined;
-  const awsSecretAccessKey = config.AWS_SECRET_ACCESS_KEY as string | undefined;
-  const awsRegion = (config.PUBLIC_AWS_REGION || config.AWS_REGION) as string | undefined;
-  const storageBucket = (config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET) as
-    | string
-    | undefined;
-  const publicBaseUrl = (config.PUBLIC_NEON_STORAGE_BASE_URL ||
-    config.NEON_STORAGE_PUBLIC_BASE_URL) as string | undefined;
+  const awsEndpointUrlS3 = (
+    (config.PUBLIC_AWS_ENDPOINT_URL_S3 || config.AWS_ENDPOINT_URL_S3) as string | undefined
+  )?.trim();
+  const awsAccessKeyId = (config.AWS_ACCESS_KEY_ID as string | undefined)?.trim();
+  const awsSecretAccessKey = (config.AWS_SECRET_ACCESS_KEY as string | undefined)?.trim();
+  const awsRegion = ((config.PUBLIC_AWS_REGION || config.AWS_REGION) as string | undefined)?.trim();
+  const storageBucket = (
+    (config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET) as string | undefined
+  )?.trim();
+  const publicBaseUrl = (
+    (config.PUBLIC_NEON_STORAGE_BASE_URL || config.NEON_STORAGE_PUBLIC_BASE_URL) as
+      | string
+      | undefined
+  )?.trim();
 
-  const moderatorEmail = (config.PUBLIC_MODERATOR_EMAIL || config.MODERATOR_EMAIL) as
-    | string
-    | undefined;
-  const moderatorFirstName = (config.PUBLIC_MODERATOR_FIRST_NAME || config.MODERATOR_FIRST_NAME) as
-    | string
-    | undefined;
-  const moderatorLastName = (config.PUBLIC_MODERATOR_LAST_NAME || config.MODERATOR_LAST_NAME) as
-    | string
-    | undefined;
+  if (nodeEnv === 'production') {
+    if (!awsEndpointUrlS3) {
+      throw new Error('PUBLIC_AWS_ENDPOINT_URL_S3 environment variable is required in production.');
+    }
+    if (!awsAccessKeyId) {
+      throw new Error('AWS_ACCESS_KEY_ID environment variable is required in production.');
+    }
+    if (!awsSecretAccessKey) {
+      throw new Error('AWS_SECRET_ACCESS_KEY environment variable is required in production.');
+    }
+    if (!awsRegion) {
+      throw new Error('PUBLIC_AWS_REGION environment variable is required in production.');
+    }
+    if (!storageBucket) {
+      throw new Error('PUBLIC_STORAGE_BUCKET environment variable is required in production.');
+    }
+  }
+
+  const moderatorEmail = (
+    (config.PUBLIC_MODERATOR_EMAIL || config.MODERATOR_EMAIL) as string | undefined
+  )?.trim();
+  const moderatorFirstName = (
+    (config.PUBLIC_MODERATOR_FIRST_NAME || config.MODERATOR_FIRST_NAME) as string | undefined
+  )?.trim();
+  const moderatorLastName = (
+    (config.PUBLIC_MODERATOR_LAST_NAME || config.MODERATOR_LAST_NAME) as string | undefined
+  )?.trim();
+  const moderatorPassword = (config.MODERATOR_PASSWORD as string | undefined)?.trim();
 
   return {
     PORT: port,
@@ -95,20 +124,21 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     JWT_SECRET: jwtSecret.trim(),
     JWT_EXPIRES_IN: rawExpiresIn.trim(),
     PUBLIC_JWT_EXPIRATION: rawExpiresIn.trim(),
-    CORS_ORIGIN: corsOrigin.trim(),
-    PUBLIC_CORS_ORIGIN: corsOrigin.trim(),
-    PUBLIC_MODERATOR_EMAIL: moderatorEmail ? moderatorEmail.trim() : undefined,
-    PUBLIC_MODERATOR_FIRST_NAME: moderatorFirstName ? moderatorFirstName.trim() : undefined,
-    PUBLIC_MODERATOR_LAST_NAME: moderatorLastName ? moderatorLastName.trim() : undefined,
-    PUBLIC_AWS_ENDPOINT_URL_S3: awsEndpointUrlS3 ? awsEndpointUrlS3.trim() : undefined,
-    AWS_ENDPOINT_URL_S3: awsEndpointUrlS3 ? awsEndpointUrlS3.trim() : undefined,
-    AWS_ACCESS_KEY_ID: awsAccessKeyId ? awsAccessKeyId.trim() : undefined,
-    AWS_SECRET_ACCESS_KEY: awsSecretAccessKey ? awsSecretAccessKey.trim() : undefined,
-    PUBLIC_AWS_REGION: awsRegion ? awsRegion.trim() : undefined,
-    AWS_REGION: awsRegion ? awsRegion.trim() : undefined,
-    PUBLIC_STORAGE_BUCKET: storageBucket ? storageBucket.trim() : undefined,
-    STORAGE_BUCKET: storageBucket ? storageBucket.trim() : undefined,
-    PUBLIC_NEON_STORAGE_BASE_URL: publicBaseUrl ? publicBaseUrl.trim() : undefined,
-    NEON_STORAGE_PUBLIC_BASE_URL: publicBaseUrl ? publicBaseUrl.trim() : undefined,
+    CORS_ORIGIN: corsOrigin,
+    PUBLIC_CORS_ORIGIN: corsOrigin,
+    MODERATOR_PASSWORD: moderatorPassword || undefined,
+    PUBLIC_MODERATOR_EMAIL: moderatorEmail || undefined,
+    PUBLIC_MODERATOR_FIRST_NAME: moderatorFirstName || undefined,
+    PUBLIC_MODERATOR_LAST_NAME: moderatorLastName || undefined,
+    PUBLIC_AWS_ENDPOINT_URL_S3: awsEndpointUrlS3 || undefined,
+    AWS_ENDPOINT_URL_S3: awsEndpointUrlS3 || undefined,
+    AWS_ACCESS_KEY_ID: awsAccessKeyId || undefined,
+    AWS_SECRET_ACCESS_KEY: awsSecretAccessKey || undefined,
+    PUBLIC_AWS_REGION: awsRegion || undefined,
+    AWS_REGION: awsRegion || undefined,
+    PUBLIC_STORAGE_BUCKET: storageBucket || undefined,
+    STORAGE_BUCKET: storageBucket || undefined,
+    PUBLIC_NEON_STORAGE_BASE_URL: publicBaseUrl || undefined,
+    NEON_STORAGE_PUBLIC_BASE_URL: publicBaseUrl || undefined,
   };
 };
