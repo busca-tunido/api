@@ -21,8 +21,8 @@ import { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import { UpdatePensionDto } from './dto/update-pension.dto.js';
 import {
   type PaginatedPensions,
-  type PriceHistogram,
   PensionsService,
+  type PriceHistogram,
 } from './pensions.service.js';
 
 @ApiTags('Pensions')

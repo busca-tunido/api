@@ -142,7 +142,17 @@ export class PensionsService {
         some: {
           ...(where.amenities?.some ? where.amenities.some : {}),
           OR: [
-            { slug: { in: ['comida-incluida', 'pension-completa', 'media-pension', 'desayuno-incluido', 'alimentacion-incluida'] } },
+            {
+              slug: {
+                in: [
+                  'comida-incluida',
+                  'pension-completa',
+                  'media-pension',
+                  'desayuno-incluido',
+                  'alimentacion-incluida',
+                ],
+              },
+            },
             { slug: { contains: 'comida', mode: 'insensitive' } },
             { slug: { contains: 'pension', mode: 'insensitive' } },
             { slug: { contains: 'alimento', mode: 'insensitive' } },
@@ -504,12 +514,7 @@ export class PensionsService {
 
       const prices: number[] = [];
       for (const p of candidates) {
-        const distanceKm = calculateHaversineDistanceKm(
-          userLat,
-          userLng,
-          p.latitude,
-          p.longitude,
-        );
+        const distanceKm = calculateHaversineDistanceKm(userLat, userLng, p.latitude, p.longitude);
         if (hasBounds || distanceKm <= radiusKm) {
           prices.push(Number(p.baseMonthlyPrice));
         }
