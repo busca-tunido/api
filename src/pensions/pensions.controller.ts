@@ -19,7 +19,11 @@ import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { CreatePensionDto } from './dto/create-pension.dto.js';
 import { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import { UpdatePensionDto } from './dto/update-pension.dto.js';
-import { type PaginatedPensions, PensionsService } from './pensions.service.js';
+import {
+  type PaginatedPensions,
+  type PriceHistogram,
+  PensionsService,
+} from './pensions.service.js';
 
 @ApiTags('Pensions')
 @Controller('pensions')
@@ -31,6 +35,13 @@ export class PensionsController {
   @ApiResponse({ status: 200, description: 'Paginated list of pensions' })
   async findAll(@Query() filter: FilterPensionsDto): Promise<PaginatedPensions<unknown>> {
     return this.pensionsService.findAll(filter);
+  }
+
+  @Get('price-histogram')
+  @ApiOperation({ summary: 'Get price distribution histogram for pensions' })
+  @ApiResponse({ status: 200, description: 'Price distribution histogram with 28 bins' })
+  async getPriceHistogram(@Query() query: FilterPensionsDto): Promise<PriceHistogram> {
+    return this.pensionsService.getPriceHistogram(query);
   }
 
   @Get(':idOrSlug')
