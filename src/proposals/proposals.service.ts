@@ -1,5 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { type Prisma, ProposalStatus } from '@prisma/client';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { type Prisma, ProposalStatus, Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateProposalDto } from './dto/create-proposal.dto.js';
@@ -168,10 +173,26 @@ export class ProposalsService {
   async review(id: string, dto: ReviewProposalDto, reviewer: SanitizedUser): Promise<unknown> {
     const proposal = await this.prisma.pensionProposal.findUnique({
       where: { id },
+      include: {
+        pension: {
+          select: {
+            id: true,
+            landlordId: true,
+          },
+        },
+      },
     });
 
     if (!proposal) {
       throw new NotFoundException(`Proposal '${id}' not found`);
+    }
+
+    if (
+      reviewer.role !== Role.ADMIN &&
+      reviewer.role !== Role.MODERATOR &&
+      proposal.pension?.landlordId !== reviewer.id
+    ) {
+      throw new ForbiddenException('No tienes permisos para revisar sugerencias de esta pensión');
     }
 
     if (proposal.status !== ProposalStatus.PENDING) {
