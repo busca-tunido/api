@@ -17,6 +17,7 @@
 ## Objective
 
 Provide the dedicated authenticated endpoint `GET /pensions/mine` allowing landlords to retrieve all pensions they own:
+
 1. Register `GET /pensions/mine` with `JwtAuthGuard` and `Roles(UserRole.LANDLORD, UserRole.ADMIN)`.
 2. Implement `PensionsService.findMine(userId: string)` fetching all active pensions where `ownerId === userId`.
 3. Include associated counts: total rooms, available rooms, pending community edit proposals, and average rating.
