@@ -70,13 +70,14 @@ export class ProposalsController {
 
   @Patch('moderation/proposals/:id/review')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.MODERATOR, Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.LANDLORD)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Approve, reject, or modify and merge proposal (Moderator or Admin only)',
+    summary: 'Approve, reject, or modify and merge proposal (Moderator, Admin, or Landlord)',
   })
   @ApiResponse({ status: 200, description: 'Proposal reviewed and merged' })
   @ApiResponse({ status: 400, description: 'Invalid review action or notes missing' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Proposal not found' })
   async review(
     @Param('id') id: string,
