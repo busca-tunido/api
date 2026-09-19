@@ -44,6 +44,18 @@ export class PensionsController {
     return this.pensionsService.getPriceHistogram(query);
   }
 
+  @Get('mine')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.LANDLORD, Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List pensions owned by authenticated landlord' })
+  @ApiResponse({ status: 200, description: 'List of pensions owned by landlord' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  async getMine(@CurrentUser('id') userId: string): Promise<unknown> {
+    return this.pensionsService.findMine(userId);
+  }
+
   @Get(':idOrSlug')
   @ApiOperation({ summary: 'Get pension detail by ID or Slug' })
   @ApiResponse({ status: 200, description: 'Pension detailed information' })
