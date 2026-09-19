@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
-import { Role } from '@prisma/client';
+import { ProposalStatus, Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreatePensionDto } from './dto/create-pension.dto.js';
@@ -583,6 +583,39 @@ export class PensionsService {
       totalListings,
       bins,
     };
+  }
+
+  async findMine(userId: string): Promise<unknown> {
+    return this.prisma.pension.findMany({
+      where: {
+        landlordId: userId,
+        deletedAt: null,
+      },
+      include: {
+        rooms: {
+          where: { deletedAt: null },
+          select: {
+            id: true,
+            roomNumber: true,
+            title: true,
+            type: true,
+            monthlyPrice: true,
+            deposit: true,
+            hasPrivateBathroom: true,
+            totalBeds: true,
+            availableBeds: true,
+            isAvailable: true,
+          },
+        },
+        _count: {
+          select: {
+            reviews: { where: { deletedAt: null } },
+            proposals: { where: { status: ProposalStatus.PENDING } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findBySlugOrId(idOrSlug: string): Promise<unknown> {
