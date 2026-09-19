@@ -107,11 +107,36 @@ Every backend feature, fix, or refactor must strictly adhere to the following wo
        - `Wave 1 (Workers)`: Feature modules, services, controllers in parallel branches/worktrees (Isolated).
        - `Wave 1 - Sync Gate`: Merge, resolve `src/app.module.ts` registration, run integrated compilation checks (Sequential).
 
+> [!IMPORTANT]
+> **Task Naming & Lifecycle Convention (Strict Rule)**:
+> - **Active tasks MUST NOT use numeric prefixes**: When defining or working on tasks in `tasks/`, name them descriptively using kebab-case without any numbers (e.g., `tasks/some-feature.md`). Numbering tasks in advance is forbidden because execution order and wave completion can vary.
+> - **Sequential numbering is strictly reserved for `tasks/completed/`**: A three-digit sequential index (`001-`, `002-`, etc.) is assigned **only** when a task is fully implemented, verified, merged, and moved into `tasks/completed/` to preserve an immutable, chronological archive.
+
+**Lifecycle Example**:
+
+1. While the task is active / in progress:
+```text
+tasks/
+├── completed/
+│   ├── 001-some-old-task.md
+│   └── 002-implement-x-feature.md
+└── some-task.md                    # Active task (no numeric prefix)
+```
+
+2. Once `some-task.md` is fully implemented and verified:
+```text
+tasks/
+├── completed/
+│   ├── 001-some-old-task.md
+│   ├── 002-implement-x-feature.md
+│   └── 003-some-task.md             # Archived with next sequential index
+```
+
 4. **Agent Role Assignment: Worker Agent vs. Integrator Agent**:
 
 | Rol de Agente                      | Ámbito de Trabajo                                                      | Reglas de Asignación                                                                                                                                                                                                                               |
 | ---------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Worker Agent (N instancias)**    | Ramas/Worktrees independientes (`worktree-task-A`, `worktree-task-B`). | Se le asigna **1 sola tarea paralela**. Solo puede editar sus `Exclusive Target Files`. Verifica localmente (`pnpm run check && pnpm run review` y `pnpm run build:local`). Al terminar, realiza su commit convencional y se detiene.              |
+| **Worker Agent (N instancias)**    | Ramas/Worktrees independientes (`worktree-task-A`, `worktree-task-B`). | Se le asigna **1 sola tarea paralela**. Solo puede editar sus `Exclusive Target Files`. Verifica localmente (`pnpm run check && pnpm run review` and `pnpm run build:local`). Al terminar, realiza su commit convencional y se detiene.              |
 | **Integrator Agent (1 instancia)** | Rama base de integración (`main` o `staging`).                         | Se asigna a tareas con etiqueta `Assigned Role: Integrator Agent`. No programa lógica de negocio nueva. Realiza merges/rebases, modifica archivos compartidos (`Shared / Integration Points`) como `app.module.ts` y valida la compilación global. |
 
 5. **Wave Sync Gate (`task-sync-wave-N.md`)**:
