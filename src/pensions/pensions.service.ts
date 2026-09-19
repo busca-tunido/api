@@ -27,6 +27,20 @@ export type PaginatedPensions<T> = {
   totalPages: number;
 };
 
+export type PriceHistogramBin = {
+  min: number;
+  max: number;
+  count: number;
+};
+
+export type PriceHistogram = {
+  minPrice: number;
+  maxPrice: number;
+  currency: string;
+  totalListings: number;
+  bins: PriceHistogramBin[];
+};
+
 export const calculateHaversineDistanceKm = (
   lat1: number,
   lon1: number,
@@ -83,11 +97,7 @@ const slugify = (text: string): string => {
 export class PensionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filter: FilterPensionsDto): Promise<PaginatedPensions<unknown>> {
-    const page = Math.max(1, filter.page || 1);
-    const limit = Math.max(1, Math.min(50, filter.limit || 12));
-    const skip = (page - 1) * limit;
-
+  private buildWhere(filter: FilterPensionsDto): Prisma.PensionWhereInput {
     const where: Prisma.PensionWhereInput = {
       deletedAt: null,
       isActive: true,
@@ -124,6 +134,41 @@ export class PensionsService {
     if (filter.amenities && filter.amenities.length > 0) {
       where.amenities = {
         some: { slug: { in: filter.amenities } },
+      };
+    }
+
+    if (filter.includesMeals) {
+      where.amenities = {
+        some: {
+          ...(where.amenities?.some ? where.amenities.some : {}),
+          OR: [
+            { slug: { in: ['comida-incluida', 'pension-completa', 'media-pension', 'desayuno-incluido', 'alimentacion-incluida'] } },
+            { slug: { contains: 'comida', mode: 'insensitive' } },
+            { slug: { contains: 'pension', mode: 'insensitive' } },
+            { slug: { contains: 'alimento', mode: 'insensitive' } },
+            { slug: { contains: 'desayuno', mode: 'insensitive' } },
+            { slug: { contains: 'almuerzo', mode: 'insensitive' } },
+            { name: { contains: 'comida', mode: 'insensitive' } },
+            { name: { contains: 'pensión', mode: 'insensitive' } },
+            { name: { contains: 'alimentación', mode: 'insensitive' } },
+            { name: { contains: 'desayuno', mode: 'insensitive' } },
+            { name: { contains: 'almuerzo', mode: 'insensitive' } },
+          ],
+        },
+      };
+    }
+
+    if (filter.roomType || filter.hasPrivateBathroom !== undefined || filter.minBeds) {
+      where.rooms = {
+        some: {
+          deletedAt: null,
+          isAvailable: true,
+          ...(filter.roomType ? { type: filter.roomType } : {}),
+          ...(filter.hasPrivateBathroom !== undefined
+            ? { hasPrivateBathroom: filter.hasPrivateBathroom }
+            : {}),
+          ...(filter.minBeds ? { availableBeds: { gte: filter.minBeds } } : {}),
+        },
       };
     }
 
@@ -169,6 +214,56 @@ export class PensionsService {
       where.latitude = { gte: filter.minLat, lte: filter.maxLat };
       where.longitude = { gte: filter.minLng, lte: filter.maxLng };
     }
+
+    return where;
+  }
+
+  private calculateBins(
+    prices: number[],
+    minPrice: number,
+    maxPrice: number,
+    binCount: number = 28,
+  ): PriceHistogramBin[] {
+    if (prices.length === 0) {
+      return [];
+    }
+
+    if (minPrice === maxPrice) {
+      return Array.from({ length: binCount }, (_, i) => ({
+        min: minPrice,
+        max: maxPrice,
+        count: i === 0 ? prices.length : 0,
+      }));
+    }
+
+    const step = (maxPrice - minPrice) / binCount;
+    const bins: PriceHistogramBin[] = Array.from({ length: binCount }, (_, i) => {
+      const min = Math.round(minPrice + i * step);
+      const max = i === binCount - 1 ? maxPrice : Math.round(minPrice + (i + 1) * step);
+      return { min, max, count: 0 };
+    });
+
+    for (const price of prices) {
+      const rawIndex = Math.floor((price - minPrice) / step);
+      const index = Math.min(Math.max(0, rawIndex), binCount - 1);
+      bins[index].count += 1;
+    }
+
+    return bins;
+  }
+
+  async findAll(filter: FilterPensionsDto): Promise<PaginatedPensions<unknown>> {
+    const page = Math.max(1, filter.page || 1);
+    const limit = Math.max(1, Math.min(50, filter.limit || 12));
+    const skip = (page - 1) * limit;
+
+    const where = this.buildWhere(filter);
+
+    const hasBounds =
+      filter.minLat !== undefined &&
+      filter.maxLat !== undefined &&
+      filter.minLng !== undefined &&
+      filter.maxLng !== undefined;
 
     const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
 
@@ -381,6 +476,107 @@ export class PensionsService {
       page,
       limit,
       totalPages,
+    };
+  }
+
+  async getPriceHistogram(filter: FilterPensionsDto): Promise<PriceHistogram> {
+    const where = this.buildWhere(filter);
+    const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
+
+    if (hasGeo) {
+      const userLat = filter.latitude as number;
+      const userLng = filter.longitude as number;
+      const radiusKm = Math.max(1, Math.min(100, filter.radiusKm || 30));
+      const hasBounds =
+        filter.minLat !== undefined &&
+        filter.maxLat !== undefined &&
+        filter.minLng !== undefined &&
+        filter.maxLng !== undefined;
+
+      const candidates = await this.prisma.pension.findMany({
+        where,
+        select: {
+          latitude: true,
+          longitude: true,
+          baseMonthlyPrice: true,
+        },
+      });
+
+      const prices: number[] = [];
+      for (const p of candidates) {
+        const distanceKm = calculateHaversineDistanceKm(
+          userLat,
+          userLng,
+          p.latitude,
+          p.longitude,
+        );
+        if (hasBounds || distanceKm <= radiusKm) {
+          prices.push(Number(p.baseMonthlyPrice));
+        }
+      }
+
+      if (prices.length === 0) {
+        return {
+          minPrice: 100000,
+          maxPrice: 600000,
+          currency: 'CLP',
+          totalListings: 0,
+          bins: [],
+        };
+      }
+
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      const bins = this.calculateBins(prices, minPrice, maxPrice, 28);
+
+      return {
+        minPrice,
+        maxPrice,
+        currency: 'CLP',
+        totalListings: prices.length,
+        bins,
+      };
+    }
+
+    const aggregate = await this.prisma.pension.aggregate({
+      where,
+      _min: { baseMonthlyPrice: true },
+      _max: { baseMonthlyPrice: true },
+      _count: { id: true },
+    });
+
+    const totalListings = aggregate._count.id;
+    if (
+      totalListings === 0 ||
+      aggregate._min.baseMonthlyPrice === null ||
+      aggregate._max.baseMonthlyPrice === null
+    ) {
+      return {
+        minPrice: 100000,
+        maxPrice: 600000,
+        currency: 'CLP',
+        totalListings: 0,
+        bins: [],
+      };
+    }
+
+    const minPrice = Number(aggregate._min.baseMonthlyPrice);
+    const maxPrice = Number(aggregate._max.baseMonthlyPrice);
+
+    const listings = await this.prisma.pension.findMany({
+      where,
+      select: { baseMonthlyPrice: true },
+    });
+
+    const prices = listings.map((l) => Number(l.baseMonthlyPrice));
+    const bins = this.calculateBins(prices, minPrice, maxPrice, 28);
+
+    return {
+      minPrice,
+      maxPrice,
+      currency: 'CLP',
+      totalListings,
+      bins,
     };
   }
 
