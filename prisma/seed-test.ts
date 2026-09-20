@@ -35,6 +35,20 @@ const ROOM_PHOTOS = [
   'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/room-spacious-balcony.webp',
   'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/room-studio-modern.webp',
   'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/room-single-cozy.webp',
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/rooms/pension-room-good.webp',
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/rooms/pension-room-normal.webp',
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/rooms/pension-room-worn.webp',
+];
+
+const LANDLORD_AVATARS = [
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-landlord-cl-m.webp',
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-landlord-cl-w.webp',
+];
+
+const STUDENT_AVATARS = [
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-student-cl-w.webp',
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-student-cl-m.webp',
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-student-lat-w.webp',
 ];
 
 const PENSION_TITLES_PREFIXES = [
@@ -211,7 +225,7 @@ const main = async (): Promise<void> => {
         role: 'ADMIN' as Role,
         isEmailVerified: true,
         avatarUrl:
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+          'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-admin.webp',
       },
       {
         id: moderatorId,
@@ -223,7 +237,7 @@ const main = async (): Promise<void> => {
         role: 'MODERATOR' as Role,
         isEmailVerified: true,
         avatarUrl:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+          'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-moderator.webp',
       },
     ],
   });
@@ -266,7 +280,7 @@ const main = async (): Promise<void> => {
     role: 'LANDLORD' as Role,
     isEmailVerified: true,
     avatarUrl:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+      'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-landlord-cl-m.webp',
   };
 
   const landlordUsers = [landlordDemo];
@@ -283,7 +297,7 @@ const main = async (): Promise<void> => {
       phone: `+569${faker.string.numeric(8)}`,
       role: 'LANDLORD' as Role,
       isEmailVerified: true,
-      avatarUrl: `https://images.unsplash.com/photo-${1500000000000 + i * 45000000}?auto=format&fit=crop&w=300&q=80`,
+      avatarUrl: LANDLORD_AVATARS[i % LANDLORD_AVATARS.length],
     });
   }
 
@@ -492,7 +506,7 @@ const main = async (): Promise<void> => {
     isEmailVerified: true,
     universityId: primaryUni.id,
     avatarUrl:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/avatars/avatar-student-cl-w.webp',
   };
 
   const studentUsers = [studentDemo];
@@ -514,7 +528,7 @@ const main = async (): Promise<void> => {
       role: 'STUDENT' as Role,
       isEmailVerified: faker.datatype.boolean(0.85),
       universityId: assignedUni.id,
-      avatarUrl: `https://images.unsplash.com/photo-${1530000000000 + (i % 30) * 35000000}?auto=format&fit=crop&w=300&q=80`,
+      avatarUrl: STUDENT_AVATARS[i % STUDENT_AVATARS.length],
     });
   }
 

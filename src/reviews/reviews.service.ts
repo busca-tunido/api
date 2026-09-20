@@ -159,7 +159,7 @@ export class ReviewsService {
         pension.images.find((img) => img.isFeatured)?.url ||
         pension.images[0]?.url ||
         review.images[0] ||
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80';
+        'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/pensions/stay-history-fallback.webp';
 
       const firstRoom = pension.rooms[0];
       const roomTitle = firstRoom?.title || 'Habitación Individual';
