@@ -13,15 +13,21 @@ export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
   @Get('pensions/:pensionId/rooms')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'List rooms for a specific pension' })
   @ApiResponse({ status: 200, description: 'List of rooms' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findByPension(@Param('pensionId') pensionId: string): Promise<unknown[]> {
     return this.roomsService.findByPension(pensionId);
   }
 
   @Get('rooms/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get room by ID' })
   @ApiResponse({ status: 200, description: 'Room details' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Room not found' })
   async findOne(@Param('id') id: string): Promise<unknown> {
     return this.roomsService.findById(id);

@@ -31,8 +31,11 @@ export class ProposalsController {
   }
 
   @Get('pensions/:id/proposals')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get proposal history for a specific pension' })
   @ApiResponse({ status: 200, description: 'List of proposals' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findByPension(@Param('id') pensionId: string): Promise<unknown[]> {
     return this.proposalsService.findByPension(pensionId);
   }

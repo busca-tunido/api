@@ -618,7 +618,7 @@ export class PensionsService {
     });
   }
 
-  async findBySlugOrId(idOrSlug: string): Promise<unknown> {
+  async findBySlugOrId(idOrSlug: string, user?: SanitizedUser | null): Promise<unknown> {
     const pension = await this.prisma.pension.findFirst({
       where: {
         deletedAt: null,
@@ -656,6 +656,21 @@ export class PensionsService {
 
     if (!pension) {
       throw new NotFoundException(`Pension '${idOrSlug}' not found`);
+    }
+
+    if (!user) {
+      return {
+        ...pension,
+        address: `${pension.neighborhood}, ${pension.city}`,
+        landlord: pension.landlord
+          ? {
+              id: pension.landlord.id,
+              firstName: pension.landlord.firstName,
+              avatarUrl: pension.landlord.avatarUrl,
+            }
+          : null,
+        rooms: [],
+      };
     }
 
     return pension;

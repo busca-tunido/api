@@ -14,6 +14,7 @@ import { Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { CreatePensionDto } from './dto/create-pension.dto.js';
@@ -57,11 +58,15 @@ export class PensionsController {
   }
 
   @Get(':idOrSlug')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Get pension detail by ID or Slug' })
   @ApiResponse({ status: 200, description: 'Pension detailed information' })
   @ApiResponse({ status: 404, description: 'Pension not found' })
-  async findOne(@Param('idOrSlug') idOrSlug: string): Promise<unknown> {
-    return this.pensionsService.findBySlugOrId(idOrSlug);
+  async findOne(
+    @Param('idOrSlug') idOrSlug: string,
+    @CurrentUser() user?: SanitizedUser,
+  ): Promise<unknown> {
+    return this.pensionsService.findBySlugOrId(idOrSlug, user);
   }
 
   @Post()

@@ -24,10 +24,13 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Get('pensions/:pensionId/reviews')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get paginated reviews for a pension with optional rating filter and sorting',
   })
   @ApiResponse({ status: 200, description: 'Paginated reviews response' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findByPension(
     @Param('pensionId') pensionId: string,
     @Query() filter: FilterReviewsDto,
