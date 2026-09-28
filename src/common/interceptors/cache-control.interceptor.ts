@@ -2,7 +2,6 @@ import {
   type CallHandler,
   type CustomDecorator,
   type ExecutionContext,
-  Inject,
   Injectable,
   type NestInterceptor,
   Optional,
@@ -43,43 +42,10 @@ export class CacheControlInterceptor implements NestInterceptor {
   private readonly defaultMaxAge?: number;
   private readonly defaultStaleWhileRevalidate?: number;
 
-  constructor(reflector?: Reflector);
-  constructor(options: CacheControlOptions);
-  constructor(maxAgeSeconds: number, staleWhileRevalidateSeconds?: number);
-  constructor(reflector: Reflector, maxAgeSeconds: number, staleWhileRevalidateSeconds?: number);
   constructor(
     @Optional()
-    @Inject(Reflector)
-    reflectorOrMaxAgeOrOptions?: Reflector | number | CacheControlOptions,
-    maxAgeSecondsOrStale?: number,
-    staleWhileRevalidateSeconds?: number,
-  ) {
-    if (typeof reflectorOrMaxAgeOrOptions === 'number') {
-      this.reflector = undefined;
-      this.defaultMaxAge = reflectorOrMaxAgeOrOptions;
-      this.defaultStaleWhileRevalidate = maxAgeSecondsOrStale;
-    } else if (
-      typeof reflectorOrMaxAgeOrOptions === 'object' &&
-      reflectorOrMaxAgeOrOptions !== null &&
-      'maxAgeSeconds' in reflectorOrMaxAgeOrOptions
-    ) {
-      this.reflector = undefined;
-      this.defaultMaxAge = reflectorOrMaxAgeOrOptions.maxAgeSeconds;
-      this.defaultStaleWhileRevalidate = reflectorOrMaxAgeOrOptions.staleWhileRevalidateSeconds;
-    } else if (
-      typeof reflectorOrMaxAgeOrOptions === 'object' &&
-      reflectorOrMaxAgeOrOptions !== null &&
-      ('getAllAndOverride' in reflectorOrMaxAgeOrOptions || 'get' in reflectorOrMaxAgeOrOptions)
-    ) {
-      this.reflector = reflectorOrMaxAgeOrOptions as Reflector;
-      this.defaultMaxAge = maxAgeSecondsOrStale;
-      this.defaultStaleWhileRevalidate = staleWhileRevalidateSeconds;
-    } else {
-      this.reflector = undefined;
-      this.defaultMaxAge = maxAgeSecondsOrStale;
-      this.defaultStaleWhileRevalidate = staleWhileRevalidateSeconds;
-    }
-  }
+    private readonly reflector?: Reflector,
+  ) {}
 
   intercept<T>(context: ExecutionContext, next: CallHandler<T>): Observable<T> {
     const http = context.switchToHttp();

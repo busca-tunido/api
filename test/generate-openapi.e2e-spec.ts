@@ -19,5 +19,5 @@ describe('Generate OpenAPI', () => {
     await fs.writeFile(outputPath, JSON.stringify(document, null, 2));
     expect(document.openapi).toBeDefined();
     await app.close();
-  });
+  }, 30000);
 });

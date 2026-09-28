@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -8,8 +8,8 @@ import type { JwtPayload, SanitizedUser } from '../types/auth.types.js';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
+    @Inject(ConfigService) readonly configService: ConfigService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {

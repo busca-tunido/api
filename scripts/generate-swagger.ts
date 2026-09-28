@@ -1,21 +1,10 @@
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
-import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { Test } from '@nestjs/testing';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from '../src/app.module.js';
-
-try {
-  process.loadEnvFile?.();
-} catch {}
+import { createTestApp } from '../test/test-utils.js';
 
 const run = async (): Promise<void> => {
-  const moduleFixture = await Test.createTestingModule({
-    imports: [AppModule],
-  }).compile();
-
-  const app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-  await app.init();
+  const app = await createTestApp();
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('BuscaTuNido API')

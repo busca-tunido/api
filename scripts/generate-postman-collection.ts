@@ -205,8 +205,213 @@ const generateExampleFromSchema = (
   return null;
 };
 
+const resolvePathVariableDefault = (
+  routePath: string,
+  paramName: string,
+  example?: unknown,
+): string => {
+  if (paramName === 'pensionId') return '{{pensionId}}';
+  if (paramName === 'roomId') return '{{roomId}}';
+  if (paramName === 'universityId') return '{{universityId}}';
+  if (paramName === 'reviewId') return '{{reviewId}}';
+  if (paramName === 'reportId') return '{{reportId}}';
+  if (paramName === 'proposalId') return '{{proposalId}}';
+  if (paramName === 'idOrSlug') return '{{pensionId}}';
+
+  if (paramName === 'id') {
+    if (
+      routePath.startsWith('/pensions') &&
+      !routePath.includes('/rooms') &&
+      !routePath.includes('/reviews') &&
+      !routePath.includes('/proposals')
+    ) {
+      return '{{pensionId}}';
+    }
+    if (routePath.startsWith('/pensions') && routePath.includes('/proposals')) {
+      return '{{pensionId}}';
+    }
+    if (routePath.startsWith('/rooms') || routePath.includes('/rooms/')) {
+      return '{{roomId}}';
+    }
+    if (routePath.startsWith('/universities')) {
+      return '{{universityId}}';
+    }
+    if (routePath.startsWith('/reviews')) {
+      return '{{reviewId}}';
+    }
+    if (routePath.startsWith('/reports')) {
+      return '{{reportId}}';
+    }
+    if (routePath.startsWith('/moderation/proposals')) {
+      return '{{proposalId}}';
+    }
+    if (routePath.startsWith('/moderation/reviews')) {
+      return '{{reviewId}}';
+    }
+    if (routePath.startsWith('/moderation/pensions')) {
+      return '{{pensionId}}';
+    }
+  }
+
+  if (example !== undefined && example !== null && String(example).trim() !== '') {
+    return String(example);
+  }
+
+  return `test-${paramName}`;
+};
+
+const generateTestScript = (extractions: Record<string, string>): string[] => {
+  const lines: string[] = [
+    'try {',
+    '  const res = pm.response.json();',
+    '  const data = res && res.data !== undefined ? res.data : res;',
+    '  const setVar = (key, val) => {',
+    '    if (val === undefined || val === null || val === "") return;',
+    '    const str = String(val);',
+    '    if (typeof pm !== "undefined") {',
+    '      if (pm.collectionVariables) pm.collectionVariables.set(key, str);',
+    '      if (pm.environment) pm.environment.set(key, str);',
+    '      if (pm.globals) pm.globals.set(key, str);',
+    '    }',
+    '    if (typeof postman !== "undefined" && postman.setEnvironmentVariable) {',
+    '      postman.setEnvironmentVariable(key, str);',
+    '    }',
+    '    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);',
+    '  };',
+    '  const first = (arrOrObj) => {',
+    '    if (!arrOrObj) return null;',
+    '    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;',
+    '    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;',
+    '    if (typeof arrOrObj === "object") return arrOrObj;',
+    '    return null;',
+    '  };',
+  ];
+
+  for (const [varName, expr] of Object.entries(extractions)) {
+    lines.push(`  setVar("${varName}", ${expr});`);
+  }
+
+  lines.push('} catch (e) {');
+  lines.push('  console.warn("[BuscaTuNido] Error al extraer variables de respuesta:", e.message);');
+  lines.push('}');
+
+  return lines;
+};
+
+const getEndpointExtractions = (
+  routePath: string,
+  method: string,
+): Record<string, string> | undefined => {
+  if (routePath === '/auth/login' && method === 'POST') {
+    return {
+      token: 'data.accessToken || (res && res.accessToken)',
+      userId: 'data.user?.id || data.userId',
+    };
+  }
+  if (routePath === '/auth/register' && method === 'POST') {
+    return {
+      token: 'data.accessToken || (res && res.accessToken)',
+      userId: 'data.user?.id || data.userId',
+    };
+  }
+  if (routePath === '/auth/me' && method === 'GET') {
+    return {
+      userId: 'data.id || data.user?.id',
+    };
+  }
+  if (routePath === '/pensions' && method === 'POST') {
+    return {
+      pensionId: 'data.id',
+      pensionSlug: 'data.slug',
+    };
+  }
+  if (routePath === '/pensions' && method === 'GET') {
+    return {
+      pensionId: 'first(data)?.id',
+      pensionSlug: 'first(data)?.slug',
+    };
+  }
+  if (routePath === '/pensions/{idOrSlug}' && method === 'GET') {
+    return {
+      pensionId: 'data.id',
+      pensionSlug: 'data.slug',
+    };
+  }
+  if (routePath === '/pensions/{pensionId}/rooms' && method === 'POST') {
+    return {
+      roomId: 'data.id',
+    };
+  }
+  if (routePath === '/pensions/{pensionId}/rooms' && method === 'GET') {
+    return {
+      roomId: 'first(data)?.id',
+    };
+  }
+  if (routePath === '/rooms/{id}' && method === 'GET') {
+    return {
+      roomId: 'data.id',
+    };
+  }
+  if (routePath === '/universities' && method === 'POST') {
+    return {
+      universityId: 'data.id',
+    };
+  }
+  if (routePath === '/universities' && method === 'GET') {
+    return {
+      universityId: 'first(data)?.id',
+    };
+  }
+  if (routePath === '/universities/{id}' && method === 'GET') {
+    return {
+      universityId: 'data.id',
+    };
+  }
+  if (routePath === '/pensions/{pensionId}/reviews' && method === 'POST') {
+    return {
+      reviewId: 'data.id',
+    };
+  }
+  if (routePath === '/pensions/{pensionId}/reviews' && method === 'GET') {
+    return {
+      reviewId: 'first(data)?.id',
+    };
+  }
+  if (routePath === '/reports' && method === 'POST') {
+    return {
+      reportId: 'data.id',
+    };
+  }
+  if (routePath === '/reports' && method === 'GET') {
+    return {
+      reportId: 'first(data)?.id',
+    };
+  }
+  if (routePath === '/pensions/{id}/proposals' && method === 'POST') {
+    return {
+      proposalId: 'data.id',
+    };
+  }
+  if (routePath === '/moderation/proposals' && method === 'GET') {
+    return {
+      proposalId: 'first(data)?.id',
+    };
+  }
+  if (routePath === '/moderation/proposals/{id}' && method === 'GET') {
+    return {
+      proposalId: 'data.id',
+    };
+  }
+  if (routePath === '/uploads/images' && method === 'POST') {
+    return {
+      uploadedImageUrl: 'data.url || data.variants?.medium || data.variants?.full',
+    };
+  }
+  return undefined;
+};
+
 const main = async (): Promise<void> => {
-  const openApiPath = path.resolve(process.cwd(), '../web/src/lib/openapi.json');
+  const openApiPath = path.resolve(import.meta.dirname, '../../web/src/lib/openapi.json');
   const openApiRaw = await fs.readFile(openApiPath, 'utf-8');
   const openApi: OpenApiDoc = JSON.parse(openApiRaw);
 
@@ -217,7 +422,7 @@ const main = async (): Promise<void> => {
       _postman_id: 'buscatunido-echoapi-collection',
       name: 'BuscaTuNido API',
       description:
-        'Colección oficial de endpoints para BuscaTuNido API. Configurada con variables y scripts de extracción automática de JWT para EchoAPI y Postman.',
+        'Colección oficial de endpoints para BuscaTuNido API. Configurada con variables dinámicas y scripts de extracción automática para flujos de prueba continuos.',
       schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
     },
     variable: [
@@ -228,6 +433,51 @@ const main = async (): Promise<void> => {
       },
       {
         key: 'token',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'userId',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'pensionId',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'pensionSlug',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'roomId',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'universityId',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'reviewId',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'reportId',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'proposalId',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'uploadedImageUrl',
         value: '',
         type: 'string',
       },
@@ -270,8 +520,7 @@ const main = async (): Promise<void> => {
         if (param.in === 'path') {
           urlVariables.push({
             key: param.name,
-            value:
-              param.schema?.example !== undefined ? String(param.schema.example) : `test-${param.name}`,
+            value: resolvePathVariableDefault(routePath, param.name, param.schema?.example),
             description: param.description,
           });
         }
@@ -285,14 +534,18 @@ const main = async (): Promise<void> => {
       }> = [];
       for (const param of operation.parameters || []) {
         if (param.in === 'query') {
+          let paramValue =
+            param.schema?.example !== undefined
+              ? String(param.schema.example)
+              : param.schema?.enum?.[0] !== undefined
+                ? String(param.schema.enum[0])
+                : '';
+          if (param.name === 'universityId') {
+            paramValue = '{{universityId}}';
+          }
           queryParams.push({
             key: param.name,
-            value:
-              param.schema?.example !== undefined
-                ? String(param.schema.example)
-                : param.schema?.enum?.[0] !== undefined
-                  ? String(param.schema.enum[0])
-                  : '',
+            value: paramValue,
             description: param.description,
             disabled: !param.required,
           });
@@ -373,22 +626,11 @@ const main = async (): Promise<void> => {
         },
       };
 
-      const testScriptLines = [
-        'const res = pm.response.json();',
-        'const token = res && res.data ? res.data.accessToken : (res ? res.accessToken : null);',
-        'if (token) {',
-        '    if (typeof pm !== "undefined") {',
-        '        if (pm.globals) pm.globals.set("token", token);',
-        '        if (pm.environment) pm.environment.set("token", token);',
-        '        if (pm.collectionVariables) pm.collectionVariables.set("token", token);',
-        '    }',
-        '    if (typeof postman !== "undefined") {',
-        '        if (postman.setGlobalVariable) postman.setGlobalVariable("token", token);',
-        '        if (postman.setEnvironmentVariable) postman.setEnvironmentVariable("token", token);',
-        '    }',
-        '    console.log("Token guardado exitosamente en la variable {{token}}");',
-        '}',
-      ];
+      const authExtractions = {
+        token: 'data.accessToken || (res && res.accessToken)',
+        userId: 'data.user?.id || data.userId',
+      };
+      const authTestScript = generateTestScript(authExtractions);
 
       if (routePath === '/auth/login' && method === 'POST') {
         const seedLogins = [
@@ -437,7 +679,7 @@ const main = async (): Promise<void> => {
                 host: ['{{baseUrl}}'],
                 path: ['auth', 'login'],
               },
-              description: `Iniciar sesión como ${account.role} (${account.email}). Guarda automáticamente el JWT en {{token}}.`,
+              description: `Iniciar sesión como ${account.role} (${account.email}). Guarda automáticamente el JWT en {{token}} y el ID en {{userId}}.`,
               auth: { type: 'noauth' },
             },
             event: [
@@ -445,7 +687,7 @@ const main = async (): Promise<void> => {
                 listen: 'test',
                 script: {
                   type: 'text/javascript',
-                  exec: testScriptLines,
+                  exec: authTestScript,
                 },
               },
             ],
@@ -459,13 +701,14 @@ const main = async (): Promise<void> => {
         continue;
       }
 
-      if (routePath === '/auth/register' && method === 'POST') {
+      const extractions = getEndpointExtractions(routePath, method);
+      if (extractions) {
         postmanItem.event = [
           {
             listen: 'test',
             script: {
               type: 'text/javascript',
-              exec: testScriptLines,
+              exec: generateTestScript(extractions),
             },
           },
         ];
@@ -485,16 +728,13 @@ const main = async (): Promise<void> => {
     });
   }
 
-  const outputApiPath = path.resolve(process.cwd(), 'buscatunido.postman_collection.json');
-  const outputRootPath = path.resolve(process.cwd(), '../buscatunido.postman_collection.json');
+  const outputApiPath = path.resolve(import.meta.dirname, '../buscatunido.postman_collection.json');
 
   const jsonContent = JSON.stringify(collection, null, 2);
   await fs.writeFile(outputApiPath, jsonContent, 'utf-8');
-  await fs.writeFile(outputRootPath, jsonContent, 'utf-8');
 
   console.log(`Postman collection generated successfully:`);
   console.log(`- ${outputApiPath}`);
-  console.log(`- ${outputRootPath}`);
 };
 
 main().catch((err) => {
