@@ -285,6 +285,14 @@ const generateTestScript = (extractions: Record<string, string>): string[] => {
     '    if (typeof arrOrObj === "object") return arrOrObj;',
     '    return null;',
     '  };',
+    '  const reqEmail = (() => {',
+    '    try {',
+    '      if (typeof pm !== "undefined" && pm.request && pm.request.body && pm.request.body.raw) {',
+    '        return JSON.parse(pm.request.body.raw).email || null;',
+    '      }',
+    '    } catch (e) {}',
+    '    return null;',
+    '  })();',
   ];
 
   for (const [varName, expr] of Object.entries(extractions)) {
@@ -312,6 +320,7 @@ const getEndpointExtractions = (
     return {
       token: 'data.accessToken || (res && res.accessToken)',
       userId: 'data.user?.id || data.userId',
+      email: 'data.user?.email || reqEmail',
     };
   }
   if (routePath === '/auth/me' && method === 'GET') {
@@ -410,6 +419,127 @@ const getEndpointExtractions = (
   return undefined;
 };
 
+const DEFAULT_ENDPOINT_BODIES: Record<string, Record<string, unknown>> = {
+  'POST /pensions': {
+    title: 'Residencia San Joaquín',
+    description:
+      'Excelente pensión cerca de campus San Joaquín, habitaciones amobladas con WiFi y áreas comunes.',
+    address: 'Av. Vicuña Mackenna 4860',
+    city: 'Santiago',
+    neighborhood: 'San Joaquín',
+    latitude: -33.4996,
+    longitude: -70.6145,
+    baseMonthlyPrice: 250000,
+    deposit: 250000,
+    currency: 'CLP',
+    waterIncluded: true,
+    electricityIncluded: true,
+    gasIncluded: true,
+    internetIncluded: true,
+    curfewTime: '23:00',
+    guestsAllowed: true,
+    smokingAllowed: false,
+    petsAllowed: false,
+    genderPreference: 'ANY',
+    quietHoursStart: '23:00',
+    quietHoursEnd: '07:00',
+    amenitySlugs: ['wifi-alta-velocidad', 'bano-privado'],
+    nearbyUniversityId: '{{universityId}}',
+    distanceMeters: 500,
+  },
+  'PATCH /pensions/{id}': {
+    title: 'Residencia San Joaquín - Actualizada',
+    description:
+      'Pensión universitaria renovada con nuevas habitaciones disponibles y ambiente tranquilo.',
+    baseMonthlyPrice: 260000,
+    deposit: 260000,
+    curfewTime: '23:30',
+  },
+  'POST /pensions/{pensionId}/rooms': {
+    roomNumber: 'Hab 101',
+    title: 'Habitación Individual Luminosa',
+    description: 'Pieza amoblada con clóset, escritorio y buena iluminación para estudio.',
+    type: 'SINGLE',
+    monthlyPrice: 250000,
+    deposit: 250000,
+    hasPrivateBathroom: true,
+    totalBeds: 1,
+    availableBeds: 1,
+    isAvailable: true,
+    images: ['{{uploadedImageUrl}}'],
+  },
+  'PATCH /rooms/{id}': {
+    title: 'Habitación Individual - Precio Promocional',
+    monthlyPrice: 240000,
+    isAvailable: true,
+  },
+  'POST /universities': {
+    name: 'Universidad de Chile',
+    shortName: 'UCH',
+    emailDomains: ['uchile.cl', 'alumnos.uchile.cl'],
+    city: 'Santiago',
+    address: "Av. Libertador Bernardo O'Higgins 1058",
+    latitude: -33.4442,
+    longitude: -70.6517,
+  },
+  'PATCH /universities/{id}': {
+    name: 'Universidad de Chile - Campus Central',
+    shortName: 'UCH',
+    emailDomains: ['uchile.cl', 'alumnos.uchile.cl', 'ingenieria.uchile.cl'],
+  },
+  'POST /pensions/{pensionId}/reviews': {
+    overallRating: 5,
+    cleanlinessRating: 5,
+    landlordRating: 4,
+    quietnessRating: 4,
+    wifiRating: 5,
+    comment:
+      'Excelente pensión y ambiente de estudio. La dueña es muy amable y atenta a cualquier necesidad.',
+    images: ['{{uploadedImageUrl}}'],
+    stayDurationCategory: 'ONE_SEMESTER',
+  },
+  'PATCH /reviews/{id}': {
+    overallRating: 5,
+    cleanlinessRating: 5,
+    comment: 'Actualización: completé mi segundo semestre aquí y sigo recomendando este lugar 100%.',
+    wifiRating: 5,
+  },
+  'POST /reports': {
+    pensionId: '{{pensionId}}',
+    reason: 'INACCURATE_PRICE',
+    description:
+      'El precio cobrado en la visita no coincide con el valor mensual publicado en la ficha de la pensión.',
+  },
+  'PATCH /reports/{id}': {
+    status: 'RESOLVED',
+    resolutionNotes: 'Se contactó al arrendador y se corrigió el precio publicado en el perfil.',
+  },
+  'POST /pensions/{id}/proposals': {
+    type: 'BASIC_INFO',
+    proposedChanges: {
+      curfewTime: '23:30',
+      quietHoursStart: '22:00',
+      amenitiesToAdd: ['sala-estudio'],
+      amenitiesToRemove: [],
+    },
+    submissionNotes: 'Actualización tras consulta presencial con el arrendador.',
+  },
+  'PATCH /moderation/proposals/{id}/review': {
+    action: 'APPROVE',
+    reviewNotes: 'Cambios validados telefónicamente con el propietario de la pensión.',
+  },
+  'PATCH /moderation/reviews/{id}/visibility': {
+    isHidden: true,
+    reason:
+      'Comentario con lenguaje inapropiado o difamatorio que infringe las normas de la comunidad.',
+  },
+  'PATCH /moderation/pensions/{id}/status': {
+    verificationStatus: 'COMMUNITY_VERIFIED',
+    isActive: true,
+    reason: 'Pensión validada presencialmente por la comunidad estudiantil.',
+  },
+};
+
 const main = async (): Promise<void> => {
   const openApiPath = path.resolve(import.meta.dirname, '../../web/src/lib/openapi.json');
   const openApiRaw = await fs.readFile(openApiPath, 'utf-8');
@@ -491,6 +621,21 @@ const main = async (): Promise<void> => {
         value: '',
         type: 'string',
       },
+      {
+        key: 'studentEmail',
+        value: 'nuevo.estudiante@alumnos.uchile.cl',
+        type: 'string',
+      },
+      {
+        key: 'duenoEmail',
+        value: 'nuevo.dueno@gmail.com',
+        type: 'string',
+      },
+      {
+        key: 'email',
+        value: 'nuevo.estudiante@alumnos.uchile.cl',
+        type: 'string',
+      },
     ],
     auth: {
       type: 'bearer',
@@ -553,11 +698,25 @@ const main = async (): Promise<void> => {
           if (param.name === 'universityId') {
             paramValue = '{{universityId}}';
           }
+          if (param.name === 'email') {
+            paramValue = '{{email}}';
+          }
           queryParams.push({
             key: param.name,
             value: paramValue,
             description: param.description,
             disabled: !param.required,
+          });
+        }
+      }
+
+      if (routePath === '/auth/check-email' && method === 'GET') {
+        const hasEmailParam = queryParams.some((q) => q.key === 'email');
+        if (!hasEmailParam) {
+          queryParams.push({
+            key: 'email',
+            value: '{{email}}',
+            description: 'Correo electrónico a verificar',
           });
         }
       }
@@ -593,6 +752,20 @@ const main = async (): Promise<void> => {
             ],
           };
         }
+      }
+
+      const fallbackBody = DEFAULT_ENDPOINT_BODIES[`${method} ${routePath}`];
+      if (!requestBody && fallbackBody) {
+        headers.push({ key: 'Content-Type', value: 'application/json', type: 'text' });
+        requestBody = {
+          mode: 'raw',
+          raw: JSON.stringify(fallbackBody, null, 2),
+          options: {
+            raw: {
+              language: 'json',
+            },
+          },
+        };
       }
 
       const isPublic = !operation.security || operation.security.length === 0;
@@ -647,7 +820,7 @@ const main = async (): Promise<void> => {
           {
             name: 'Registro - Estudiante (STUDENT)',
             description:
-              'Crear una nueva cuenta de estudiante con dominio institucional. Guarda automáticamente el JWT en {{token}}, {{studentToken}} y {{userId}}.',
+              'Crear una nueva cuenta de estudiante con dominio institucional. Guarda automáticamente el JWT en {{token}}, {{studentToken}}, el ID en {{userId}}, y el correo registrado en {{studentEmail}} y {{email}} para ser usado en el login.',
             body: {
               email: 'nuevo.estudiante@alumnos.uchile.cl',
               password: 'Password123!',
@@ -660,12 +833,14 @@ const main = async (): Promise<void> => {
               token: 'data.accessToken || (res && res.accessToken)',
               userId: 'data.user?.id || data.userId',
               studentToken: 'data.accessToken || (res && res.accessToken)',
+              studentEmail: 'data.user?.email || reqEmail',
+              email: 'data.user?.email || reqEmail',
             },
           },
           {
             name: 'Registro - Dueño / Propietario (LANDLORD)',
             description:
-              'Crear una nueva cuenta de dueño / propietario de pensión. Guarda automáticamente el JWT en {{token}}, {{duenoToken}} y {{userId}}.',
+              'Crear una nueva cuenta de dueño / propietario de pensión. Guarda automáticamente el JWT en {{token}}, {{duenoToken}}, el ID en {{userId}}, y el correo registrado en {{duenoEmail}} y {{email}} para ser usado en el login.',
             body: {
               email: 'nuevo.dueno@gmail.com',
               password: 'Password123!',
@@ -678,6 +853,8 @@ const main = async (): Promise<void> => {
               token: 'data.accessToken || (res && res.accessToken)',
               userId: 'data.user?.id || data.userId',
               duenoToken: 'data.accessToken || (res && res.accessToken)',
+              duenoEmail: 'data.user?.email || reqEmail',
+              email: 'data.user?.email || reqEmail',
             },
           },
         ];
@@ -729,7 +906,7 @@ const main = async (): Promise<void> => {
           {
             name: 'Login - Estudiante (STUDENT)',
             role: 'Estudiante (STUDENT)',
-            email: 'estudiante.demo@uchile.cl',
+            email: '{{studentEmail}}',
             extractions: {
               token: 'data.accessToken || (res && res.accessToken)',
               userId: 'data.user?.id || data.userId',
@@ -739,7 +916,7 @@ const main = async (): Promise<void> => {
           {
             name: 'Login - Dueño / Propietario (LANDLORD)',
             role: 'Dueño / Propietario (LANDLORD)',
-            email: 'propietario.demo@buscatunido.cl',
+            email: '{{duenoEmail}}',
             extractions: {
               token: 'data.accessToken || (res && res.accessToken)',
               userId: 'data.user?.id || data.userId',
