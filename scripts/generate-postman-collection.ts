@@ -481,6 +481,16 @@ const main = async (): Promise<void> => {
         value: '',
         type: 'string',
       },
+      {
+        key: 'duenoToken',
+        value: '',
+        type: 'string',
+      },
+      {
+        key: 'studentToken',
+        value: '',
+        type: 'string',
+      },
     ],
     auth: {
       type: 'bearer',
@@ -632,29 +642,133 @@ const main = async (): Promise<void> => {
       };
       const authTestScript = generateTestScript(authExtractions);
 
+      if (routePath === '/auth/register' && method === 'POST') {
+        const registerPresets = [
+          {
+            name: 'Registro - Estudiante (STUDENT)',
+            description:
+              'Crear una nueva cuenta de estudiante con dominio institucional. Guarda automáticamente el JWT en {{token}}, {{studentToken}} y {{userId}}.',
+            body: {
+              email: 'nuevo.estudiante@alumnos.uchile.cl',
+              password: 'Password123!',
+              firstName: 'Estudiante',
+              lastName: 'Demo',
+              phone: '+56912345678',
+              role: 'STUDENT',
+            },
+            extractions: {
+              token: 'data.accessToken || (res && res.accessToken)',
+              userId: 'data.user?.id || data.userId',
+              studentToken: 'data.accessToken || (res && res.accessToken)',
+            },
+          },
+          {
+            name: 'Registro - Dueño / Propietario (LANDLORD)',
+            description:
+              'Crear una nueva cuenta de dueño / propietario de pensión. Guarda automáticamente el JWT en {{token}}, {{duenoToken}} y {{userId}}.',
+            body: {
+              email: 'nuevo.dueno@gmail.com',
+              password: 'Password123!',
+              firstName: 'Dueño',
+              lastName: 'Pensión',
+              phone: '+56987654321',
+              role: 'LANDLORD',
+            },
+            extractions: {
+              token: 'data.accessToken || (res && res.accessToken)',
+              userId: 'data.user?.id || data.userId',
+              duenoToken: 'data.accessToken || (res && res.accessToken)',
+            },
+          },
+        ];
+
+        for (const preset of registerPresets) {
+          const registerItem: PostmanItem = {
+            name: preset.name,
+            request: {
+              method: 'POST',
+              header: [{ key: 'Content-Type', value: 'application/json', type: 'text' }],
+              body: {
+                mode: 'raw',
+                raw: JSON.stringify(preset.body, null, 2),
+                options: {
+                  raw: {
+                    language: 'json',
+                  },
+                },
+              },
+              url: {
+                raw: '{{baseUrl}}/auth/register',
+                host: ['{{baseUrl}}'],
+                path: ['auth', 'register'],
+              },
+              description: preset.description,
+              auth: { type: 'noauth' },
+            },
+            event: [
+              {
+                listen: 'test',
+                script: {
+                  type: 'text/javascript',
+                  exec: generateTestScript(preset.extractions),
+                },
+              },
+            ],
+          };
+
+          if (!tagGroups.has(tagName)) {
+            tagGroups.set(tagName, []);
+          }
+          tagGroups.get(tagName)?.push(registerItem);
+        }
+        continue;
+      }
+
       if (routePath === '/auth/login' && method === 'POST') {
         const seedLogins = [
           {
+            name: 'Login - Estudiante (STUDENT)',
             role: 'Estudiante (STUDENT)',
             email: 'estudiante.demo@uchile.cl',
+            extractions: {
+              token: 'data.accessToken || (res && res.accessToken)',
+              userId: 'data.user?.id || data.userId',
+              studentToken: 'data.accessToken || (res && res.accessToken)',
+            },
           },
           {
-            role: 'Propietario (LANDLORD)',
+            name: 'Login - Dueño / Propietario (LANDLORD)',
+            role: 'Dueño / Propietario (LANDLORD)',
             email: 'propietario.demo@buscatunido.cl',
+            extractions: {
+              token: 'data.accessToken || (res && res.accessToken)',
+              userId: 'data.user?.id || data.userId',
+              duenoToken: 'data.accessToken || (res && res.accessToken)',
+            },
           },
           {
+            name: 'Login - Moderador (MODERATOR)',
             role: 'Moderador (MODERATOR)',
             email: 'moderador@buscatunido.cl',
+            extractions: {
+              token: 'data.accessToken || (res && res.accessToken)',
+              userId: 'data.user?.id || data.userId',
+            },
           },
           {
+            name: 'Login - Administrador (ADMIN)',
             role: 'Administrador (ADMIN)',
             email: 'admin@buscatunido.cl',
+            extractions: {
+              token: 'data.accessToken || (res && res.accessToken)',
+              userId: 'data.user?.id || data.userId',
+            },
           },
         ];
 
         for (const account of seedLogins) {
           const roleLoginItem: PostmanItem = {
-            name: `Login - ${account.role}`,
+            name: account.name,
             request: {
               method: 'POST',
               header: [{ key: 'Content-Type', value: 'application/json', type: 'text' }],
@@ -687,7 +801,7 @@ const main = async (): Promise<void> => {
                 listen: 'test',
                 script: {
                   type: 'text/javascript',
-                  exec: authTestScript,
+                  exec: generateTestScript(account.extractions),
                 },
               },
             ],
