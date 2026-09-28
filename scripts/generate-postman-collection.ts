@@ -665,21 +665,13 @@ const main = async (): Promise<void> => {
         .filter(Boolean)
         .map((segment) => {
           if (segment.startsWith('{') && segment.endsWith('}')) {
-            return `:${segment.slice(1, -1)}`;
+            const paramName = segment.slice(1, -1);
+            return resolvePathVariableDefault(routePath, paramName);
           }
           return segment;
         });
 
       const urlVariables: Array<{ key: string; value: string; description?: string }> = [];
-      for (const param of operation.parameters || []) {
-        if (param.in === 'path') {
-          urlVariables.push({
-            key: param.name,
-            value: resolvePathVariableDefault(routePath, param.name, param.schema?.example),
-            description: param.description,
-          });
-        }
-      }
 
       const queryParams: Array<{
         key: string;
