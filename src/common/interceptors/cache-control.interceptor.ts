@@ -38,7 +38,6 @@ export function CacheControl(
 
 @Injectable()
 export class CacheControlInterceptor implements NestInterceptor {
-  private readonly reflector?: Reflector;
   private readonly defaultMaxAge?: number;
   private readonly defaultStaleWhileRevalidate?: number;
 
