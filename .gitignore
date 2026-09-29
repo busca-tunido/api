@@ -19,4 +19,3 @@ Thumbs.db
 *.tsbuildinfo
 /.data
 /uploads
-*.postman_collection.json

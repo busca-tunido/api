@@ -1,0 +1,2980 @@
+{
+  "info": {
+    "_postman_id": "buscatunido-echoapi-collection",
+    "name": "BuscaTuNido API",
+    "description": "Colección oficial de endpoints para BuscaTuNido API. Configurada con variables dinámicas y scripts de extracción automática para flujos de prueba continuos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pensionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pensionSlug",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "roomId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "universityId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reportId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "proposalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "uploadedImageUrl",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "duenoToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentEmail",
+      "value": "nuevo.estudiante@alumnos.uchile.cl",
+      "type": "string"
+    },
+    {
+      "key": "duenoEmail",
+      "value": "nuevo.dueno@gmail.com",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "nuevo.estudiante@alumnos.uchile.cl",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "App",
+      "item": [
+        {
+          "name": "GET /",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Registro - Estudiante (STUDENT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.estudiante@alumnos.uchile.cl\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Estudiante\",\n  \"lastName\": \"Demo\",\n  \"phone\": \"+56912345678\",\n  \"role\": \"STUDENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Crear una nueva cuenta de estudiante con dominio institucional. Guarda automáticamente el JWT en {{token}}, {{studentToken}}, el ID en {{userId}}, y el correo registrado en {{studentEmail}} y {{email}} para ser usado en el login.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"token\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"userId\", data.user?.id || data.userId);",
+                  "  setVar(\"studentToken\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"studentEmail\", data.user?.email || reqEmail);",
+                  "  setVar(\"email\", data.user?.email || reqEmail);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registro - Dueño / Propietario (LANDLORD)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.dueno@gmail.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Dueño\",\n  \"lastName\": \"Pensión\",\n  \"phone\": \"+56987654321\",\n  \"role\": \"LANDLORD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Crear una nueva cuenta de dueño / propietario de pensión. Guarda automáticamente el JWT en {{token}}, {{duenoToken}}, el ID en {{userId}}, y el correo registrado en {{duenoEmail}} y {{email}} para ser usado en el login.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"token\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"userId\", data.user?.id || data.userId);",
+                  "  setVar(\"duenoToken\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"duenoEmail\", data.user?.email || reqEmail);",
+                  "  setVar(\"email\", data.user?.email || reqEmail);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Estudiante (STUDENT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Iniciar sesión como Estudiante (STUDENT) ({{studentEmail}}). Guarda automáticamente el JWT en {{token}} y el ID en {{userId}}.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"token\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"userId\", data.user?.id || data.userId);",
+                  "  setVar(\"studentToken\", data.accessToken || (res && res.accessToken));",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Dueño / Propietario (LANDLORD)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{duenoEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Iniciar sesión como Dueño / Propietario (LANDLORD) ({{duenoEmail}}). Guarda automáticamente el JWT en {{token}} y el ID en {{userId}}.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"token\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"userId\", data.user?.id || data.userId);",
+                  "  setVar(\"duenoToken\", data.accessToken || (res && res.accessToken));",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Moderador (MODERATOR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"moderador@buscatunido.cl\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Iniciar sesión como Moderador (MODERATOR) (moderador@buscatunido.cl). Guarda automáticamente el JWT en {{token}} y el ID en {{userId}}.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"token\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"userId\", data.user?.id || data.userId);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Administrador (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@buscatunido.cl\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Iniciar sesión como Administrador (ADMIN) (admin@buscatunido.cl). Guarda automáticamente el JWT en {{token}} y el ID en {{userId}}.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"token\", data.accessToken || (res && res.accessToken));",
+                  "  setVar(\"userId\", data.user?.id || data.userId);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Check if an email address is already registered",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/check-email?email={{email}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "check-email"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "{{email}}",
+                  "description": "Correo electrónico a verificar"
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get current authenticated user profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"userId\", data.id || data.user?.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pensions",
+      "item": [
+        {
+          "name": "List pensions with filtering and pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"pensionId\", first(data)?.id);",
+                  "  setVar(\"pensionSlug\", first(data)?.slug);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a new pension (Landlord or Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Residencia San Joaquín\",\n  \"description\": \"Excelente pensión cerca de campus San Joaquín, habitaciones amobladas con WiFi y áreas comunes.\",\n  \"address\": \"Av. Vicuña Mackenna 4860\",\n  \"city\": \"Santiago\",\n  \"neighborhood\": \"San Joaquín\",\n  \"latitude\": -33.4996,\n  \"longitude\": -70.6145,\n  \"baseMonthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"currency\": \"CLP\",\n  \"waterIncluded\": true,\n  \"electricityIncluded\": true,\n  \"gasIncluded\": true,\n  \"internetIncluded\": true,\n  \"curfewTime\": \"23:00\",\n  \"guestsAllowed\": true,\n  \"smokingAllowed\": false,\n  \"petsAllowed\": false,\n  \"genderPreference\": \"ANY\",\n  \"quietHoursStart\": \"23:00\",\n  \"quietHoursEnd\": \"07:00\",\n  \"amenitySlugs\": [\n    \"wifi-alta-velocidad\",\n    \"bano-privado\"\n  ],\n  \"nearbyUniversityId\": \"{{universityId}}\",\n  \"distanceMeters\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pensions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"pensionId\", data.id);",
+                  "  setVar(\"pensionSlug\", data.slug);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get price distribution histogram for pensions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/price-histogram",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "price-histogram"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "List pensions owned by authenticated landlord",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "mine"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get pension detail by ID or Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"pensionId\", data.id);",
+                  "  setVar(\"pensionSlug\", data.slug);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update pension details (Owner or Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Residencia San Joaquín - Actualizada\",\n  \"description\": \"Pensión universitaria renovada con nuevas habitaciones disponibles y ambiente tranquilo.\",\n  \"baseMonthlyPrice\": 260000,\n  \"deposit\": 260000,\n  \"curfewTime\": \"23:30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Soft delete pension (Owner or Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rooms",
+      "item": [
+        {
+          "name": "List rooms for a specific pension",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "rooms"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"roomId\", first(data)?.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add a new room to a pension (Owner or Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomNumber\": \"Hab 101\",\n  \"title\": \"Habitación Individual Luminosa\",\n  \"description\": \"Pieza amoblada con clóset, escritorio y buena iluminación para estudio.\",\n  \"type\": \"SINGLE\",\n  \"monthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"hasPrivateBathroom\": true,\n  \"totalBeds\": 1,\n  \"availableBeds\": 1,\n  \"isAvailable\": true,\n  \"images\": [\n    \"{{uploadedImageUrl}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "rooms"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"roomId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get room by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{roomId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"roomId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update room details (Owner or Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Habitación Individual - Precio Promocional\",\n  \"monthlyPrice\": 240000,\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{roomId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Soft delete room (Owner or Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{roomId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Universities",
+      "item": [
+        {
+          "name": "List all universities with optional city filter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/universities?city=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "universities"
+              ],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"universityId\", first(data)?.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a new university (Admin only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Universidad de Chile\",\n  \"shortName\": \"UCH\",\n  \"emailDomains\": [\n    \"uchile.cl\",\n    \"alumnos.uchile.cl\"\n  ],\n  \"city\": \"Santiago\",\n  \"address\": \"Av. Libertador Bernardo O'Higgins 1058\",\n  \"latitude\": -33.4442,\n  \"longitude\": -70.6517\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/universities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "universities"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"universityId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get university by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/universities/{{universityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "universities",
+                "{{universityId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"universityId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update university (Admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Universidad de Chile - Campus Central\",\n  \"shortName\": \"UCH\",\n  \"emailDomains\": [\n    \"uchile.cl\",\n    \"alumnos.uchile.cl\",\n    \"ingenieria.uchile.cl\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/universities/{{universityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "universities",
+                "{{universityId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Soft delete university (Admin only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/universities/{{universityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "universities",
+                "{{universityId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Get paginated reviews for a pension with optional rating filter and sorting",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "reviews"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"reviewId\", first(data)?.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Post a review for a pension (Authenticated students)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"overallRating\": 5,\n  \"cleanlinessRating\": 5,\n  \"landlordRating\": 4,\n  \"quietnessRating\": 4,\n  \"wifiRating\": 5,\n  \"comment\": \"Excelente pensión y ambiente de estudio. La dueña es muy amable y atenta a cualquier necesidad.\",\n  \"images\": [\n    \"{{uploadedImageUrl}}\"\n  ],\n  \"stayDurationCategory\": \"ONE_SEMESTER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "reviews"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"reviewId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get stay history for current authenticated student based on their reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stays",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stays"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update your review (Owner or Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"overallRating\": 5,\n  \"cleanlinessRating\": 5,\n  \"comment\": \"Actualización: completé mi segundo semestre aquí y sigo recomendando este lugar 100%.\",\n  \"wifiRating\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{reviewId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete your review (Owner or Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{reviewId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List review IDs the current user has voted as helpful",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/helpful/voted",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "helpful",
+                "voted"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Vote a review as helpful (toggle)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{reviewId}}/helpful",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}",
+                "helpful"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "List all reports (Admin and Moderator only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports?status=PENDING",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"reportId\", first(data)?.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submit an infraction report for a pension",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pensionId\": \"{{pensionId}}\",\n  \"reason\": \"INACCURATE_PRICE\",\n  \"description\": \"El precio cobrado en la visita no coincide con el valor mensual publicado en la ficha de la pensión.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"reportId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update report resolution status (Admin or Moderator only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolutionNotes\": \"Se contactó al arrendador y se corrigió el precio publicado en el perfil.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reports/{{reportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "{{reportId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "item": [
+        {
+          "name": "List all favorite pensions for the current user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add a pension to favorites",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove a pension from favorites",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proposals",
+      "item": [
+        {
+          "name": "Submit a change proposal for a pension listing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"BASIC_INFO\",\n  \"proposedChanges\": {\n    \"curfewTime\": \"23:30\",\n    \"quietHoursStart\": \"22:00\",\n    \"amenitiesToAdd\": [\n      \"sala-estudio\"\n    ],\n    \"amenitiesToRemove\": []\n  },\n  \"submissionNotes\": \"Actualización tras consulta presencial con el arrendador.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/proposals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "proposals"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"proposalId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get proposal history for a specific pension",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/proposals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "proposals"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List proposals for moderation review (Moderator or Admin only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/moderation/proposals?limit=&page=&status=PENDING",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "proposals"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"proposalId\", first(data)?.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inspect proposal diff and context (Moderator or Admin only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/moderation/proposals/{{proposalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "proposals",
+                "{{proposalId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"proposalId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approve, reject, or modify and merge proposal (Moderator, Admin, or Landlord)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"APPROVE\",\n  \"reviewNotes\": \"Cambios validados telefónicamente con el propietario de la pensión.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/moderation/proposals/{{proposalId}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "proposals",
+                "{{proposalId}}",
+                "review"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Moderation",
+      "item": [
+        {
+          "name": "Hide or unhide a review (Moderator or Admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isHidden\": true,\n  \"reason\": \"Comentario con lenguaje inapropiado o difamatorio que infringe las normas de la comunidad.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/moderation/reviews/{{reviewId}}/visibility",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "reviews",
+                "{{reviewId}}",
+                "visibility"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update pension verification status or active flag (Moderator or Admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verificationStatus\": \"COMMUNITY_VERIFIED\",\n  \"isActive\": true,\n  \"reason\": \"Pensión validada presencialmente por la comunidad estudiantil.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/moderation/pensions/{{pensionId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "pensions",
+                "{{pensionId}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Upload and process image to WebP with responsive variants",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Imagen JPEG, PNG o WebP de pensión/habitación (hasta 8MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/uploads/images",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "uploads",
+                "images"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"uploadedImageUrl\", data.url || data.variants?.medium || data.variants?.full);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
