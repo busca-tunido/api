@@ -2,49 +2,39 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
-
-try {
-  process.loadEnvFile?.();
-} catch {}
+import { env } from '../../env.js';
 
 const run = async (): Promise<void> => {
   const args = process.argv.slice(2);
-  const emailArg = args[0] || process.env.PUBLIC_MODERATOR_EMAIL || process.env.MODERATOR_EMAIL;
+  const emailArg = args[0] || env.PUBLIC_MODERATOR_EMAIL;
   if (!emailArg) {
     throw new Error(
-      'Missing env var: PUBLIC_MODERATOR_EMAIL (or MODERATOR_EMAIL) must be defined in environment (.env) or passed as argument.',
+      'Missing env var: PUBLIC_MODERATOR_EMAIL must be defined in environment (.env) or passed as argument.',
     );
   }
 
-  const passwordArg = args[1] || process.env.MODERATOR_PASSWORD;
+  const passwordArg = args[1] || env.MODERATOR_PASSWORD;
   if (!passwordArg) {
     throw new Error(
       'Missing env var: MODERATOR_PASSWORD must be defined in environment (.env) or passed as argument.',
     );
   }
 
-  const firstNameArg =
-    args[2] || process.env.PUBLIC_MODERATOR_FIRST_NAME || process.env.MODERATOR_FIRST_NAME;
+  const firstNameArg = args[2] || env.PUBLIC_MODERATOR_FIRST_NAME;
   if (!firstNameArg) {
     throw new Error(
-      'Missing env var: PUBLIC_MODERATOR_FIRST_NAME (or MODERATOR_FIRST_NAME) must be defined in environment (.env) or passed as argument.',
+      'Missing env var: PUBLIC_MODERATOR_FIRST_NAME must be defined in environment (.env) or passed as argument.',
     );
   }
 
-  const lastNameArg =
-    args[3] || process.env.PUBLIC_MODERATOR_LAST_NAME || process.env.MODERATOR_LAST_NAME;
+  const lastNameArg = args[3] || env.PUBLIC_MODERATOR_LAST_NAME;
   if (!lastNameArg) {
     throw new Error(
-      'Missing env var: PUBLIC_MODERATOR_LAST_NAME (or MODERATOR_LAST_NAME) must be defined in environment (.env) or passed as argument.',
+      'Missing env var: PUBLIC_MODERATOR_LAST_NAME must be defined in environment (.env) or passed as argument.',
     );
   }
 
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error('DATABASE_URL environment variable is required.');
-  }
-
-  const pool = new Pool({ connectionString });
+  const pool = new Pool({ connectionString: env.DATABASE_URL });
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 

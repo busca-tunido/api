@@ -1,25 +1,14 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { UploadsService } from './uploads.service.js';
+import { UploadsService, type UploadsStorageConfig } from './uploads.service.js';
 
 describe('UploadsService', () => {
   let service: UploadsService;
 
   beforeEach(() => {
-    delete process.env.AWS_ENDPOINT_URL_S3;
-    delete process.env.PUBLIC_AWS_ENDPOINT_URL_S3;
-    delete process.env.AWS_ACCESS_KEY_ID;
-    delete process.env.AWS_SECRET_ACCESS_KEY;
-    delete process.env.AWS_REGION;
-    delete process.env.PUBLIC_AWS_REGION;
-    delete process.env.STORAGE_BUCKET;
-    delete process.env.PUBLIC_STORAGE_BUCKET;
-    delete process.env.NEON_STORAGE_PUBLIC_BASE_URL;
-    delete process.env.PUBLIC_NEON_STORAGE_BASE_URL;
-    service = new UploadsService();
+    service = new UploadsService({ endpoint: null });
   });
 
   describe('processImage - local fallback mode', () => {
@@ -63,19 +52,15 @@ describe('UploadsService', () => {
 
   describe('processImage - Neon S3 storage mode', () => {
     it('should upload to S3 and return absolute public URLs', async () => {
-      const mockConfig: Record<string, string> = {
-        PUBLIC_AWS_ENDPOINT_URL_S3: 'https://br-sample.storage.c-2.us-east-2.aws.neon.tech',
-        AWS_ACCESS_KEY_ID: 'test-key',
-        AWS_SECRET_ACCESS_KEY: 'test-secret',
-        PUBLIC_AWS_REGION: 'us-east-2',
-        PUBLIC_STORAGE_BUCKET: 'uploads',
+      const storageConfig: UploadsStorageConfig = {
+        endpoint: 'https://br-sample.storage.c-2.us-east-2.aws.neon.tech',
+        accessKeyId: 'test-key',
+        secretAccessKey: 'test-secret',
+        region: 'us-east-2',
+        bucketName: 'uploads',
       };
 
-      const configService = {
-        get: <T = string>(key: string): T | undefined => mockConfig[key] as T | undefined,
-      } as ConfigService;
-
-      const s3Service = new UploadsService(configService);
+      const s3Service = new UploadsService(storageConfig);
       expect(s3Service.isRemoteStorageEnabled()).toBe(true);
 
       const sendSpy = vi.spyOn(S3Client.prototype, 'send').mockResolvedValue({} as never);
@@ -106,16 +91,12 @@ describe('UploadsService', () => {
     });
 
     it('should throw InternalServerErrorException if S3 upload fails', async () => {
-      const mockConfig: Record<string, string> = {
-        AWS_ENDPOINT_URL_S3: 'https://br-sample.storage.c-2.us-east-2.aws.neon.tech',
-        STORAGE_BUCKET: 'uploads',
+      const storageConfig: UploadsStorageConfig = {
+        endpoint: 'https://br-sample.storage.c-2.us-east-2.aws.neon.tech',
+        bucketName: 'uploads',
       };
 
-      const configService = {
-        get: <T = string>(key: string): T | undefined => mockConfig[key] as T | undefined,
-      } as ConfigService;
-
-      const s3Service = new UploadsService(configService);
+      const s3Service = new UploadsService(storageConfig);
 
       const sendSpy = vi
         .spyOn(S3Client.prototype, 'send')

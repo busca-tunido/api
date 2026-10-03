@@ -1,8 +1,8 @@
-import { Injectable, type OnModuleDestroy, type OnModuleInit, Optional } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
+import { env } from '../env.js';
 import { createSoftDeleteExtension } from './prisma.extension.js';
 
 const createExtendedClient = (baseClient: PrismaClient): unknown => {
@@ -13,13 +13,9 @@ const createExtendedClient = (baseClient: PrismaClient): unknown => {
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly pool: Pool;
 
-  constructor(@Optional() configService?: ConfigService) {
-    const connectionString = configService?.get<string>('DATABASE_URL') || process.env.DATABASE_URL;
-    if (!connectionString?.trim()) {
-      throw new Error('DATABASE_URL environment variable is required.');
-    }
+  constructor() {
     const pool = new Pool({
-      connectionString,
+      connectionString: env.DATABASE_URL,
     });
     const adapter = new PrismaPg(pool);
     super({ adapter });
