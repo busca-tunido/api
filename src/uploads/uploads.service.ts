@@ -2,7 +2,12 @@ import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Optional,
+} from '@nestjs/common';
 import sharp, { type Metadata } from 'sharp';
 import { env } from '../env.js';
 
@@ -35,7 +40,7 @@ export class UploadsService {
   private readonly bucketName: string;
   private readonly publicBaseUrl: string | null = null;
 
-  constructor(storageConfig?: UploadsStorageConfig) {
+  constructor(@Optional() storageConfig?: UploadsStorageConfig) {
     this.uploadDir = path.resolve(process.cwd(), 'uploads');
 
     const endpoint =
