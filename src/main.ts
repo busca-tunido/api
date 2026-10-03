@@ -32,12 +32,7 @@ async function bootstrap(): Promise<void> {
   });
 
   const corsOrigin = env.PUBLIC_CORS_ORIGIN;
-  const allowedOrigins: Array<string | RegExp> = [
-    corsOrigin,
-    /https:\/\/.*\.vercel\.app$/,
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ];
+  const allowedOrigins: Array<string | RegExp> = [corsOrigin];
 
   app.enableCors({
     origin: allowedOrigins,

@@ -2,7 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
-import { env } from '../../env.js';
+import { env } from '../src/env.js';
 
 const run = async (): Promise<void> => {
   const args = process.argv.slice(2);
