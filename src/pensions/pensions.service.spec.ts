@@ -14,6 +14,10 @@ type MockPrismaService = {
     create: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
     groupBy: ReturnType<typeof vi.fn>;
+    aggregate: ReturnType<typeof vi.fn>;
+  };
+  university: {
+    findUnique: ReturnType<typeof vi.fn>;
   };
 };
 
@@ -73,6 +77,10 @@ describe('PensionsService', () => {
         create: vi.fn(),
         update: vi.fn(),
         groupBy: vi.fn().mockResolvedValue([{ city: 'Santiago', _count: { id: 5 } }]),
+        aggregate: vi.fn(),
+      },
+      university: {
+        findUnique: vi.fn(),
       },
     };
 
@@ -227,6 +235,87 @@ describe('PensionsService', () => {
 
       expect((result as { id: string }).id).toBe('pension-new');
       expect(mockPrisma.pension.create).toHaveBeenCalled();
+    });
+
+    it('should compute geodesic distance to university when distanceMeters is not passed', async () => {
+      mockPrisma.university.findUnique.mockResolvedValue({
+        id: 'uni-1',
+        latitude: -33.4998,
+        longitude: -70.6152,
+      });
+      mockPrisma.pension.create.mockImplementation((args: { data: Record<string, unknown> }) =>
+        Promise.resolve({ id: 'pension-geo', ...args.data }),
+      );
+
+      await service.create(
+        {
+          title: 'Pensión Cerca de Campus San Joaquín',
+          description: 'A pasos del campus',
+          address: 'Vicuña Mackenna 4860',
+          city: 'Santiago',
+          neighborhood: 'San Joaquín',
+          latitude: -33.498,
+          longitude: -70.613,
+          baseMonthlyPrice: 280000,
+          nearbyUniversityId: 'uni-1',
+        },
+        mockLandlord,
+      );
+
+      expect(mockPrisma.university.findUnique).toHaveBeenCalledWith({
+        where: { id: 'uni-1' },
+        select: { latitude: true, longitude: true },
+      });
+      expect(mockPrisma.pension.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            nearbyUniversities: {
+              create: expect.objectContaining({
+                universityId: 'uni-1',
+                distanceMeters: expect.any(Number),
+                walkingMinutes: expect.any(Number),
+              }),
+            },
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('getPriceHistogram', () => {
+    it('should return null minPrice and maxPrice when no listings exist', async () => {
+      mockPrisma.pension.aggregate.mockResolvedValue({
+        _count: { id: 0 },
+        _min: { baseMonthlyPrice: null },
+        _max: { baseMonthlyPrice: null },
+      });
+
+      const result = await service.getPriceHistogram({});
+      expect(result).toEqual({
+        minPrice: null,
+        maxPrice: null,
+        currency: 'CLP',
+        totalListings: 0,
+        bins: [],
+      });
+    });
+
+    it('should compute 28 bins when listings exist', async () => {
+      mockPrisma.pension.aggregate.mockResolvedValue({
+        _count: { id: 2 },
+        _min: { baseMonthlyPrice: 200000 },
+        _max: { baseMonthlyPrice: 300000 },
+      });
+      mockPrisma.pension.findMany.mockResolvedValue([
+        { baseMonthlyPrice: 200000 },
+        { baseMonthlyPrice: 300000 },
+      ]);
+
+      const result = await service.getPriceHistogram({});
+      expect(result.minPrice).toBe(200000);
+      expect(result.maxPrice).toBe(300000);
+      expect(result.totalListings).toBe(2);
+      expect(result.bins).toHaveLength(28);
     });
   });
 

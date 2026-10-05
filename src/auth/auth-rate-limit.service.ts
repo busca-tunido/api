@@ -119,10 +119,7 @@ export class AuthRateLimitService {
 
     try {
       const formData = new URLSearchParams();
-      formData.append(
-        'secret',
-        process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA',
-      );
+      formData.append('secret', env.TURNSTILE_SECRET_KEY);
       formData.append('response', token.trim());
       if (remoteIp) {
         formData.append('remoteip', remoteIp);
