@@ -1,5 +1,7 @@
 import * as path from 'node:path';
+import fastifyHelmet from '@fastify/helmet';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -19,6 +21,18 @@ async function bootstrap(): Promise<void> {
     opts?: unknown,
   ) => Promise<unknown>;
 
+  await registerPlugin(fastifyHelmet, {
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  });
+
+  await registerPlugin(fastifyRateLimit, {
+    global: true,
+    max: 120,
+    timeWindow: '1 minute',
+    allowList: ['127.0.0.1', 'localhost'],
+  });
+
   await registerPlugin(fastifyMultipart, {
     limits: {
       fileSize: 15 * 1024 * 1024,
@@ -29,6 +43,12 @@ async function bootstrap(): Promise<void> {
   await registerPlugin(fastifyStatic, {
     root: path.resolve(process.cwd(), 'uploads'),
     prefix: '/uploads/',
+    dotfiles: 'ignore',
+    index: false,
+    setHeaders: (res: { setHeader: (name: string, value: string) => void }) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    },
   });
 
   const corsOrigin = env.PUBLIC_CORS_ORIGIN;

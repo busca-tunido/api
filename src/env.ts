@@ -106,6 +106,13 @@ const envSchema = z
           path: ['PUBLIC_STORAGE_BUCKET'],
         });
       }
+      if (typeof data.JWT_SECRET === 'string' && data.JWT_SECRET.length < 32) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'JWT_SECRET must be at least 32 characters long in production.',
+          path: ['JWT_SECRET'],
+        });
+      }
     }
   });
 

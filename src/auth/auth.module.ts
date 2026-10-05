@@ -5,6 +5,7 @@ import { env } from '../env.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
+import { AuthRateLimitService } from './auth-rate-limit.service.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { OwnershipGuard } from './guards/ownership.guard.js';
 import { RolesGuard } from './guards/roles.guard.js';
@@ -23,7 +24,22 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard, OwnershipGuard],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, OwnershipGuard, JwtModule, PassportModule],
+  providers: [
+    AuthService,
+    AuthRateLimitService,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    OwnershipGuard,
+  ],
+  exports: [
+    AuthService,
+    AuthRateLimitService,
+    JwtAuthGuard,
+    RolesGuard,
+    OwnershipGuard,
+    JwtModule,
+    PassportModule,
+  ],
 })
 export class AuthModule {}

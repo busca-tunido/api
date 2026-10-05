@@ -10,28 +10,34 @@ import {
   IsString,
   IsUUID,
   Matches,
+  MaxLength,
   Min,
 } from 'class-validator';
 
 export class CreatePensionDto {
   @ApiProperty({ example: 'Residencia San Joaquín' })
   @IsString()
+  @MaxLength(150)
   title!: string;
 
   @ApiProperty({ example: 'Excelente pensión cerca de campus San Joaquín' })
   @IsString()
+  @MaxLength(4000)
   description!: string;
 
   @ApiProperty({ example: 'Av. Vicuña Mackenna 4860' })
   @IsString()
+  @MaxLength(250)
   address!: string;
 
   @ApiProperty({ example: 'Santiago' })
   @IsString()
+  @MaxLength(100)
   city!: string;
 
   @ApiProperty({ example: 'San Joaquín' })
   @IsString()
+  @MaxLength(100)
   neighborhood!: string;
 
   @ApiProperty({ example: -33.4996 })

@@ -83,10 +83,11 @@ describe('validateEnv', () => {
     );
   });
 
-  it('should pass in production mode when all storage variables are provided', () => {
+  it('should pass in production mode when all storage variables and 32+ char secret are provided', () => {
     const prodConfig = {
       ...baseValidConfig,
       NODE_ENV: 'production',
+      JWT_SECRET: 'super-secret-jwt-key-with-sufficient-length-32',
       PUBLIC_AWS_ENDPOINT_URL_S3: 'https://branch.storage.c-2.us-east-2.aws.neon.tech',
       AWS_ACCESS_KEY_ID: 'neon-key',
       AWS_SECRET_ACCESS_KEY: 'neon-secret',
@@ -97,6 +98,22 @@ describe('validateEnv', () => {
     expect(validated.NODE_ENV).toBe('production');
     expect(validated.PUBLIC_AWS_ENDPOINT_URL_S3).toBe(
       'https://branch.storage.c-2.us-east-2.aws.neon.tech',
+    );
+  });
+
+  it('should throw in production mode when JWT_SECRET is shorter than 32 characters', () => {
+    const prodConfig = {
+      ...baseValidConfig,
+      NODE_ENV: 'production',
+      JWT_SECRET: 'short-secret',
+      PUBLIC_AWS_ENDPOINT_URL_S3: 'https://branch.storage.c-2.us-east-2.aws.neon.tech',
+      AWS_ACCESS_KEY_ID: 'neon-key',
+      AWS_SECRET_ACCESS_KEY: 'neon-secret',
+      PUBLIC_AWS_REGION: 'us-east-2',
+      PUBLIC_STORAGE_BUCKET: 'uploads',
+    };
+    expect(() => validateEnv(prodConfig)).toThrow(
+      'JWT_SECRET must be at least 32 characters long in production.',
     );
   });
 });
