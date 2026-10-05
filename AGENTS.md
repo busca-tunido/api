@@ -67,6 +67,10 @@ The backend relies on an isolated local database cluster stored in `.data/` for 
    - Anonymous or guest modes are completely prohibited by design.
 1. **Brand Naming Convention**:
    - The brand name must always be formatted as a single PascalCase token: `BuscaTuNido` (never separated as `Busca Tu Nido`).
+1. **Strict Prohibition of Hardcoded Values & Seed-First Rule**:
+   - Hardcoded values, dummy/mock data, synthetic fallbacks (e.g., fallback images, fake room titles, hardcoded prices, synthetic date arithmetic), and hardcoded heuristic dictionaries (e.g., hardcoded university regexes, hardcoded amenity slugs) are strictly prohibited unless explicitly requested by the user.
+   - If initial, sample, or testing data is required for features or verification, it must be created in the corresponding seed file (`prisma/seed.ts`, `prisma/seed-utils.ts`) or managed via Prisma database migrations.
+   - Endpoints and services must always query and return real database records, compute geospatial distances with real coordinates, or return clean null/empty states.
 
 ---
 
