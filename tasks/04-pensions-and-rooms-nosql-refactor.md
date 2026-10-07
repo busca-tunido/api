@@ -7,7 +7,7 @@
 - **Assigned Role**: `Worker Agent (Pensions & Rooms Domain)`
 - **Dependencies (`depends_on`)**:
   - `01-mongodb-prisma-engine-and-schema-migration.md`
-  - `03-mongodb-seed-pipeline-and-fixtures.md`
+  - `03-enrich-seed-test-reviews-amenities-and-variability.md`
 - **Collision Risk**: `LOW (Exclusive access to pensions and rooms modules)`
 
 ## Target Files

@@ -7,7 +7,7 @@
 - **Assigned Role**: `Worker Agent (Engagement & Reviews Domain)`
 - **Dependencies (`depends_on`)**:
   - `01-mongodb-prisma-engine-and-schema-migration.md`
-  - `03-mongodb-seed-pipeline-and-fixtures.md`
+  - `03-enrich-seed-test-reviews-amenities-and-variability.md`
 - **Collision Risk**: `LOW (Disjoint from pensions and rooms files)`
 
 ## Target Files
