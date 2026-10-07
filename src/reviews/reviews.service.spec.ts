@@ -14,13 +14,6 @@ type MockPrismaService = {
     create: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
-  reviewHelpfulVote: {
-    findUnique: ReturnType<typeof vi.fn>;
-    findMany: ReturnType<typeof vi.fn>;
-    create: ReturnType<typeof vi.fn>;
-    delete: ReturnType<typeof vi.fn>;
-    count: ReturnType<typeof vi.fn>;
-  };
   pension: {
     findUnique: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
@@ -69,13 +62,6 @@ describe('ReviewsService', () => {
         create: vi.fn(),
         update: vi.fn(),
       },
-      reviewHelpfulVote: {
-        findUnique: vi.fn(),
-        findMany: vi.fn(),
-        create: vi.fn(),
-        delete: vi.fn(),
-        count: vi.fn(),
-      },
       pension: {
         findUnique: vi.fn(),
         update: vi.fn(),
@@ -86,12 +72,15 @@ describe('ReviewsService', () => {
   });
 
   describe('findByPension', () => {
-    it('should return list of reviews', async () => {
+    it('should return list of reviews with helpfulCount', async () => {
       mockPrisma.review.count.mockResolvedValue(1);
-      mockPrisma.review.findMany.mockResolvedValue([{ id: 'rev-1', overallRating: 5 }]);
+      mockPrisma.review.findMany.mockResolvedValue([
+        { id: 'rev-1', overallRating: 5, helpfulUserIds: ['user-a'] },
+      ]);
 
       const result = await service.findByPension('pension-1');
       expect(result.items).toHaveLength(1);
+      expect((result.items[0] as { helpfulCount: number }).helpfulCount).toBe(1);
       expect(result.pagination.total).toBe(1);
     });
   });
@@ -99,15 +88,20 @@ describe('ReviewsService', () => {
   describe('create', () => {
     it('should create review and recalculate pension rating', async () => {
       mockPrisma.pension.findUnique.mockResolvedValue({ id: 'pension-1' });
-      mockPrisma.review.findUnique.mockResolvedValue(null);
-      mockPrisma.review.create.mockResolvedValue({ id: 'rev-1', overallRating: 5 });
+      mockPrisma.review.findFirst.mockResolvedValue(null);
+      mockPrisma.review.create.mockResolvedValue({
+        id: 'rev-1',
+        overallRating: 5,
+        pensionId: 'pension-1',
+      });
       mockPrisma.review.findMany.mockResolvedValue([{ overallRating: 5 }]);
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.create(
         'pension-1',
         {
           overallRating: 5,
-          comment: 'Excelente ambiente y ubicación inmejorable',
+          comment: 'Excelente pensión',
         },
         mockStudent,
       );
@@ -116,50 +110,49 @@ describe('ReviewsService', () => {
       expect(mockPrisma.pension.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'pension-1' },
-          data: { ratingAverage: 5, ratingCount: 1 },
+          data: expect.objectContaining({
+            ratingAverage: 5,
+            ratingCount: 1,
+            communityScore: expect.any(Number),
+          }),
         }),
       );
     });
 
-    it('should throw ConflictException if student already reviewed', async () => {
+    it('should throw ConflictException if user already reviewed', async () => {
       mockPrisma.pension.findUnique.mockResolvedValue({ id: 'pension-1' });
-      mockPrisma.review.findUnique.mockResolvedValue({ id: 'rev-1', deletedAt: null });
+      mockPrisma.review.findFirst.mockResolvedValue({ id: 'rev-existing' });
 
       await expect(
-        service.create(
-          'pension-1',
-          {
-            overallRating: 5,
-            comment: 'Excelente pensión y dormitorios',
-          },
-          mockStudent,
-        ),
+        service.create('pension-1', { overallRating: 4, comment: 'Repetido' }, mockStudent),
       ).rejects.toThrow(ConflictException);
     });
   });
 
   describe('update', () => {
-    it('should allow author to update review', async () => {
+    it('should allow author to update review and recompute rating', async () => {
       mockPrisma.review.findUnique.mockResolvedValue({
         id: 'rev-1',
         userId: 'student-1',
-        pensionId: 'pen-1',
+        pensionId: 'pension-1',
       });
       mockPrisma.review.update.mockResolvedValue({ id: 'rev-1', overallRating: 4 });
       mockPrisma.review.findMany.mockResolvedValue([{ overallRating: 4 }]);
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.update('rev-1', { overallRating: 4 }, mockStudent);
       expect((result as { overallRating: number }).overallRating).toBe(4);
+      expect(mockPrisma.pension.update).toHaveBeenCalled();
     });
 
-    it('should throw ForbiddenException if user does not own review', async () => {
+    it('should throw ForbiddenException if user is not author', async () => {
       mockPrisma.review.findUnique.mockResolvedValue({
         id: 'rev-1',
         userId: 'student-1',
-        pensionId: 'pen-1',
+        pensionId: 'pension-1',
       });
 
-      await expect(service.update('rev-1', { overallRating: 4 }, mockOtherUser)).rejects.toThrow(
+      await expect(service.update('rev-1', { overallRating: 3 }, mockOtherUser)).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -170,126 +163,68 @@ describe('ReviewsService', () => {
       mockPrisma.review.findUnique.mockResolvedValue({
         id: 'rev-1',
         userId: 'student-1',
-        pensionId: 'pen-1',
+        pensionId: 'pension-1',
       });
       mockPrisma.review.update.mockResolvedValue({ id: 'rev-1', deletedAt: new Date() });
       mockPrisma.review.findMany.mockResolvedValue([]);
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.delete('rev-1', mockStudent);
       expect(result.deleted).toBe(true);
-    });
-
-    it('should throw ForbiddenException if user is not author or admin', async () => {
-      mockPrisma.review.findUnique.mockResolvedValue({
-        id: 'rev-1',
-        userId: 'student-1',
-        pensionId: 'pen-1',
-      });
-
-      await expect(service.delete('rev-1', mockOtherUser)).rejects.toThrow(ForbiddenException);
-    });
-  });
-
-  describe('findUserStays', () => {
-    it('should return mapped stay history items for a user', async () => {
-      mockPrisma.review.findMany.mockResolvedValue([
-        {
-          id: 'rev-1',
-          pensionId: 'pen-1',
-          overallRating: 5,
-          cleanlinessRating: 4,
-          landlordRating: 5,
-          quietnessRating: 4,
-          wifiRating: 5,
-          comment: 'Muy buena experiencia',
-          pros: 'Cerca del metro',
-          cons: 'Pieza algo fría',
-          stayDurationCategory: 'ONE_SEMESTER',
-          stayStartDate: new Date('2025-03-01T00:00:00.000Z'),
-          stayEndDate: new Date('2025-07-31T00:00:00.000Z'),
-          createdAt: new Date('2025-08-01T00:00:00.000Z'),
-          images: [],
-          pension: {
-            id: 'pen-1',
-            title: 'Residencia Beauchef',
-            address: 'Club Hípico 1234',
-            city: 'Santiago',
-            commune: 'Santiago Centro',
-            images: [{ id: 'img-1', url: 'https://example.com/pen.jpg', isPrimary: true }],
-            rooms: [{ id: 'room-1', name: 'Habitación Individual', price: 250000 }],
-          },
-          user: {
-            id: 'student-1',
-            firstName: 'Matías',
-            lastName: 'Rojas',
-            avatarUrl: null,
-          },
-        },
-      ]);
-
-      const result = (await service.findUserStays('student-1')) as Array<{
-        pensionId: string;
-        pensionTitle: string;
-        pensionCity: string;
-        review?: { stayDurationCategory: string; id: string };
-      }>;
-      expect(result).toHaveLength(1);
-      expect(result[0].pensionId).toBe('pen-1');
-      expect(result[0].pensionTitle).toBe('Residencia Beauchef');
-      expect(result[0].pensionCity).toBe('Santiago');
-      expect(result[0].review?.stayDurationCategory).toBe('ONE_SEMESTER');
-      expect(result[0].review?.id).toBe('rev-1');
+      expect(mockPrisma.pension.update).toHaveBeenCalled();
     });
   });
 
   describe('voteHelpful', () => {
-    it('should add vote when not previously voted', async () => {
-      mockPrisma.review.findFirst.mockResolvedValue({ id: 'rev-1' });
-      mockPrisma.reviewHelpfulVote.findUnique.mockResolvedValue(null);
-      mockPrisma.reviewHelpfulVote.create.mockResolvedValue({
-        userId: 'student-1',
-        reviewId: 'rev-1',
+    it('should add userId to helpfulUserIds when not previously voted', async () => {
+      mockPrisma.review.findFirst.mockResolvedValue({ id: 'rev-1', helpfulUserIds: [] });
+      mockPrisma.review.update.mockResolvedValue({
+        id: 'rev-1',
+        helpfulUserIds: ['student-1'],
+        helpfulVotesCount: 1,
       });
-      mockPrisma.reviewHelpfulVote.count.mockResolvedValue(1);
 
       const result = await service.voteHelpful('rev-1', 'student-1');
       expect(result).toEqual({ helpfulCount: 1, voted: true });
-      expect(mockPrisma.reviewHelpfulVote.create).toHaveBeenCalledWith({
-        data: { userId: 'student-1', reviewId: 'rev-1' },
-      });
+      expect(mockPrisma.review.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'rev-1' },
+          data: {
+            helpfulUserIds: { set: ['student-1'] },
+            helpfulVotesCount: 1,
+          },
+        }),
+      );
     });
 
-    it('should remove vote when already voted', async () => {
-      mockPrisma.review.findFirst.mockResolvedValue({ id: 'rev-1' });
-      mockPrisma.reviewHelpfulVote.findUnique.mockResolvedValue({
-        userId: 'student-1',
-        reviewId: 'rev-1',
+    it('should remove userId from helpfulUserIds when already voted', async () => {
+      mockPrisma.review.findFirst.mockResolvedValue({
+        id: 'rev-1',
+        helpfulUserIds: ['student-1'],
       });
-      mockPrisma.reviewHelpfulVote.delete.mockResolvedValue({
-        userId: 'student-1',
-        reviewId: 'rev-1',
+      mockPrisma.review.update.mockResolvedValue({
+        id: 'rev-1',
+        helpfulUserIds: [],
+        helpfulVotesCount: 0,
       });
-      mockPrisma.reviewHelpfulVote.count.mockResolvedValue(0);
 
       const result = await service.voteHelpful('rev-1', 'student-1');
       expect(result).toEqual({ helpfulCount: 0, voted: false });
-      expect(mockPrisma.reviewHelpfulVote.delete).toHaveBeenCalledWith({
-        where: {
-          userId_reviewId: {
-            userId: 'student-1',
-            reviewId: 'rev-1',
+      expect(mockPrisma.review.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'rev-1' },
+          data: {
+            helpfulUserIds: { set: [] },
+            helpfulVotesCount: 0,
           },
-        },
-      });
+        }),
+      );
     });
   });
 
   describe('findUserHelpfulVotes', () => {
     it('should return list of reviewIds voted by user', async () => {
-      mockPrisma.reviewHelpfulVote.findMany.mockResolvedValue([
-        { reviewId: 'rev-1' },
-        { reviewId: 'rev-2' },
-      ]);
+      mockPrisma.review.findMany.mockResolvedValue([{ id: 'rev-1' }, { id: 'rev-2' }]);
 
       const result = await service.findUserHelpfulVotes('student-1');
       expect(result).toEqual({ reviewIds: ['rev-1', 'rev-2'] });

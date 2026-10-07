@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ReportReason } from '@prisma/client';
-import { IsEnum, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateReportDto {
-  @ApiProperty({ example: '00000000-0000-0000-0000-000000000000' })
-  @IsUUID()
+  @ApiProperty({ example: '6659f8c123456789abcdef01' })
+  @IsString()
   pensionId!: string;
 
   @ApiProperty({ enum: ReportReason, example: ReportReason.INACCURATE_PRICE })

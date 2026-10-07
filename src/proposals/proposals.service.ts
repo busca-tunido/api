@@ -123,11 +123,7 @@ export class ProposalsService {
     const proposal = await this.prisma.pensionProposal.findUnique({
       where: { id },
       include: {
-        pension: {
-          include: {
-            amenities: { select: { slug: true, name: true, category: true } },
-          },
-        },
+        pension: true,
         submittedBy: {
           select: {
             id: true,
@@ -228,17 +224,18 @@ export class ProposalsService {
       };
 
       if (Array.isArray(amenitiesToAdd) || Array.isArray(amenitiesToRemove)) {
-        const connect = Array.isArray(amenitiesToAdd)
-          ? (amenitiesToAdd as string[]).map((s) => ({ slug: s }))
-          : undefined;
-        const disconnect = Array.isArray(amenitiesToRemove)
-          ? (amenitiesToRemove as string[]).map((s) => ({ slug: s }))
-          : undefined;
-
-        updateData.amenities = {
-          connect,
-          disconnect,
-        };
+        const currentPension = await tx.pension.findUnique({
+          where: { id: proposal.pensionId },
+          select: { amenities: true },
+        });
+        const currentSet = new Set(currentPension?.amenities || []);
+        if (Array.isArray(amenitiesToAdd)) {
+          for (const a of amenitiesToAdd as string[]) currentSet.add(a);
+        }
+        if (Array.isArray(amenitiesToRemove)) {
+          for (const r of amenitiesToRemove as string[]) currentSet.delete(r);
+        }
+        updateData.amenities = Array.from(currentSet);
       }
 
       await tx.pension.update({

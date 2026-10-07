@@ -4,14 +4,13 @@ import type { PrismaService } from '../prisma/prisma.service.js';
 import { FavoritesService } from './favorites.service.js';
 
 type MockPrismaService = {
-  favorite: {
-    findMany: ReturnType<typeof vi.fn>;
+  user: {
     findUnique: ReturnType<typeof vi.fn>;
-    create: ReturnType<typeof vi.fn>;
-    delete: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
   };
   pension: {
     findUnique: ReturnType<typeof vi.fn>;
+    findMany: ReturnType<typeof vi.fn>;
   };
 };
 
@@ -21,14 +20,13 @@ describe('FavoritesService', () => {
 
   beforeEach(() => {
     mockPrisma = {
-      favorite: {
-        findMany: vi.fn(),
+      user: {
         findUnique: vi.fn(),
-        create: vi.fn(),
-        delete: vi.fn(),
+        update: vi.fn(),
       },
       pension: {
         findUnique: vi.fn(),
+        findMany: vi.fn(),
       },
     };
 
@@ -36,43 +34,73 @@ describe('FavoritesService', () => {
   });
 
   it('should return user favorites strictly isolated by userId', async () => {
-    mockPrisma.favorite.findMany.mockResolvedValue([{ pensionId: 'pen-1', userId: 'user-1' }]);
+    mockPrisma.user.findUnique.mockResolvedValue({
+      favoritePensionIds: ['pen-1'],
+    });
+    mockPrisma.pension.findMany.mockResolvedValue([
+      {
+        id: 'pen-1',
+        slug: 'pension-1',
+        title: 'Pensión San Joaquín',
+        city: 'Santiago',
+        neighborhood: 'San Joaquín',
+        baseMonthlyPrice: 250000,
+        ratingAverage: 4.5,
+        ratingCount: 10,
+        images: [],
+        createdAt: new Date(),
+      },
+    ]);
 
     const result = await service.findAllByUser('user-1');
     expect(result).toHaveLength(1);
-    expect(mockPrisma.favorite.findMany).toHaveBeenCalledWith(
+    expect(mockPrisma.pension.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { userId: 'user-1' },
+        where: expect.objectContaining({
+          id: { in: ['pen-1'] },
+        }),
       }),
     );
   });
 
   it('should add pension to favorites', async () => {
     mockPrisma.pension.findUnique.mockResolvedValue({ id: 'pen-1' });
-    mockPrisma.favorite.findUnique.mockResolvedValue(null);
-    mockPrisma.favorite.create.mockResolvedValue({ pensionId: 'pen-1', userId: 'user-1' });
+    mockPrisma.user.findUnique.mockResolvedValue({ favoritePensionIds: [] });
+    mockPrisma.user.update.mockResolvedValue({ id: 'user-1' });
 
     const result = await service.addFavorite('user-1', 'pen-1');
     expect(result.added).toBe(true);
+    expect(mockPrisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'user-1' },
+        data: { favoritePensionIds: { push: 'pen-1' } },
+      }),
+    );
   });
 
   it('should throw ConflictException if already favorited', async () => {
     mockPrisma.pension.findUnique.mockResolvedValue({ id: 'pen-1' });
-    mockPrisma.favorite.findUnique.mockResolvedValue({ pensionId: 'pen-1', userId: 'user-1' });
+    mockPrisma.user.findUnique.mockResolvedValue({ favoritePensionIds: ['pen-1'] });
 
     await expect(service.addFavorite('user-1', 'pen-1')).rejects.toThrow(ConflictException);
   });
 
   it('should remove pension from favorites', async () => {
-    mockPrisma.favorite.findUnique.mockResolvedValue({ pensionId: 'pen-1', userId: 'user-1' });
-    mockPrisma.favorite.delete.mockResolvedValue({ pensionId: 'pen-1', userId: 'user-1' });
+    mockPrisma.user.findUnique.mockResolvedValue({ favoritePensionIds: ['pen-1'] });
+    mockPrisma.user.update.mockResolvedValue({ id: 'user-1' });
 
     const result = await service.removeFavorite('user-1', 'pen-1');
     expect(result.removed).toBe(true);
+    expect(mockPrisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'user-1' },
+        data: { favoritePensionIds: { set: [] } },
+      }),
+    );
   });
 
   it('should throw NotFoundException when removing non-existent favorite', async () => {
-    mockPrisma.favorite.findUnique.mockResolvedValue(null);
+    mockPrisma.user.findUnique.mockResolvedValue({ favoritePensionIds: [] });
 
     await expect(service.removeFavorite('user-1', 'pen-1')).rejects.toThrow(NotFoundException);
   });

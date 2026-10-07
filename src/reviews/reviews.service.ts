@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Role } from '@prisma/client';
+import { type Prisma, Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateReviewDto } from './dto/create-review.dto.js';
@@ -25,6 +25,38 @@ export interface PaginatedReviews<T = unknown> {
   limit: number;
   totalPages: number;
   hasMore: boolean;
+}
+
+interface EmbeddedPensionImageRaw {
+  id: string;
+  url: string;
+  thumbnailUrl: string;
+  caption?: string | null;
+  isFeatured?: boolean;
+  sortOrder?: number;
+}
+
+interface EmbeddedRoomRaw {
+  id: string;
+  roomNumber?: string | null;
+  title: string;
+  type: string;
+  monthlyPrice: number;
+  deposit?: number | null;
+  hasPrivateBathroom: boolean;
+  totalBeds: number;
+  availableBeds: number;
+  isAvailable: boolean;
+  images: string[];
+}
+
+interface PensionStayRaw {
+  id: string;
+  title: string;
+  city: string;
+  baseMonthlyPrice: number;
+  images?: EmbeddedPensionImageRaw[];
+  rooms?: EmbeddedRoomRaw[];
 }
 
 @Injectable()
@@ -77,22 +109,15 @@ export class ReviewsService {
               },
             },
           },
-          _count: {
-            select: {
-              helpfulVotes: true,
-            },
-          },
         },
       }),
     ]);
 
     const mappedItems = items.map((review) => {
-      const reviewWithCount = review as typeof review & {
-        _count?: { helpfulVotes?: number };
-      };
+      const helpfulVotes = review.helpfulUserIds || [];
       return {
         ...review,
-        helpfulCount: reviewWithCount._count?.helpfulVotes ?? 0,
+        helpfulCount: helpfulVotes.length,
       };
     });
 
@@ -124,18 +149,7 @@ export class ReviewsService {
       },
       orderBy: { createdAt: 'desc' },
       include: {
-        pension: {
-          include: {
-            images: {
-              where: { deletedAt: null },
-              orderBy: { sortOrder: 'asc' },
-            },
-            rooms: {
-              where: { deletedAt: null },
-              orderBy: { monthlyPrice: 'asc' },
-            },
-          },
-        },
+        pension: true,
         user: {
           select: {
             id: true,
@@ -154,21 +168,19 @@ export class ReviewsService {
     });
 
     return reviews.map((review) => {
-      const pension = review.pension;
+      const pension = review.pension as unknown as PensionStayRaw;
+      const images = pension.images || [];
       const featuredImage =
-        pension.images.find((img) => img.isFeatured)?.url ||
-        pension.images[0]?.url ||
-        review.images[0] ||
-        null;
+        images.find((img) => img.isFeatured)?.url || images[0]?.url || review.images[0] || null;
 
-      const firstRoom = pension.rooms[0];
+      const rooms = pension.rooms || [];
+      const firstRoom = rooms[0];
       const roomTitle = firstRoom?.title || pension.title;
       const monthlyPaidClp = firstRoom?.monthlyPrice
         ? Number(firstRoom.monthlyPrice)
         : Number(pension.baseMonthlyPrice) || 0;
 
-      const startDateStr = review.stayStartDate ? review.stayStartDate.toISOString() : null;
-      const endDateStr = review.stayEndDate ? review.stayEndDate.toISOString() : null;
+      const stayDurationCategory = review.stayDurationCategory ?? undefined;
 
       return {
         id: `stay-${review.id}`,
@@ -176,8 +188,7 @@ export class ReviewsService {
         pensionTitle: pension.title,
         pensionCity: pension.city,
         roomTitle,
-        startDate: startDateStr,
-        endDate: endDateStr,
+        stayDurationCategory,
         ratingGiven: review.overallRating,
         hasReview: true,
         monthlyPaidClp,
@@ -191,22 +202,24 @@ export class ReviewsService {
           quietnessRating: review.quietnessRating ?? undefined,
           wifiRating: review.wifiRating ?? undefined,
           comment: review.comment,
-          stayDurationCategory: review.stayDurationCategory ?? undefined,
+          stayDurationCategory,
           isResidentVerified: review.isResidentVerified,
           images: review.images.map((url, idx) => ({ id: `rev-img-${idx}`, url })),
           createdAt: review.createdAt.toISOString(),
-          user: {
-            id: review.user.id,
-            firstName: review.user.firstName,
-            lastName: review.user.lastName,
-            avatarUrl: review.user.avatarUrl ?? undefined,
-            university: review.user.university
-              ? {
-                  shortName: review.user.university.shortName ?? '',
-                  name: review.user.university.name,
-                }
-              : undefined,
-          },
+          user: review.user
+            ? {
+                id: review.user.id,
+                firstName: review.user.firstName,
+                lastName: review.user.lastName,
+                avatarUrl: review.user.avatarUrl ?? undefined,
+                university: review.user.university
+                  ? {
+                      shortName: review.user.university.shortName ?? '',
+                      name: review.user.university.name,
+                    }
+                  : undefined,
+              }
+            : undefined,
         },
       };
     });
@@ -221,16 +234,15 @@ export class ReviewsService {
       throw new NotFoundException(`Pension '${pensionId}' not found`);
     }
 
-    const existing = await this.prisma.review.findUnique({
+    const existing = await this.prisma.review.findFirst({
       where: {
-        pensionId_userId: {
-          pensionId,
-          userId: user.id,
-        },
+        pensionId,
+        userId: user.id,
+        deletedAt: null,
       },
     });
 
-    if (existing && !existing.deletedAt) {
+    if (existing) {
       throw new ConflictException('Ya has publicado una reseña para esta pensión');
     }
 
@@ -239,7 +251,9 @@ export class ReviewsService {
         ...dto,
         pensionId,
         userId: user.id,
-        isResidentVerified: user.isEmailVerified,
+        isVerifiedResident: user.isEmailVerified,
+        helpfulUserIds: [],
+        helpfulVotesCount: 0,
       },
     });
 
@@ -305,23 +319,30 @@ export class ReviewsService {
     });
 
     const count = reviews.length;
-    const average =
-      count === 0
-        ? 0
-        : Number(
-            (
-              reviews.reduce(
-                (acc: number, r: { overallRating: number }) => acc + r.overallRating,
-                0,
-              ) / count
-            ).toFixed(2),
-          );
+    let average = 0;
+    let communityScore = 0;
+
+    if (count > 0) {
+      const sum = reviews.reduce(
+        (acc: number, r: { overallRating: number }) => acc + r.overallRating,
+        0,
+      );
+      average = Number((sum / count).toFixed(2));
+
+      const priorWeight = 3;
+      const priorMean = 3.5;
+      const bayesianRating =
+        (count / (count + priorWeight)) * average +
+        (priorWeight / (count + priorWeight)) * priorMean;
+      communityScore = Math.round((bayesianRating / 5.0) * 1000) / 10;
+    }
 
     await this.prisma.pension.update({
       where: { id: pensionId },
       data: {
         ratingAverage: average,
         ratingCount: count,
+        communityScore,
       },
     });
   }
@@ -333,63 +354,44 @@ export class ReviewsService {
         deletedAt: null,
         isHidden: false,
       },
-      select: { id: true },
+      select: { id: true, helpfulUserIds: true },
     });
 
     if (!review) {
       throw new NotFoundException(`Review with id '${id}' not found`);
     }
 
-    const existingVote = await this.prisma.reviewHelpfulVote.findUnique({
-      where: {
-        userId_reviewId: {
-          userId,
-          reviewId: id,
-        },
-      },
-    });
+    const currentHelpful = review.helpfulUserIds || [];
+    const hasVoted = currentHelpful.includes(userId);
+    const updatedHelpful = hasVoted
+      ? currentHelpful.filter((uid) => uid !== userId)
+      : [...currentHelpful, userId];
 
-    let voted: boolean;
-    if (existingVote) {
-      await this.prisma.reviewHelpfulVote.delete({
-        where: {
-          userId_reviewId: {
-            userId,
-            reviewId: id,
-          },
-        },
-      });
-      voted = false;
-    } else {
-      await this.prisma.reviewHelpfulVote.create({
-        data: {
-          userId,
-          reviewId: id,
-        },
-      });
-      voted = true;
-    }
-
-    const helpfulCount = await this.prisma.reviewHelpfulVote.count({
-      where: {
-        reviewId: id,
+    await this.prisma.review.update({
+      where: { id },
+      data: {
+        helpfulUserIds: { set: updatedHelpful },
+        helpfulVotesCount: updatedHelpful.length,
       },
     });
 
     return {
-      helpfulCount,
-      voted,
+      helpfulCount: updatedHelpful.length,
+      voted: !hasVoted,
     };
   }
 
   async findUserHelpfulVotes(userId: string): Promise<{ reviewIds: string[] }> {
-    const votes = await this.prisma.reviewHelpfulVote.findMany({
-      where: { userId },
-      select: { reviewId: true },
+    const reviews = await this.prisma.review.findMany({
+      where: {
+        helpfulUserIds: { has: userId },
+        deletedAt: null,
+      },
+      select: { id: true },
     });
 
     return {
-      reviewIds: votes.map((v) => v.reviewId),
+      reviewIds: reviews.map((r) => r.id),
     };
   }
 }
