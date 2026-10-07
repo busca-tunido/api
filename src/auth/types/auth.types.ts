@@ -37,4 +37,3 @@ export type CheckEmailResponse = {
   role?: Role;
   detectedUniversity?: DetectedUniversityDto | null;
 };
-

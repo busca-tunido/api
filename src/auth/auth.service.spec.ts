@@ -144,7 +144,9 @@ describe('AuthService', () => {
       });
 
       expect(result.user.universityId).toBe('uni-uchile');
-      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('estudiante@uchile.cl');
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith(
+        'estudiante@uchile.cl',
+      );
     });
 
     it('should throw BadRequestException if student email domain is not registered', async () => {
@@ -397,7 +399,9 @@ describe('AuthService', () => {
           city: 'Santiago',
         },
       });
-      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('nuevo.estudiante@uchile.cl');
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith(
+        'nuevo.estudiante@uchile.cl',
+      );
     });
 
     it('should return exists: false and detectedUniversity: null when domain is unrecognized', async () => {
@@ -409,7 +413,9 @@ describe('AuthService', () => {
         exists: false,
         detectedUniversity: null,
       });
-      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('unregistered@gmail.com');
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith(
+        'unregistered@gmail.com',
+      );
     });
 
     it('should return exists: false when user is deactivated/deleted and resolve domain', async () => {

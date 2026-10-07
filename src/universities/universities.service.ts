@@ -44,7 +44,6 @@ export class UniversitiesService {
     });
   }
 
-
   async findAll(city?: string): Promise<unknown[]> {
     const where: Prisma.UniversityWhereInput = {
       deletedAt: null,
