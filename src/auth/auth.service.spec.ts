@@ -9,6 +9,7 @@ import { Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../prisma/prisma.service.js';
+import type { UniversitiesService } from '../universities/universities.service.js';
 import { AuthService } from './auth.service.js';
 
 type MockPrismaService = {
@@ -25,10 +26,15 @@ type MockJwtService = {
   sign: ReturnType<typeof vi.fn>;
 };
 
+type MockUniversitiesService = {
+  findByEmailDomain: ReturnType<typeof vi.fn>;
+};
+
 describe('AuthService', () => {
   let service: AuthService;
   let mockPrisma: MockPrismaService;
   let mockJwtService: MockJwtService;
+  let mockUniversitiesService: MockUniversitiesService;
 
   beforeEach(() => {
     mockPrisma = {
@@ -45,15 +51,27 @@ describe('AuthService', () => {
       sign: vi.fn().mockReturnValue('mock-jwt-token'),
     };
 
+    mockUniversitiesService = {
+      findByEmailDomain: vi.fn(),
+    };
+
     service = new AuthService(
       mockPrisma as unknown as PrismaService,
       mockJwtService as unknown as JwtService,
+      mockUniversitiesService as unknown as UniversitiesService,
     );
   });
 
   describe('register', () => {
     it('should register a new user successfully', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockUniversitiesService.findByEmailDomain.mockResolvedValue({
+        id: 'uni-1',
+        name: 'Universidad de Chile',
+        shortName: 'UCH',
+        city: 'Santiago',
+        address: 'Av. Libertador Bernardo O Higgins 1058',
+      });
       const createdUser = {
         id: 'user-1',
         email: 'test@uchile.cl',
@@ -63,7 +81,7 @@ describe('AuthService', () => {
         avatarUrl: null,
         role: Role.STUDENT,
         isEmailVerified: false,
-        universityId: null,
+        universityId: 'uni-1',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -83,7 +101,97 @@ describe('AuthService', () => {
         email: 'test@uchile.cl',
         role: Role.STUDENT,
       });
-      expect(mockPrisma.user.create).toHaveBeenCalled();
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('test@uchile.cl');
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          email: 'test@uchile.cl',
+          role: Role.STUDENT,
+          universityId: 'uni-1',
+        }),
+        select: expect.any(Object),
+      });
+    });
+
+    it('should automatically bind universityId when registering student with valid domain', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockUniversitiesService.findByEmailDomain.mockResolvedValue({
+        id: 'uni-uchile',
+        name: 'Universidad de Chile',
+        shortName: 'UCH',
+        city: 'Santiago',
+        address: 'Av. Libertador Bernardo O Higgins 1058',
+      });
+      const createdUser = {
+        id: 'student-1',
+        email: 'estudiante@uchile.cl',
+        firstName: 'Estudiante',
+        lastName: 'Prueba',
+        phone: null,
+        avatarUrl: null,
+        role: Role.STUDENT,
+        isEmailVerified: false,
+        universityId: 'uni-uchile',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrisma.user.create.mockResolvedValue(createdUser);
+
+      const result = await service.register({
+        email: 'estudiante@uchile.cl',
+        password: 'password123',
+        firstName: 'Estudiante',
+        lastName: 'Prueba',
+      });
+
+      expect(result.user.universityId).toBe('uni-uchile');
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('estudiante@uchile.cl');
+    });
+
+    it('should throw BadRequestException if student email domain is not registered', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockUniversitiesService.findByEmailDomain.mockResolvedValue(null);
+
+      await expect(
+        service.register({
+          email: 'user@unknown.com',
+          password: 'password123',
+          firstName: 'User',
+          lastName: 'Unknown',
+        }),
+      ).rejects.toThrow(
+        new BadRequestException(
+          'El correo institucional no pertenece a una universidad registrada en BuscaTuNido.',
+        ),
+      );
+    });
+
+    it('should register landlord without enforcing institutional email domain', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      const createdUser = {
+        id: 'landlord-1',
+        email: 'owner@gmail.com',
+        firstName: 'Land',
+        lastName: 'Lord',
+        phone: null,
+        avatarUrl: null,
+        role: Role.LANDLORD,
+        isEmailVerified: false,
+        universityId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrisma.user.create.mockResolvedValue(createdUser);
+
+      const result = await service.register({
+        email: 'owner@gmail.com',
+        password: 'password123',
+        firstName: 'Land',
+        lastName: 'Lord',
+        role: Role.LANDLORD,
+      });
+
+      expect(result.user.role).toBe(Role.LANDLORD);
+      expect(mockUniversitiesService.findByEmailDomain).not.toHaveBeenCalled();
     });
 
     it('should throw ConflictException if email is already taken', async () => {
@@ -266,28 +374,55 @@ describe('AuthService', () => {
         where: { email: 'estudiante.demo@uchile.cl' },
         select: { id: true, deletedAt: true },
       });
+      expect(mockUniversitiesService.findByEmailDomain).not.toHaveBeenCalled();
     });
 
-    it('should return exists: false when email is not found', async () => {
+    it('should return exists: false with detectedUniversity when email is not found but domain matches', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-
-      const result = await service.checkEmail('unregistered@uchile.cl');
-      expect(result).toEqual({ exists: false });
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'unregistered@uchile.cl' },
-        select: { id: true, deletedAt: true },
+      mockUniversitiesService.findByEmailDomain.mockResolvedValue({
+        id: 'uni-1',
+        name: 'Universidad de Chile',
+        shortName: 'UCH',
+        city: 'Santiago',
+        address: 'Av. Libertador Bernardo O Higgins 1058',
       });
+
+      const result = await service.checkEmail('nuevo.estudiante@uchile.cl');
+      expect(result).toEqual({
+        exists: false,
+        detectedUniversity: {
+          id: 'uni-1',
+          name: 'Universidad de Chile',
+          shortName: 'UCH',
+          city: 'Santiago',
+        },
+      });
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('nuevo.estudiante@uchile.cl');
     });
 
-    it('should return exists: false when user is deactivated/deleted', async () => {
+    it('should return exists: false and detectedUniversity: null when domain is unrecognized', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockUniversitiesService.findByEmailDomain.mockResolvedValue(null);
+
+      const result = await service.checkEmail('unregistered@gmail.com');
+      expect(result).toEqual({
+        exists: false,
+        detectedUniversity: null,
+      });
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('unregistered@gmail.com');
+    });
+
+    it('should return exists: false when user is deactivated/deleted and resolve domain', async () => {
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         role: Role.STUDENT,
         deletedAt: new Date(),
       });
+      mockUniversitiesService.findByEmailDomain.mockResolvedValue(null);
 
       const result = await service.checkEmail('deleted@uchile.cl');
-      expect(result).toEqual({ exists: false });
+      expect(result).toEqual({ exists: false, detectedUniversity: null });
+      expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('deleted@uchile.cl');
     });
   });
 });

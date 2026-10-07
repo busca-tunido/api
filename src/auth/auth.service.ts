@@ -9,11 +9,13 @@ import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { UniversitiesService } from '../universities/universities.service.js';
 import type { LoginDto } from './dto/login.dto.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import type {
   AuthResponse,
   CheckEmailResponse,
+  DetectedUniversityDto,
   JwtPayload,
   SanitizedUser,
 } from './types/auth.types.js';
@@ -23,6 +25,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly universitiesService: UniversitiesService,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
@@ -38,13 +41,25 @@ export class AuthService {
       throw new ConflictException('An account with this email already exists');
     }
 
-    if (dto.universityId) {
+    const targetRole = dto.role || Role.STUDENT;
+    let universityId: string | null = null;
+
+    if (targetRole === Role.STUDENT) {
+      const detectedUniversity = await this.universitiesService.findByEmailDomain(dto.email);
+      if (!detectedUniversity) {
+        throw new BadRequestException(
+          'El correo institucional no pertenece a una universidad registrada en BuscaTuNido.',
+        );
+      }
+      universityId = detectedUniversity.id;
+    } else if (dto.universityId) {
       const university = await this.prisma.university.findUnique({
         where: { id: dto.universityId, deletedAt: null },
       });
       if (!university) {
         throw new NotFoundException('University not found');
       }
+      universityId = dto.universityId;
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -57,8 +72,8 @@ export class AuthService {
         firstName: dto.firstName.trim(),
         lastName: dto.lastName.trim(),
         phone: dto.phone?.trim() || null,
-        role: dto.role || Role.STUDENT,
-        universityId: dto.universityId || null,
+        role: targetRole,
+        universityId,
       },
       select: {
         id: true,
@@ -151,7 +166,20 @@ export class AuthService {
     });
 
     if (!user || user.deletedAt !== null) {
-      return { exists: false };
+      const detected = await this.universitiesService.findByEmailDomain(normalizedEmail);
+      const detectedUniversity: DetectedUniversityDto | null = detected
+        ? {
+            id: detected.id,
+            name: detected.name,
+            shortName: detected.shortName,
+            city: detected.city,
+          }
+        : null;
+
+      return {
+        exists: false,
+        detectedUniversity,
+      };
     }
 
     return {

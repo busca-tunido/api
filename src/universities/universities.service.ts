@@ -4,9 +4,46 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateUniversityDto } from './dto/create-university.dto.js';
 import type { UpdateUniversityDto } from './dto/update-university.dto.js';
 
+export type UniversityDomainMatch = {
+  id: string;
+  name: string;
+  shortName: string | null;
+  city: string;
+  address: string;
+};
+
 @Injectable()
 export class UniversitiesService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findByEmailDomain(email: string): Promise<UniversityDomainMatch | null> {
+    const parts = email.toLowerCase().trim().split('@');
+    const fullDomain = parts.length === 2 ? parts[1] : '';
+    if (!fullDomain) {
+      return null;
+    }
+
+    const candidateDomains = [fullDomain];
+    const domainSegments = fullDomain.split('.');
+    if (domainSegments.length > 2) {
+      candidateDomains.push(domainSegments.slice(1).join('.'));
+    }
+
+    return this.prisma.university.findFirst({
+      where: {
+        deletedAt: null,
+        emailDomains: { hasSome: candidateDomains },
+      },
+      select: {
+        id: true,
+        name: true,
+        shortName: true,
+        city: true,
+        address: true,
+      },
+    });
+  }
+
 
   async findAll(city?: string): Promise<unknown[]> {
     const where: Prisma.UniversityWhereInput = {

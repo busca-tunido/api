@@ -57,8 +57,10 @@ export class AuthController {
   }
 
   @Get('check-email')
-  @ApiOperation({ summary: 'Check if an email address is already registered' })
-  @ApiResponse({ status: 200, description: 'Check email status returned' })
+  @ApiOperation({
+    summary: 'Check if an email address is already registered and auto-detect university',
+  })
+  @ApiResponse({ status: 200, description: 'Check email status and detected university returned' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async checkEmail(
     @Query() query: CheckEmailDto,
