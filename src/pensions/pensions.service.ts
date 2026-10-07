@@ -34,8 +34,8 @@ export type PriceHistogramBin = {
 };
 
 export type PriceHistogram = {
-  minPrice: number;
-  maxPrice: number;
+  minPrice: number | null;
+  maxPrice: number | null;
   currency: string;
   totalListings: number;
   bins: PriceHistogramBin[];
@@ -154,12 +154,10 @@ export class PensionsService {
               },
             },
             { slug: { contains: 'comida', mode: 'insensitive' } },
-            { slug: { contains: 'pension', mode: 'insensitive' } },
             { slug: { contains: 'alimento', mode: 'insensitive' } },
             { slug: { contains: 'desayuno', mode: 'insensitive' } },
             { slug: { contains: 'almuerzo', mode: 'insensitive' } },
             { name: { contains: 'comida', mode: 'insensitive' } },
-            { name: { contains: 'pensión', mode: 'insensitive' } },
             { name: { contains: 'alimentación', mode: 'insensitive' } },
             { name: { contains: 'desayuno', mode: 'insensitive' } },
             { name: { contains: 'almuerzo', mode: 'insensitive' } },
@@ -183,18 +181,8 @@ export class PensionsService {
     }
 
     if (filter.search) {
-      const searchTerms = [filter.search];
-      if (/uchile/i.test(filter.search)) {
-        searchTerms.push('Universidad de Chile');
-      }
-      if (/\b(uc|puc|pucch)\b/i.test(filter.search)) {
-        searchTerms.push('Catolica');
-      }
-      if (/\b(usm|utfsm)\b/i.test(filter.search)) {
-        searchTerms.push('Santa María');
-      }
-
-      where.OR = searchTerms.flatMap((term) => [
+      const term = filter.search.trim();
+      where.OR = [
         { title: { contains: term, mode: 'insensitive' } },
         { description: { contains: term, mode: 'insensitive' } },
         { neighborhood: { contains: term, mode: 'insensitive' } },
@@ -211,7 +199,7 @@ export class PensionsService {
             },
           },
         },
-      ]);
+      ];
     }
 
     const hasBounds =
@@ -522,8 +510,8 @@ export class PensionsService {
 
       if (prices.length === 0) {
         return {
-          minPrice: 100000,
-          maxPrice: 600000,
+          minPrice: null,
+          maxPrice: null,
           currency: 'CLP',
           totalListings: 0,
           bins: [],
@@ -557,8 +545,8 @@ export class PensionsService {
       aggregate._max.baseMonthlyPrice === null
     ) {
       return {
-        minPrice: 100000,
-        maxPrice: 600000,
+        minPrice: null,
+        maxPrice: null,
         currency: 'CLP',
         totalListings: 0,
         bins: [],
@@ -683,6 +671,33 @@ export class PensionsService {
 
     const { amenitySlugs, nearbyUniversityId, distanceMeters, ...pensionData } = dto;
 
+    let computedDistanceMeters = distanceMeters;
+    let computedWalkingMinutes: number | null =
+      typeof distanceMeters === 'number' ? Math.round(distanceMeters / 80) : null;
+
+    if (nearbyUniversityId && computedDistanceMeters === undefined) {
+      const uni = await this.prisma.university.findUnique({
+        where: { id: nearbyUniversityId },
+        select: { latitude: true, longitude: true },
+      });
+      if (
+        uni &&
+        typeof uni.latitude === 'number' &&
+        typeof uni.longitude === 'number' &&
+        typeof dto.latitude === 'number' &&
+        typeof dto.longitude === 'number'
+      ) {
+        const distanceKm = calculateHaversineDistanceKm(
+          dto.latitude,
+          dto.longitude,
+          uni.latitude,
+          uni.longitude,
+        );
+        computedDistanceMeters = Math.round(distanceKm * 1000);
+        computedWalkingMinutes = Math.round(computedDistanceMeters / 80);
+      }
+    }
+
     return this.prisma.pension.create({
       data: {
         ...pensionData,
@@ -695,15 +710,16 @@ export class PensionsService {
                 connect: amenitySlugs.map((s) => ({ slug: s })),
               }
             : undefined,
-        nearbyUniversities: nearbyUniversityId
-          ? {
-              create: {
-                universityId: nearbyUniversityId,
-                distanceMeters: distanceMeters || 1000,
-                walkingMinutes: Math.round((distanceMeters || 1000) / 80),
-              },
-            }
-          : undefined,
+        nearbyUniversities:
+          nearbyUniversityId && typeof computedDistanceMeters === 'number'
+            ? {
+                create: {
+                  universityId: nearbyUniversityId,
+                  distanceMeters: computedDistanceMeters,
+                  walkingMinutes: computedWalkingMinutes,
+                },
+              }
+            : undefined,
       },
       include: {
         amenities: true,

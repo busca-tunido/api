@@ -65,9 +65,10 @@ const envSchema = z
     PUBLIC_AWS_ENDPOINT_URL_S3: z.string().trim().optional(),
     AWS_ACCESS_KEY_ID: z.string().trim().optional(),
     AWS_SECRET_ACCESS_KEY: z.string().trim().optional(),
-    PUBLIC_AWS_REGION: z.string().trim().optional(),
-    PUBLIC_STORAGE_BUCKET: z.string().trim().optional(),
+    PUBLIC_AWS_REGION: z.string().trim().default('us-east-2'),
+    PUBLIC_STORAGE_BUCKET: z.string().trim().default('uploads'),
     PUBLIC_NEON_STORAGE_BASE_URL: z.string().trim().optional(),
+    TURNSTILE_SECRET_KEY: z.string().trim().default('1x0000000000000000000000000000000AA'),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production') {
@@ -113,6 +114,16 @@ const envSchema = z
           path: ['JWT_SECRET'],
         });
       }
+      if (
+        !data.TURNSTILE_SECRET_KEY ||
+        data.TURNSTILE_SECRET_KEY === '1x0000000000000000000000000000000AA'
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'TURNSTILE_SECRET_KEY must be a valid production key in production.',
+          path: ['TURNSTILE_SECRET_KEY'],
+        });
+      }
     }
   });
 
@@ -131,15 +142,16 @@ export type EnvironmentConfig = {
   readonly PUBLIC_MODERATOR_FIRST_NAME?: string;
   readonly PUBLIC_MODERATOR_LAST_NAME?: string;
   readonly PUBLIC_AWS_ENDPOINT_URL_S3?: string;
-  readonly PUBLIC_AWS_REGION?: string;
-  readonly PUBLIC_STORAGE_BUCKET?: string;
+  readonly PUBLIC_AWS_REGION: string;
+  readonly PUBLIC_STORAGE_BUCKET: string;
   readonly PUBLIC_NEON_STORAGE_BASE_URL?: string;
   readonly AWS_ENDPOINT_URL_S3?: string;
   readonly AWS_ACCESS_KEY_ID?: string;
   readonly AWS_SECRET_ACCESS_KEY?: string;
-  readonly AWS_REGION?: string;
-  readonly STORAGE_BUCKET?: string;
+  readonly AWS_REGION: string;
+  readonly STORAGE_BUCKET: string;
   readonly NEON_STORAGE_PUBLIC_BASE_URL?: string;
+  readonly TURNSTILE_SECRET_KEY: string;
 };
 
 export type Env = EnvironmentConfig;
@@ -163,10 +175,11 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     PUBLIC_AWS_ENDPOINT_URL_S3: config.PUBLIC_AWS_ENDPOINT_URL_S3 || config.AWS_ENDPOINT_URL_S3,
     AWS_ACCESS_KEY_ID: config.AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY: config.AWS_SECRET_ACCESS_KEY,
-    PUBLIC_AWS_REGION: config.PUBLIC_AWS_REGION || config.AWS_REGION,
-    PUBLIC_STORAGE_BUCKET: config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET,
+    PUBLIC_AWS_REGION: config.PUBLIC_AWS_REGION || config.AWS_REGION || undefined,
+    PUBLIC_STORAGE_BUCKET: config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET || undefined,
     PUBLIC_NEON_STORAGE_BASE_URL:
       config.PUBLIC_NEON_STORAGE_BASE_URL || config.NEON_STORAGE_PUBLIC_BASE_URL,
+    TURNSTILE_SECRET_KEY: config.TURNSTILE_SECRET_KEY,
   };
 
   const result = envSchema.safeParse(normalized);
@@ -184,8 +197,8 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
   const awsEndpointUrlS3 = data.PUBLIC_AWS_ENDPOINT_URL_S3 || undefined;
   const awsAccessKeyId = data.AWS_ACCESS_KEY_ID || undefined;
   const awsSecretAccessKey = data.AWS_SECRET_ACCESS_KEY || undefined;
-  const awsRegion = data.PUBLIC_AWS_REGION || undefined;
-  const storageBucket = data.PUBLIC_STORAGE_BUCKET || undefined;
+  const awsRegion = data.PUBLIC_AWS_REGION;
+  const storageBucket = data.PUBLIC_STORAGE_BUCKET;
   const publicBaseUrl = data.PUBLIC_NEON_STORAGE_BASE_URL || undefined;
 
   return Object.freeze({
@@ -212,6 +225,7 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     STORAGE_BUCKET: storageBucket,
     PUBLIC_NEON_STORAGE_BASE_URL: publicBaseUrl,
     NEON_STORAGE_PUBLIC_BASE_URL: publicBaseUrl,
+    TURNSTILE_SECRET_KEY: data.TURNSTILE_SECRET_KEY,
   });
 };
 

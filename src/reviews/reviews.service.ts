@@ -159,41 +159,16 @@ export class ReviewsService {
         pension.images.find((img) => img.isFeatured)?.url ||
         pension.images[0]?.url ||
         review.images[0] ||
-        'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads/pensions/stay-history-fallback.webp';
+        null;
 
       const firstRoom = pension.rooms[0];
-      const roomTitle = firstRoom?.title || 'Habitación Individual';
+      const roomTitle = firstRoom?.title || pension.title;
       const monthlyPaidClp = firstRoom?.monthlyPrice
         ? Number(firstRoom.monthlyPrice)
-        : Number(pension.baseMonthlyPrice) || 280000;
+        : Number(pension.baseMonthlyPrice) || 0;
 
-      let startDateStr: string;
-      let endDateStr: string;
-
-      if (review.stayStartDate && review.stayEndDate) {
-        startDateStr = review.stayStartDate.toISOString();
-        endDateStr = review.stayEndDate.toISOString();
-      } else {
-        const endDate = new Date(review.createdAt);
-        const startDate = new Date(endDate);
-        switch (review.stayDurationCategory) {
-          case 'ONE_YEAR':
-          case 'MORE_THAN_A_YEAR':
-            startDate.setFullYear(startDate.getFullYear() - 1);
-            break;
-          case 'ONE_SEMESTER':
-            startDate.setMonth(startDate.getMonth() - 5);
-            break;
-          case 'FEW_WEEKS':
-            startDate.setDate(startDate.getDate() - 21);
-            break;
-          default:
-            startDate.setDate(startDate.getDate() - 7);
-            break;
-        }
-        startDateStr = startDate.toISOString();
-        endDateStr = endDate.toISOString();
-      }
+      const startDateStr = review.stayStartDate ? review.stayStartDate.toISOString() : null;
+      const endDateStr = review.stayEndDate ? review.stayEndDate.toISOString() : null;
 
       return {
         id: `stay-${review.id}`,

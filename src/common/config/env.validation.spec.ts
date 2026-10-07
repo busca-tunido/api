@@ -83,7 +83,7 @@ describe('validateEnv', () => {
     );
   });
 
-  it('should pass in production mode when all storage variables and 32+ char secret are provided', () => {
+  it('should pass in production mode when all storage variables, Turnstile key and 32+ char secret are provided', () => {
     const prodConfig = {
       ...baseValidConfig,
       NODE_ENV: 'production',
@@ -93,12 +93,14 @@ describe('validateEnv', () => {
       AWS_SECRET_ACCESS_KEY: 'neon-secret',
       PUBLIC_AWS_REGION: 'us-east-2',
       PUBLIC_STORAGE_BUCKET: 'uploads',
+      TURNSTILE_SECRET_KEY: 'prod-turnstile-secret-key-live',
     };
     const validated = validateEnv(prodConfig);
     expect(validated.NODE_ENV).toBe('production');
     expect(validated.PUBLIC_AWS_ENDPOINT_URL_S3).toBe(
       'https://branch.storage.c-2.us-east-2.aws.neon.tech',
     );
+    expect(validated.TURNSTILE_SECRET_KEY).toBe('prod-turnstile-secret-key-live');
   });
 
   it('should throw in production mode when JWT_SECRET is shorter than 32 characters', () => {
@@ -111,9 +113,27 @@ describe('validateEnv', () => {
       AWS_SECRET_ACCESS_KEY: 'neon-secret',
       PUBLIC_AWS_REGION: 'us-east-2',
       PUBLIC_STORAGE_BUCKET: 'uploads',
+      TURNSTILE_SECRET_KEY: 'prod-turnstile-secret-key-live',
     };
     expect(() => validateEnv(prodConfig)).toThrow(
       'JWT_SECRET must be at least 32 characters long in production.',
+    );
+  });
+
+  it('should throw in production mode when TURNSTILE_SECRET_KEY is test secret or missing', () => {
+    const prodConfig = {
+      ...baseValidConfig,
+      NODE_ENV: 'production',
+      JWT_SECRET: 'super-secret-jwt-key-with-sufficient-length-32',
+      PUBLIC_AWS_ENDPOINT_URL_S3: 'https://branch.storage.c-2.us-east-2.aws.neon.tech',
+      AWS_ACCESS_KEY_ID: 'neon-key',
+      AWS_SECRET_ACCESS_KEY: 'neon-secret',
+      PUBLIC_AWS_REGION: 'us-east-2',
+      PUBLIC_STORAGE_BUCKET: 'uploads',
+      TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
+    };
+    expect(() => validateEnv(prodConfig)).toThrow(
+      'TURNSTILE_SECRET_KEY must be a valid production key in production.',
     );
   });
 });

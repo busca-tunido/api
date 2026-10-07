@@ -49,8 +49,7 @@ export class UploadsService {
         : env.PUBLIC_AWS_ENDPOINT_URL_S3 || env.AWS_ENDPOINT_URL_S3;
 
     if (endpoint) {
-      const region =
-        storageConfig?.region ?? env.PUBLIC_AWS_REGION ?? env.AWS_REGION ?? 'us-east-2';
+      const region = storageConfig?.region ?? env.PUBLIC_AWS_REGION;
 
       const accessKeyId = storageConfig?.accessKeyId ?? env.AWS_ACCESS_KEY_ID;
 
@@ -66,8 +65,7 @@ export class UploadsService {
         forcePathStyle: true,
       });
 
-      this.bucketName =
-        storageConfig?.bucketName ?? env.PUBLIC_STORAGE_BUCKET ?? env.STORAGE_BUCKET ?? 'uploads';
+      this.bucketName = storageConfig?.bucketName ?? env.PUBLIC_STORAGE_BUCKET;
 
       const customPublicUrl =
         storageConfig !== undefined
@@ -79,7 +77,7 @@ export class UploadsService {
         ? customPublicUrl.replace(/\/+$/, '')
         : `${cleanEndpoint}/${this.bucketName}`;
     } else {
-      this.bucketName = 'uploads';
+      this.bucketName = env.PUBLIC_STORAGE_BUCKET;
     }
   }
 
