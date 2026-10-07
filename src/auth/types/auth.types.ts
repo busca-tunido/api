@@ -25,7 +25,16 @@ export type AuthResponse = {
   accessToken: string;
 };
 
+export type DetectedUniversityDto = {
+  id: string;
+  name: string;
+  shortName: string | null;
+  city: string;
+};
+
 export type CheckEmailResponse = {
   exists: boolean;
   role?: Role;
+  detectedUniversity?: DetectedUniversityDto | null;
 };
+
