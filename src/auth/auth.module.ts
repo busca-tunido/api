@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { env } from '../env.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
+import { UniversitiesModule } from '../universities/universities.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { AuthRateLimitService } from './auth-rate-limit.service.js';
@@ -15,6 +16,7 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
 @Module({
   imports: [
     PrismaModule,
+    UniversitiesModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: env.JWT_SECRET,
