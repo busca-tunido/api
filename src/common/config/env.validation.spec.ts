@@ -4,7 +4,8 @@ import { validateEnv } from './env.validation.js';
 describe('validateEnv', () => {
   const baseValidConfig = {
     PORT: '4000',
-    DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/buscatunido',
+    DATABASE_URL:
+      'mongodb+srv://user:pass@busca-tunido.yevktbz.mongodb.net/buscatunido?retryWrites=true&w=majority',
     NODE_ENV: 'development',
     JWT_SECRET: 'super-secret',
     JWT_EXPIRES_IN: '7d',
@@ -15,7 +16,7 @@ describe('validateEnv', () => {
     const validated = validateEnv(baseValidConfig);
     expect(validated.PORT).toBe(4000);
     expect(validated.DATABASE_URL).toBe(
-      'postgresql://postgres:postgres@localhost:5432/buscatunido',
+      'mongodb+srv://user:pass@busca-tunido.yevktbz.mongodb.net/buscatunido?retryWrites=true&w=majority',
     );
     expect(validated.NODE_ENV).toBe('development');
     expect(validated.JWT_SECRET).toBe('super-secret');

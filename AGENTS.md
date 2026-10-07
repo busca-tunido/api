@@ -6,7 +6,7 @@ This document provides essential architectural context, domain patterns, and dev
 
 ## 1. Project Overview & Architecture
 
-BuscaTuNido API is a modular backend service written in TypeScript using [NestJS](https://nestjs.com/) and [Prisma ORM](https://www.prisma.io/) on top of [PostgreSQL](https://www.postgresql.org/).
+BuscaTuNido API is a modular backend service written in TypeScript using [NestJS](https://nestjs.com/) and [Prisma ORM](https://www.prisma.io/) on top of [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database).
 
 ### Core Components Structure (Provisional Baseline):
 
@@ -28,21 +28,16 @@ BuscaTuNido API is a modular backend service written in TypeScript using [NestJS
   - `reviews/`: Community reviews, ratings, and verification voting.
   - `comparison/`: Multi-pension comparison data aggregation.
   - `reports/`: Community flag reports and moderation pipeline.
-- `prisma/schema.prisma`: Database models, indices, and PostgreSQL relations.
-- `api/.data/`: Isolated local PostgreSQL cluster (ignored by git via `.gitignore`).
+- `prisma/schema.prisma`: Database models, indices, and embedded MongoDB document structures.
 - `tasks/[task-name].md`: Active task specification being executed.
 - `tasks/completed/[index]_[task-name].md`: Historical record of finished task specifications with chronological index.
 
-### Local Database Management (`pnpm db:*`):
+### Database Management with MongoDB Atlas:
 
-The backend relies on an isolated local database cluster stored in `.data/` for zero-configuration reproducibility:
+The backend connects directly to MongoDB Atlas M0 clusters (`DATABASE_URL`) with environment-isolated databases (`buscatunido_dev` for local development and `buscatunido_test` for Vitest):
 
-- `pnpm db:init`: Initializes the local PostgreSQL cluster in `.data/` (`initdb -D .data -U postgres -A trust`).
-- `pnpm db:start`: Starts the local PostgreSQL daemon in the background (`pg_ctl -D .data start`).
-- `pnpm db:stop`: Gracefully shuts down the local PostgreSQL daemon (`pg_ctl -D .data stop`).
-- `pnpm db:status`: Inspects if PostgreSQL is responding to connections (`pg_isready -h localhost -U postgres`).
-- `pnpm db:seed`: Populates initial sample data via Prisma (`prisma db seed`).
-- `pnpm run build:local`: Sets up and compiles the full local development stack for a new or existing machine (`pnpm db:start && prisma db push && pnpm db:seed && nest build`).
+- `pnpm db:seed`: Seeds MongoDB with amenities, universities, and listings (`prisma db seed` via `prisma/seed-test.ts`).
+- `pnpm db:view`: Launches Prisma Studio for visual inspection (`prisma studio`).
 
 ---
 

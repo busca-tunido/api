@@ -1,7 +1,5 @@
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { Pool } from 'pg';
 import { env } from '../src/env.js';
 
 const run = async (): Promise<void> => {
@@ -34,9 +32,7 @@ const run = async (): Promise<void> => {
     );
   }
 
-  const pool = new Pool({ connectionString: env.DATABASE_URL });
-  const adapter = new PrismaPg(pool);
-  const prisma = new PrismaClient({ adapter });
+  const prisma = new PrismaClient();
 
   try {
     const email = emailArg.toLowerCase().trim();
@@ -73,7 +69,6 @@ const run = async (): Promise<void> => {
     }
   } finally {
     await prisma.$disconnect();
-    await pool.end();
   }
 };
 

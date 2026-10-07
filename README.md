@@ -1,6 +1,6 @@
 # BuscaTuNido API
 
-Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and PostgreSQL.
+Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and MongoDB Atlas.
 
 ## Public Deployments & Links
 
@@ -18,7 +18,7 @@ Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and Postgre
 ## Tech Stack
 
 - **Framework**: [NestJS](https://nestjs.com/)
-- **ORM & Database**: [Prisma ORM](https://www.prisma.io/) on [PostgreSQL](https://www.postgresql.org/)
+- **ORM & Database**: [Prisma ORM](https://www.prisma.io/) on [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database)
 - **Linter & Formatter**: [Biome](https://biomejs.dev/)
 
 ## Getting Started
@@ -27,7 +27,7 @@ Backend REST service for BuscaTuNido, built with NestJS, Prisma ORM, and Postgre
 
 - Node.js >= 20
 - pnpm >= 9
-- PostgreSQL CLI tools (`initdb`, `pg_ctl`, `pg_isready` in PATH or installed via Scoop/Homebrew)
+- MongoDB Atlas connection string (or cluster access)
 
 ### Environment Configuration
 
@@ -43,17 +43,11 @@ cp .env.example .env
 # 1. Install dependencies
 pnpm install
 
-# 2. Initialize local database cluster (first time only)
-pnpm run db:init
+# 2. Seed database with amenities, universities, and listings
+pnpm run db:seed
 
-# 3. Start local stack and build (starts DB, pushes Prisma schema, seeds data, and compiles NestJS)
-pnpm run build:local
-
-# 4. Start NestJS development server (http://localhost:4000 and Swagger docs at /api/docs)
+# 3. Start NestJS development server (http://localhost:4000 and Swagger docs at /api/docs)
 pnpm start:dev
-
-# 5. Stop local database daemon when finished
-pnpm run db:stop
 ```
 
 ---
@@ -80,7 +74,7 @@ pnpm run start:prod
 
 **Render Environment Variables**:
 - `NODE_ENV`: `production`
-- `DATABASE_URL`: Cloud PostgreSQL connection string (with SSL).
+- `DATABASE_URL`: MongoDB Atlas connection string (with SSL & replica set).
 - `JWT_SECRET`: Secret key for signing and verifying JWT tokens.
 - `JWT_EXPIRATION`: Session token duration (e.g., `7d`).
 - `CORS_ORIGIN`: `https://buscatunido.vercel.app` (enables cross-origin communication with the official Vercel web frontend).
