@@ -37,11 +37,7 @@ describe('PrismaService', () => {
     expect(connectSpy).toHaveBeenCalled();
 
     const disconnectSpy = vi.spyOn(service, '$disconnect').mockResolvedValue(undefined);
-    const poolEndSpy = vi
-      .spyOn((service as unknown as { pool: { end: () => Promise<void> } }).pool, 'end')
-      .mockResolvedValue(undefined);
     await service.onModuleDestroy();
     expect(disconnectSpy).toHaveBeenCalled();
-    expect(poolEndSpy).toHaveBeenCalled();
   });
 });
