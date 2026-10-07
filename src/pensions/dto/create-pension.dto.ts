@@ -8,7 +8,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   Matches,
   MaxLength,
   Min,
@@ -136,9 +135,9 @@ export class CreatePensionDto {
   })
   amenitySlugs?: string[];
 
-  @ApiPropertyOptional({ example: '00000000-0000-0000-0000-000000000000' })
+  @ApiPropertyOptional({ example: '6659f8c123456789abcdef01' })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   nearbyUniversityId?: string;
 
   @ApiPropertyOptional({ example: 500 })

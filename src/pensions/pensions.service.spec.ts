@@ -264,18 +264,18 @@ describe('PensionsService', () => {
 
       expect(mockPrisma.university.findUnique).toHaveBeenCalledWith({
         where: { id: 'uni-1' },
-        select: { latitude: true, longitude: true },
+        select: { id: true, name: true, shortName: true, latitude: true, longitude: true },
       });
       expect(mockPrisma.pension.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            nearbyUniversities: {
-              create: expect.objectContaining({
+            nearbyUniversities: expect.arrayContaining([
+              expect.objectContaining({
                 universityId: 'uni-1',
                 distanceMeters: expect.any(Number),
                 walkingMinutes: expect.any(Number),
               }),
-            },
+            ]),
           }),
         }),
       );

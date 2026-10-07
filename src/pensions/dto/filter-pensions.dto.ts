@@ -10,7 +10,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   Max,
   Min,
 } from 'class-validator';
@@ -45,9 +44,9 @@ export class FilterPensionsDto {
   @IsEnum(GenderPreference)
   genderPreference?: GenderPreference;
 
-  @ApiPropertyOptional({ example: '00000000-0000-0000-0000-000000000000' })
+  @ApiPropertyOptional({ example: '6659f8c123456789abcdef01' })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   universityId?: string;
 
   @ApiPropertyOptional({ example: 'wifi-alta-velocidad,cocina-equipada' })

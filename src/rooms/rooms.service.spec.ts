@@ -6,14 +6,10 @@ import type { PrismaService } from '../prisma/prisma.service.js';
 import { RoomsService } from './rooms.service.js';
 
 type MockPrismaService = {
-  room: {
-    findMany: ReturnType<typeof vi.fn>;
-    findUnique: ReturnType<typeof vi.fn>;
-    create: ReturnType<typeof vi.fn>;
-    update: ReturnType<typeof vi.fn>;
-  };
   pension: {
     findUnique: ReturnType<typeof vi.fn>;
+    findFirst: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
   };
 };
 
@@ -51,14 +47,10 @@ describe('RoomsService', () => {
 
   beforeEach(() => {
     mockPrisma = {
-      room: {
-        findMany: vi.fn(),
-        findUnique: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn(),
-      },
       pension: {
         findUnique: vi.fn(),
+        findFirst: vi.fn(),
+        update: vi.fn(),
       },
     };
 
@@ -67,7 +59,10 @@ describe('RoomsService', () => {
 
   describe('findByPension', () => {
     it('should return rooms belonging to pension', async () => {
-      mockPrisma.room.findMany.mockResolvedValue([{ id: 'room-1', title: 'Hab 101' }]);
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        rooms: [{ id: 'room-1', title: 'Hab 101', monthlyPrice: 200000, deletedAt: null }],
+      });
 
       const result = await service.findByPension('pension-1');
       expect(result).toHaveLength(1);
@@ -79,8 +74,9 @@ describe('RoomsService', () => {
       mockPrisma.pension.findUnique.mockResolvedValue({
         id: 'pension-1',
         landlordId: 'landlord-1',
+        rooms: [],
       });
-      mockPrisma.room.create.mockResolvedValue({ id: 'room-new', title: 'Hab 101' });
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.create(
         'pension-1',
@@ -93,13 +89,16 @@ describe('RoomsService', () => {
         mockLandlord,
       );
 
-      expect((result as { id: string }).id).toBe('room-new');
+      expect((result as { title: string }).title).toBe('Habitación Individual');
+      expect((result as { pensionId: string }).pensionId).toBe('pension-1');
+      expect(mockPrisma.pension.update).toHaveBeenCalled();
     });
 
     it('should throw ForbiddenException if user is not pension owner', async () => {
       mockPrisma.pension.findUnique.mockResolvedValue({
         id: 'pension-1',
         landlordId: 'landlord-1',
+        rooms: [],
       });
 
       await expect(
@@ -119,20 +118,23 @@ describe('RoomsService', () => {
 
   describe('update', () => {
     it('should allow pension owner to update room', async () => {
-      mockPrisma.room.findUnique.mockResolvedValue({
-        id: 'room-1',
-        pension: { landlordId: 'landlord-1' },
+      mockPrisma.pension.findFirst.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: 'landlord-1',
+        rooms: [{ id: 'room-1', title: 'Hab 101', monthlyPrice: 200000, deletedAt: null }],
       });
-      mockPrisma.room.update.mockResolvedValue({ id: 'room-1', monthlyPrice: 220000 });
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.update('room-1', { monthlyPrice: 220000 }, mockLandlord);
       expect((result as { monthlyPrice: number }).monthlyPrice).toBe(220000);
+      expect(mockPrisma.pension.update).toHaveBeenCalled();
     });
 
     it('should throw ForbiddenException if user is not pension owner', async () => {
-      mockPrisma.room.findUnique.mockResolvedValue({
-        id: 'room-1',
-        pension: { landlordId: 'landlord-1' },
+      mockPrisma.pension.findFirst.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: 'landlord-1',
+        rooms: [{ id: 'room-1', title: 'Hab 101', monthlyPrice: 200000, deletedAt: null }],
       });
 
       await expect(
@@ -143,18 +145,20 @@ describe('RoomsService', () => {
 
   describe('delete', () => {
     it('should allow owner to delete room', async () => {
-      mockPrisma.room.findUnique.mockResolvedValue({
-        id: 'room-1',
-        pension: { landlordId: 'landlord-1' },
+      mockPrisma.pension.findFirst.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: 'landlord-1',
+        rooms: [{ id: 'room-1', title: 'Hab 101', deletedAt: null }],
       });
-      mockPrisma.room.update.mockResolvedValue({ id: 'room-1', deletedAt: new Date() });
+      mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.delete('room-1', mockLandlord);
       expect(result.deleted).toBe(true);
+      expect(mockPrisma.pension.update).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if room does not exist', async () => {
-      mockPrisma.room.findUnique.mockResolvedValue(null);
+      mockPrisma.pension.findFirst.mockResolvedValue(null);
 
       await expect(service.delete('non-existent', mockLandlord)).rejects.toThrow(NotFoundException);
     });

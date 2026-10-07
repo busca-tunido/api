@@ -93,9 +93,155 @@ const slugify = (text: string): string => {
     .replace(/(^-|-$)+/g, '');
 };
 
+const formatAmenityName = (slug: string): string => {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+interface EmbeddedPensionImageRaw {
+  id: string;
+  url: string;
+  thumbnailUrl: string;
+  caption?: string | null;
+  isFeatured?: boolean;
+  sortOrder?: number;
+  createdAt?: Date;
+}
+
+interface EmbeddedRoomRaw {
+  id: string;
+  roomNumber?: string | null;
+  title: string;
+  description?: string | null;
+  type: string;
+  monthlyPrice: number;
+  deposit?: number | null;
+  hasPrivateBathroom: boolean;
+  totalBeds: number;
+  availableBeds: number;
+  isAvailable: boolean;
+  images: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date | null;
+}
+
+interface EmbeddedNearbyUniversityRaw {
+  universityId: string;
+  name: string;
+  shortName?: string | null;
+  distanceMeters: number;
+  walkingMinutes?: number | null;
+  transitMinutes?: number | null;
+}
+
+interface PensionDocRaw {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  address: string;
+  city: string;
+  neighborhood: string;
+  latitude: number;
+  longitude: number;
+  baseMonthlyPrice: number;
+  deposit?: number | null;
+  currency: string;
+  waterIncluded: boolean;
+  electricityIncluded: boolean;
+  gasIncluded: boolean;
+  internetIncluded: boolean;
+  curfewTime?: string | null;
+  guestsAllowed: boolean;
+  smokingAllowed: boolean;
+  petsAllowed: boolean;
+  genderPreference: string;
+  quietHoursStart?: string | null;
+  quietHoursEnd?: string | null;
+  verificationStatus: string;
+  ratingAverage: number;
+  ratingCount: number;
+  communityScore: number;
+  isActive: boolean;
+  landlordId?: string | null;
+  submittedById?: string | null;
+  amenities?: string[];
+  rooms?: EmbeddedRoomRaw[];
+  images?: EmbeddedPensionImageRaw[];
+  nearbyUniversities?: EmbeddedNearbyUniversityRaw[];
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date | null;
+  landlord?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    email: string;
+    avatarUrl: string | null;
+  } | null;
+  _count?: {
+    reviews?: number;
+    proposals?: number;
+  };
+}
+
 @Injectable()
 export class PensionsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private formatPensionItem(
+    pension: PensionDocRaw,
+    limitImages: number = 3,
+  ): Record<string, unknown> {
+    const images = (pension.images || [])
+      .slice()
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .slice(0, limitImages);
+
+    const amenities = (pension.amenities || []).map((item: unknown) => {
+      const slug = typeof item === 'string' ? item : ((item as { slug?: string })?.slug ?? '');
+      const existingName =
+        typeof item === 'object' && item !== null && 'name' in item
+          ? String((item as { name: unknown }).name)
+          : null;
+      return {
+        slug,
+        name: existingName || (slug ? formatAmenityName(slug) : ''),
+      };
+    });
+
+    const rooms = (pension.rooms || [])
+      .filter((r) => !r.deletedAt)
+      .sort((a, b) => a.monthlyPrice - b.monthlyPrice);
+
+    const nearbyUniversities = (pension.nearbyUniversities || []).map((u) => ({
+      ...u,
+      university: {
+        id: u.universityId,
+        name: u.name,
+        shortName: u.shortName ?? null,
+      },
+    }));
+
+    const totalRoomsCount = (pension.rooms || []).filter((r) => !r.deletedAt).length;
+    const reviewsCount = pension._count?.reviews ?? pension.ratingCount ?? 0;
+
+    return {
+      ...pension,
+      images,
+      amenities,
+      rooms,
+      nearbyUniversities,
+      _count: {
+        rooms: totalRoomsCount,
+        reviews: reviewsCount,
+      },
+    };
+  }
 
   private buildWhere(filter: FilterPensionsDto): Prisma.PensionWhereInput {
     const where: Prisma.PensionWhereInput = {
@@ -133,36 +279,19 @@ export class PensionsService {
 
     if (filter.amenities && filter.amenities.length > 0) {
       where.amenities = {
-        some: { slug: { in: filter.amenities } },
+        hasEvery: filter.amenities,
       };
     }
 
     if (filter.includesMeals) {
       where.amenities = {
-        some: {
-          ...(where.amenities?.some ? where.amenities.some : {}),
-          OR: [
-            {
-              slug: {
-                in: [
-                  'comida-incluida',
-                  'pension-completa',
-                  'media-pension',
-                  'desayuno-incluido',
-                  'alimentacion-incluida',
-                ],
-              },
-            },
-            { slug: { contains: 'comida', mode: 'insensitive' } },
-            { slug: { contains: 'alimento', mode: 'insensitive' } },
-            { slug: { contains: 'desayuno', mode: 'insensitive' } },
-            { slug: { contains: 'almuerzo', mode: 'insensitive' } },
-            { name: { contains: 'comida', mode: 'insensitive' } },
-            { name: { contains: 'alimentación', mode: 'insensitive' } },
-            { name: { contains: 'desayuno', mode: 'insensitive' } },
-            { name: { contains: 'almuerzo', mode: 'insensitive' } },
-          ],
-        },
+        hasSome: [
+          'comida-incluida',
+          'pension-completa',
+          'media-pension',
+          'desayuno-incluido',
+          'alimentacion-incluida',
+        ],
       };
     }
 
@@ -190,12 +319,10 @@ export class PensionsService {
         {
           nearbyUniversities: {
             some: {
-              university: {
-                OR: [
-                  { name: { contains: term, mode: 'insensitive' } },
-                  { shortName: { contains: term, mode: 'insensitive' } },
-                ],
-              },
+              OR: [
+                { name: { contains: term, mode: 'insensitive' } },
+                { shortName: { contains: term, mode: 'insensitive' } },
+              ],
             },
           },
         },
@@ -270,33 +397,11 @@ export class PensionsService {
       const userLng = filter.longitude as number;
       const radiusKm = Math.max(1, Math.min(100, filter.radiusKm || 30));
 
-      const candidates = await this.prisma.pension.findMany({
+      const rawCandidates = await this.prisma.pension.findMany({
         where,
         include: {
-          images: {
-            where: { deletedAt: null },
-            orderBy: { sortOrder: 'asc' },
-            take: 3,
-          },
-          amenities: {
-            where: { deletedAt: null },
-            take: 5,
-          },
-          nearbyUniversities: {
-            include: {
-              university: {
-                select: { id: true, name: true, shortName: true },
-              },
-            },
-            take: 2,
-          },
-          rooms: {
-            where: { deletedAt: null, isAvailable: true },
-            select: { availableBeds: true },
-          },
           _count: {
             select: {
-              rooms: true,
               reviews: true,
             },
           },
@@ -305,14 +410,15 @@ export class PensionsService {
 
       const cityCountsMap = new Map<string, { count: number; minDistance: number }>();
 
-      type ScoredPension = (typeof candidates)[0] & {
+      type ScoredPension = Record<string, unknown> & {
         distanceKm: number;
         relevanceScore: number;
       };
 
       const inRadiusItems: ScoredPension[] = [];
 
-      for (const pension of candidates) {
+      for (const p of rawCandidates) {
+        const pension = p as unknown as PensionDocRaw;
         const distanceKm = calculateHaversineDistanceKm(
           userLat,
           userLng,
@@ -333,17 +439,20 @@ export class PensionsService {
         }
 
         if (hasBounds || distanceKm <= radiusKm) {
-          const totalAvailableBeds = pension.rooms.reduce(
+          const totalAvailableBeds = (pension.rooms || []).reduce(
             (acc, r) => acc + (r.availableBeds || 0),
             0,
           );
-          const hasUtilities = pension.amenities.some(
-            (a) =>
-              a.category === 'BASIC_UTILITY' ||
-              a.slug.includes('wifi') ||
-              a.slug.includes('luz') ||
-              a.slug.includes('agua'),
-          );
+          const hasUtilities = (pension.amenities || []).some((item: unknown) => {
+            const slug =
+              typeof item === 'string' ? item : ((item as { slug?: string })?.slug ?? '');
+            return (
+              slug.includes('wifi') ||
+              slug.includes('luz') ||
+              slug.includes('agua') ||
+              slug.includes('gas')
+            );
+          });
 
           const relevanceScore = calculateRelevanceScore(
             distanceKm,
@@ -356,7 +465,7 @@ export class PensionsService {
           );
 
           inRadiusItems.push({
-            ...pension,
+            ...this.formatPensionItem(pension, 3),
             distanceKm,
             relevanceScore,
           });
@@ -411,33 +520,15 @@ export class PensionsService {
       orderBy = { baseMonthlyPrice: 'desc' };
     }
 
-    const [items, total, cityGroups] = await Promise.all([
+    const [rawItems, total, cityGroups] = await Promise.all([
       this.prisma.pension.findMany({
         where,
         skip,
         take: limit,
         orderBy,
         include: {
-          images: {
-            where: { deletedAt: null },
-            orderBy: { sortOrder: 'asc' },
-            take: 3,
-          },
-          amenities: {
-            where: { deletedAt: null },
-            take: 5,
-          },
-          nearbyUniversities: {
-            include: {
-              university: {
-                select: { id: true, name: true, shortName: true },
-              },
-            },
-            take: 2,
-          },
           _count: {
             select: {
-              rooms: true,
               reviews: true,
             },
           },
@@ -452,6 +543,10 @@ export class PensionsService {
         take: 10,
       }),
     ]);
+
+    const items = rawItems.map((item) =>
+      this.formatPensionItem(item as unknown as PensionDocRaw, 3),
+    );
 
     const totalPages = Math.ceil(total / limit) || 1;
     const hasMore = skip + limit < total;
@@ -574,27 +669,12 @@ export class PensionsService {
   }
 
   async findMine(userId: string): Promise<unknown> {
-    return this.prisma.pension.findMany({
+    const pensions = await this.prisma.pension.findMany({
       where: {
         landlordId: userId,
         deletedAt: null,
       },
       include: {
-        rooms: {
-          where: { deletedAt: null },
-          select: {
-            id: true,
-            roomNumber: true,
-            title: true,
-            type: true,
-            monthlyPrice: true,
-            deposit: true,
-            hasPrivateBathroom: true,
-            totalBeds: true,
-            availableBeds: true,
-            isAvailable: true,
-          },
-        },
         _count: {
           select: {
             reviews: { where: { deletedAt: null } },
@@ -603,6 +683,27 @@ export class PensionsService {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+
+    return pensions.map((p) => {
+      const doc = p as unknown as PensionDocRaw;
+      return {
+        ...doc,
+        rooms: (doc.rooms || [])
+          .filter((r) => !r.deletedAt)
+          .map((r) => ({
+            id: r.id,
+            roomNumber: r.roomNumber ?? null,
+            title: r.title,
+            type: r.type,
+            monthlyPrice: r.monthlyPrice,
+            deposit: r.deposit ?? null,
+            hasPrivateBathroom: r.hasPrivateBathroom,
+            totalBeds: r.totalBeds,
+            availableBeds: r.availableBeds,
+            isAvailable: r.isAvailable,
+          })),
+      };
     });
   }
 
@@ -613,22 +714,6 @@ export class PensionsService {
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       },
       include: {
-        images: {
-          where: { deletedAt: null },
-          orderBy: { sortOrder: 'asc' },
-        },
-        amenities: {
-          where: { deletedAt: null },
-        },
-        rooms: {
-          where: { deletedAt: null },
-          orderBy: { monthlyPrice: 'asc' },
-        },
-        nearbyUniversities: {
-          include: {
-            university: true,
-          },
-        },
         landlord: {
           select: {
             id: true,
@@ -646,9 +731,11 @@ export class PensionsService {
       throw new NotFoundException(`Pension '${idOrSlug}' not found`);
     }
 
+    const formatted = this.formatPensionItem(pension as unknown as PensionDocRaw, 100);
+
     if (!user) {
       return {
-        ...pension,
+        ...formatted,
         address: `${pension.neighborhood}, ${pension.city}`,
         landlord: pension.landlord
           ? {
@@ -661,7 +748,7 @@ export class PensionsService {
       };
     }
 
-    return pension;
+    return formatted;
   }
 
   async create(dto: CreatePensionDto, landlord: SanitizedUser): Promise<unknown> {
@@ -674,58 +761,71 @@ export class PensionsService {
     let computedDistanceMeters = distanceMeters;
     let computedWalkingMinutes: number | null =
       typeof distanceMeters === 'number' ? Math.round(distanceMeters / 80) : null;
+    let nearbyUniversitiesData: EmbeddedNearbyUniversityRaw[] = [];
 
-    if (nearbyUniversityId && computedDistanceMeters === undefined) {
+    if (nearbyUniversityId) {
       const uni = await this.prisma.university.findUnique({
         where: { id: nearbyUniversityId },
-        select: { latitude: true, longitude: true },
+        select: { id: true, name: true, shortName: true, latitude: true, longitude: true },
       });
-      if (
-        uni &&
-        typeof uni.latitude === 'number' &&
-        typeof uni.longitude === 'number' &&
-        typeof dto.latitude === 'number' &&
-        typeof dto.longitude === 'number'
-      ) {
-        const distanceKm = calculateHaversineDistanceKm(
-          dto.latitude,
-          dto.longitude,
-          uni.latitude,
-          uni.longitude,
-        );
-        computedDistanceMeters = Math.round(distanceKm * 1000);
-        computedWalkingMinutes = Math.round(computedDistanceMeters / 80);
+
+      if (uni) {
+        if (
+          computedDistanceMeters === undefined &&
+          typeof uni.latitude === 'number' &&
+          typeof uni.longitude === 'number' &&
+          typeof dto.latitude === 'number' &&
+          typeof dto.longitude === 'number'
+        ) {
+          const distanceKm = calculateHaversineDistanceKm(
+            dto.latitude,
+            dto.longitude,
+            uni.latitude,
+            uni.longitude,
+          );
+          computedDistanceMeters = Math.round(distanceKm * 1000);
+          computedWalkingMinutes = Math.round(computedDistanceMeters / 80);
+        }
+
+        nearbyUniversitiesData = [
+          {
+            universityId: uni.id,
+            name: uni.name,
+            shortName: uni.shortName ?? null,
+            distanceMeters: computedDistanceMeters ?? 0,
+            walkingMinutes: computedWalkingMinutes,
+            transitMinutes:
+              typeof computedDistanceMeters === 'number'
+                ? Math.round(computedDistanceMeters / 250 + 4)
+                : null,
+          },
+        ];
       }
     }
 
-    return this.prisma.pension.create({
+    const location =
+      typeof dto.latitude === 'number' && typeof dto.longitude === 'number'
+        ? {
+            type: 'Point',
+            coordinates: [dto.longitude, dto.latitude],
+          }
+        : undefined;
+
+    const created = await this.prisma.pension.create({
       data: {
         ...pensionData,
         slug,
         landlordId: landlord.id,
         submittedById: landlord.id,
-        amenities:
-          amenitySlugs && amenitySlugs.length > 0
-            ? {
-                connect: amenitySlugs.map((s) => ({ slug: s })),
-              }
-            : undefined,
-        nearbyUniversities:
-          nearbyUniversityId && typeof computedDistanceMeters === 'number'
-            ? {
-                create: {
-                  universityId: nearbyUniversityId,
-                  distanceMeters: computedDistanceMeters,
-                  walkingMinutes: computedWalkingMinutes,
-                },
-              }
-            : undefined,
-      },
-      include: {
-        amenities: true,
-        nearbyUniversities: true,
+        location,
+        amenities: amenitySlugs ?? [],
+        nearbyUniversities: nearbyUniversitiesData,
+        rooms: [],
+        images: [],
       },
     });
+
+    return this.formatPensionItem(created as unknown as PensionDocRaw, 100);
   }
 
   async update(id: string, dto: UpdatePensionDto, user: SanitizedUser): Promise<unknown> {
@@ -742,22 +842,63 @@ export class PensionsService {
     }
 
     const { amenitySlugs, nearbyUniversityId, distanceMeters, ...pensionData } = dto;
+    const updateData: Prisma.PensionUpdateInput = {
+      ...pensionData,
+    };
 
-    return this.prisma.pension.update({
+    if (dto.latitude !== undefined && dto.longitude !== undefined) {
+      updateData.location = {
+        type: 'Point',
+        coordinates: [dto.longitude, dto.latitude],
+      };
+    }
+
+    if (amenitySlugs !== undefined) {
+      updateData.amenities = amenitySlugs;
+    }
+
+    if (nearbyUniversityId !== undefined) {
+      const uni = await this.prisma.university.findUnique({
+        where: { id: nearbyUniversityId },
+        select: { id: true, name: true, shortName: true, latitude: true, longitude: true },
+      });
+
+      if (uni) {
+        let distMeters = distanceMeters;
+        const lat = dto.latitude ?? pension.latitude;
+        const lng = dto.longitude ?? pension.longitude;
+        if (
+          distMeters === undefined &&
+          typeof uni.latitude === 'number' &&
+          typeof uni.longitude === 'number' &&
+          typeof lat === 'number' &&
+          typeof lng === 'number'
+        ) {
+          distMeters = Math.round(
+            calculateHaversineDistanceKm(lat, lng, uni.latitude, uni.longitude) * 1000,
+          );
+        }
+
+        updateData.nearbyUniversities = [
+          {
+            universityId: uni.id,
+            name: uni.name,
+            shortName: uni.shortName ?? null,
+            distanceMeters: distMeters ?? 0,
+            walkingMinutes: typeof distMeters === 'number' ? Math.round(distMeters / 80) : null,
+            transitMinutes:
+              typeof distMeters === 'number' ? Math.round(distMeters / 250 + 4) : null,
+          },
+        ];
+      }
+    }
+
+    const updated = await this.prisma.pension.update({
       where: { id },
-      data: {
-        ...pensionData,
-        amenities: amenitySlugs
-          ? {
-              set: amenitySlugs.map((s) => ({ slug: s })),
-            }
-          : undefined,
-      },
-      include: {
-        amenities: true,
-        images: true,
-      },
+      data: updateData,
     });
+
+    return this.formatPensionItem(updated as unknown as PensionDocRaw, 100);
   }
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
