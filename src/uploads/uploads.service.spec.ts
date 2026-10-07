@@ -28,8 +28,10 @@ describe('UploadsService', () => {
 
       expect(service.isRemoteStorageEnabled()).toBe(false);
       expect(result.format).toBe('webp');
-      expect(result.url).toMatch(/^\/uploads\/[a-f0-9-]+\.webp$/);
-      expect(result.thumbnailUrl).toMatch(/^\/uploads\/[a-f0-9-]+-thumb\.webp$/);
+      expect(result.url).toMatch(/^\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+\.webp$/);
+      expect(result.thumbnailUrl).toMatch(
+        /^\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+-thumb\.webp$/,
+      );
       expect(result.width).toBe(50);
       expect(result.height).toBe(50);
       expect(result.size).toBeGreaterThan(0);
@@ -81,10 +83,10 @@ describe('UploadsService', () => {
       expect(sendSpy).toHaveBeenCalledTimes(2);
       expect(result.format).toBe('webp');
       expect(result.url).toMatch(
-        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/[a-f0-9-]+\.webp$/,
+        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+\.webp$/,
       );
       expect(result.thumbnailUrl).toMatch(
-        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/[a-f0-9-]+-thumb\.webp$/,
+        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+-thumb\.webp$/,
       );
 
       sendSpy.mockRestore();

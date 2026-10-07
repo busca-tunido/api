@@ -131,13 +131,18 @@ export class UploadsService {
       .webp({ quality: 80 })
       .toBuffer();
 
+    const folderPrefix =
+      env.NODE_ENV === 'production' ? 'prod' : env.NODE_ENV === 'test' ? 'test' : 'dev';
+    const primaryKey = `${folderPrefix}/pensions/${primaryFilename}`;
+    const thumbnailKey = `${folderPrefix}/pensions/${thumbnailFilename}`;
+
     if (this.s3Client && this.publicBaseUrl) {
       try {
         await Promise.all([
           this.s3Client.send(
             new PutObjectCommand({
               Bucket: this.bucketName,
-              Key: primaryFilename,
+              Key: primaryKey,
               Body: primaryProcessed.data,
               ContentType: 'image/webp',
             }),
@@ -145,7 +150,7 @@ export class UploadsService {
           this.s3Client.send(
             new PutObjectCommand({
               Bucket: this.bucketName,
-              Key: thumbnailFilename,
+              Key: thumbnailKey,
               Body: thumbProcessed,
               ContentType: 'image/webp',
             }),
@@ -157,8 +162,8 @@ export class UploadsService {
       }
 
       return {
-        url: `${this.publicBaseUrl}/${primaryFilename}`,
-        thumbnailUrl: `${this.publicBaseUrl}/${thumbnailFilename}`,
+        url: `${this.publicBaseUrl}/${primaryKey}`,
+        thumbnailUrl: `${this.publicBaseUrl}/${thumbnailKey}`,
         width: primaryProcessed.info.width,
         height: primaryProcessed.info.height,
         format: 'webp',
@@ -166,10 +171,11 @@ export class UploadsService {
       };
     }
 
-    await this.ensureUploadDir();
+    const localTargetDir = path.join(this.uploadDir, folderPrefix, 'pensions');
+    await fs.mkdir(localTargetDir, { recursive: true });
 
-    const primaryFilePath = path.join(this.uploadDir, primaryFilename);
-    const thumbnailFilePath = path.join(this.uploadDir, thumbnailFilename);
+    const primaryFilePath = path.join(localTargetDir, primaryFilename);
+    const thumbnailFilePath = path.join(localTargetDir, thumbnailFilename);
 
     await Promise.all([
       fs.writeFile(primaryFilePath, primaryProcessed.data),
@@ -177,8 +183,8 @@ export class UploadsService {
     ]);
 
     return {
-      url: `/uploads/${primaryFilename}`,
-      thumbnailUrl: `/uploads/${thumbnailFilename}`,
+      url: `/uploads/${primaryKey}`,
+      thumbnailUrl: `/uploads/${thumbnailKey}`,
       width: primaryProcessed.info.width,
       height: primaryProcessed.info.height,
       format: 'webp',
