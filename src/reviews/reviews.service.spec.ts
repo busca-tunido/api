@@ -181,7 +181,6 @@ describe('ReviewsService', () => {
       mockPrisma.review.update.mockResolvedValue({
         id: 'rev-1',
         helpfulUserIds: ['student-1'],
-        helpfulVotesCount: 1,
       });
 
       const result = await service.voteHelpful('rev-1', 'student-1');
@@ -191,7 +190,6 @@ describe('ReviewsService', () => {
           where: { id: 'rev-1' },
           data: {
             helpfulUserIds: { set: ['student-1'] },
-            helpfulVotesCount: 1,
           },
         }),
       );
@@ -205,7 +203,6 @@ describe('ReviewsService', () => {
       mockPrisma.review.update.mockResolvedValue({
         id: 'rev-1',
         helpfulUserIds: [],
-        helpfulVotesCount: 0,
       });
 
       const result = await service.voteHelpful('rev-1', 'student-1');
@@ -215,7 +212,6 @@ describe('ReviewsService', () => {
           where: { id: 'rev-1' },
           data: {
             helpfulUserIds: { set: [] },
-            helpfulVotesCount: 0,
           },
         }),
       );

@@ -1,6 +1,4 @@
-import { PrismaPg } from '@prisma/adapter-pg';
 import { type AmenityCategory, PrismaClient } from '@prisma/client';
-import { Pool } from 'pg';
 
 try {
   process.loadEnvFile?.();
@@ -319,15 +317,13 @@ export const assignCityToUniversity = (
   return santiago || cities[0];
 };
 
-export const createPrismaClient = (): { prisma: PrismaClient; pool: Pool } => {
+export const createPrismaClient = (): { prisma: PrismaClient } => {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error('DATABASE_URL environment variable is required.');
   }
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaPg(pool);
-  const prisma = new PrismaClient({ adapter });
-  return { prisma, pool };
+  const prisma = new PrismaClient();
+  return { prisma };
 };
 
 export const chunkArray = <T>(array: readonly T[], size: number): T[][] => {

@@ -253,7 +253,6 @@ export class ReviewsService {
         userId: user.id,
         isVerifiedResident: user.isEmailVerified,
         helpfulUserIds: [],
-        helpfulVotesCount: 0,
       },
     });
 
@@ -371,7 +370,6 @@ export class ReviewsService {
       where: { id },
       data: {
         helpfulUserIds: { set: updatedHelpful },
-        helpfulVotesCount: updatedHelpful.length,
       },
     });
 
