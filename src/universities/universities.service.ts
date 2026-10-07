@@ -53,9 +53,57 @@ export class UniversitiesService {
       where.city = { contains: city, mode: 'insensitive' };
     }
 
-    return this.prisma.university.findMany({
-      where,
-      orderBy: { name: 'asc' },
+    const [universities, activePensions] = await Promise.all([
+      this.prisma.university.findMany({
+        where,
+        orderBy: { name: 'asc' },
+        select: {
+          id: true,
+          name: true,
+          shortName: true,
+          emailDomains: true,
+          city: true,
+          address: true,
+          latitude: true,
+          longitude: true,
+          _count: {
+            select: {
+              students: true,
+            },
+          },
+        },
+      }),
+      this.prisma.pension.findMany({
+        where: { deletedAt: null, isActive: true },
+        select: {
+          nearbyUniversities: true,
+        },
+      }),
+    ]);
+
+    const countMap = new Map<string, number>();
+    for (const pension of activePensions ?? []) {
+      if (Array.isArray(pension?.nearbyUniversities)) {
+        for (const nu of pension.nearbyUniversities) {
+          if (nu?.universityId) {
+            countMap.set(nu.universityId, (countMap.get(nu.universityId) ?? 0) + 1);
+          }
+        }
+      }
+    }
+
+    return universities.map((u) => ({
+      ...u,
+      _count: {
+        students: u._count?.students ?? 0,
+        nearbyPensions: countMap.get(u.id) ?? 0,
+      },
+    }));
+  }
+
+  async findById(id: string): Promise<unknown> {
+    const university = await this.prisma.university.findUnique({
+      where: { id, deletedAt: null },
       select: {
         id: true,
         name: true,
@@ -65,39 +113,11 @@ export class UniversitiesService {
         address: true,
         latitude: true,
         longitude: true,
+        createdAt: true,
+        updatedAt: true,
         _count: {
           select: {
             students: true,
-            nearbyPensions: true,
-          },
-        },
-      },
-    });
-  }
-
-  async findById(id: string): Promise<unknown> {
-    const university = await this.prisma.university.findUnique({
-      where: { id, deletedAt: null },
-      include: {
-        nearbyPensions: {
-          include: {
-            pension: {
-              select: {
-                id: true,
-                slug: true,
-                title: true,
-                baseMonthlyPrice: true,
-                ratingAverage: true,
-                ratingCount: true,
-              },
-            },
-          },
-          take: 10,
-        },
-        _count: {
-          select: {
-            students: true,
-            nearbyPensions: true,
           },
         },
       },
@@ -107,7 +127,51 @@ export class UniversitiesService {
       throw new NotFoundException(`University '${id}' not found`);
     }
 
-    return university;
+    const [nearbyPensions, nearbyPensionsCount] = await Promise.all([
+      this.prisma.pension.findMany({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          nearbyUniversities: {
+            some: {
+              universityId: id,
+            },
+          },
+        },
+        take: 10,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          baseMonthlyPrice: true,
+          ratingAverage: true,
+          ratingCount: true,
+        },
+      }),
+      this.prisma.pension.count({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          nearbyUniversities: {
+            some: {
+              universityId: id,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      ...university,
+      nearbyPensions: nearbyPensions.map((pension) => ({
+        ...pension,
+        pension,
+      })),
+      _count: {
+        students: university._count?.students ?? 0,
+        nearbyPensions: nearbyPensionsCount,
+      },
+    };
   }
 
   async create(dto: CreateUniversityDto): Promise<unknown> {

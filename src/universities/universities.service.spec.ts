@@ -11,6 +11,10 @@ type MockPrismaService = {
     create: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
+  pension: {
+    findMany: ReturnType<typeof vi.fn>;
+    count: ReturnType<typeof vi.fn>;
+  };
 };
 
 describe('UniversitiesService', () => {
@@ -26,6 +30,10 @@ describe('UniversitiesService', () => {
         create: vi.fn(),
         update: vi.fn(),
       },
+      pension: {
+        findMany: vi.fn().mockResolvedValue([]),
+        count: vi.fn().mockResolvedValue(0),
+      },
     };
 
     service = new UniversitiesService(mockPrisma as unknown as PrismaService);
@@ -33,7 +41,10 @@ describe('UniversitiesService', () => {
 
   it('should return all universities', async () => {
     mockPrisma.university.findMany.mockResolvedValue([
-      { id: 'uni-1', name: 'Universidad de Chile' },
+      { id: 'uni-1', name: 'Universidad de Chile', _count: { students: 0 } },
+    ]);
+    mockPrisma.pension.findMany.mockResolvedValue([
+      { nearbyUniversities: [{ universityId: 'uni-1' }] },
     ]);
 
     const result = await service.findAll('Santiago');
@@ -45,7 +56,10 @@ describe('UniversitiesService', () => {
     mockPrisma.university.findUnique.mockResolvedValue({
       id: 'uni-1',
       name: 'Universidad de Chile',
+      _count: { students: 5 },
     });
+    mockPrisma.pension.findMany.mockResolvedValue([{ id: 'pen-1', title: 'Pension 1' }]);
+    mockPrisma.pension.count.mockResolvedValue(1);
 
     const result = await service.findById('uni-1');
     expect((result as { id: string }).id).toBe('uni-1');
