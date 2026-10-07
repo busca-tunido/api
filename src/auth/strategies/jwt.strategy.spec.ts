@@ -1,5 +1,4 @@
 import { UnauthorizedException } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
 import { Role } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../prisma/prisma.service.js';
@@ -12,14 +11,9 @@ type MockPrismaService = {
   };
 };
 
-type MockConfigService = {
-  get: ReturnType<typeof vi.fn>;
-};
-
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
   let mockPrisma: MockPrismaService;
-  let mockConfigService: MockConfigService;
 
   beforeEach(() => {
     mockPrisma = {
@@ -28,14 +22,7 @@ describe('JwtStrategy', () => {
       },
     };
 
-    mockConfigService = {
-      get: vi.fn().mockReturnValue('test-secret-key-12345'),
-    };
-
-    strategy = new JwtStrategy(
-      mockConfigService as unknown as ConfigService,
-      mockPrisma as unknown as PrismaService,
-    );
+    strategy = new JwtStrategy(mockPrisma as unknown as PrismaService);
   });
 
   describe('validate', () => {

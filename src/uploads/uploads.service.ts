@@ -8,8 +8,8 @@ import {
   InternalServerErrorException,
   Optional,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import sharp, { type Metadata } from 'sharp';
+import { env } from '../env.js';
 
 export type ProcessedImageResult = {
   url: string;
@@ -18,6 +18,15 @@ export type ProcessedImageResult = {
   height: number;
   format: 'webp';
   size: number;
+};
+
+export type UploadsStorageConfig = {
+  readonly endpoint?: string | null;
+  readonly region?: string;
+  readonly accessKeyId?: string;
+  readonly secretAccessKey?: string;
+  readonly bucketName?: string;
+  readonly publicBaseUrl?: string | null;
 };
 
 const SUPPORTED_FORMATS = new Set(['jpeg', 'jpg', 'png', 'webp', 'avif', 'heif', 'gif', 'tiff']);
@@ -31,29 +40,21 @@ export class UploadsService {
   private readonly bucketName: string;
   private readonly publicBaseUrl: string | null = null;
 
-  constructor(@Optional() private readonly configService?: ConfigService) {
+  constructor(@Optional() storageConfig?: UploadsStorageConfig) {
     this.uploadDir = path.resolve(process.cwd(), 'uploads');
 
     const endpoint =
-      this.configService?.get<string>('PUBLIC_AWS_ENDPOINT_URL_S3') ||
-      this.configService?.get<string>('AWS_ENDPOINT_URL_S3') ||
-      process.env.PUBLIC_AWS_ENDPOINT_URL_S3 ||
-      process.env.AWS_ENDPOINT_URL_S3;
+      storageConfig !== undefined
+        ? (storageConfig.endpoint ?? undefined)
+        : env.PUBLIC_AWS_ENDPOINT_URL_S3 || env.AWS_ENDPOINT_URL_S3;
 
     if (endpoint) {
       const region =
-        this.configService?.get<string>('PUBLIC_AWS_REGION') ||
-        this.configService?.get<string>('AWS_REGION') ||
-        process.env.PUBLIC_AWS_REGION ||
-        process.env.AWS_REGION ||
-        'us-east-2';
+        storageConfig?.region ?? env.PUBLIC_AWS_REGION ?? env.AWS_REGION ?? 'us-east-2';
 
-      const accessKeyId =
-        this.configService?.get<string>('AWS_ACCESS_KEY_ID') || process.env.AWS_ACCESS_KEY_ID;
+      const accessKeyId = storageConfig?.accessKeyId ?? env.AWS_ACCESS_KEY_ID;
 
-      const secretAccessKey =
-        this.configService?.get<string>('AWS_SECRET_ACCESS_KEY') ||
-        process.env.AWS_SECRET_ACCESS_KEY;
+      const secretAccessKey = storageConfig?.secretAccessKey ?? env.AWS_SECRET_ACCESS_KEY;
 
       const credentials =
         accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : undefined;
@@ -66,17 +67,12 @@ export class UploadsService {
       });
 
       this.bucketName =
-        this.configService?.get<string>('PUBLIC_STORAGE_BUCKET') ||
-        this.configService?.get<string>('STORAGE_BUCKET') ||
-        process.env.PUBLIC_STORAGE_BUCKET ||
-        process.env.STORAGE_BUCKET ||
-        'uploads';
+        storageConfig?.bucketName ?? env.PUBLIC_STORAGE_BUCKET ?? env.STORAGE_BUCKET ?? 'uploads';
 
       const customPublicUrl =
-        this.configService?.get<string>('PUBLIC_NEON_STORAGE_BASE_URL') ||
-        this.configService?.get<string>('NEON_STORAGE_PUBLIC_BASE_URL') ||
-        process.env.PUBLIC_NEON_STORAGE_BASE_URL ||
-        process.env.NEON_STORAGE_PUBLIC_BASE_URL;
+        storageConfig !== undefined
+          ? (storageConfig.publicBaseUrl ?? undefined)
+          : env.PUBLIC_NEON_STORAGE_BASE_URL || env.NEON_STORAGE_PUBLIC_BASE_URL;
 
       const cleanEndpoint = endpoint.replace(/\/+$/, '');
       this.publicBaseUrl = customPublicUrl

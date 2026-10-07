@@ -78,6 +78,8 @@ Every backend feature, fix, or refactor must strictly adhere to the following wo
 
 - `pnpm run check`: Unified command combining formatting, import organization, and safe lint autofixes (`biome check --write .`). Agents must run this after modifying code.
 - `pnpm run review`: Read-only verification check (`biome check .`) that returns an error exit code if any unresolved formatting or lint errors exist. Mandatory for validation.
+- `pnpm exec tsc --noEmit -p tsconfig.build.json`: Decoupled incremental static type verification (~5s). Utilizes persistent `.tsbuildinfo` without wiping `dist/` or regenerating Prisma client unnecessarily.
+- `pnpm run build`: Full production bundle (`prisma generate && nest build`). Reserved for deployment and final release builds.
 
 > [!IMPORTANT]
 > **Always Use Global `pnpm run <script>` (Do Not Target Individual Files)**:
@@ -136,7 +138,7 @@ tasks/
 
 | Rol de Agente                      | Ámbito de Trabajo                                                      | Reglas de Asignación                                                                                                                                                                                                                               |
 | ---------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Worker Agent (N instancias)**    | Ramas/Worktrees independientes (`worktree-task-A`, `worktree-task-B`). | Se le asigna **1 sola tarea paralela**. Solo puede editar sus `Exclusive Target Files`. Verifica localmente (`pnpm run check && pnpm run review` and `pnpm run build:local`). Al terminar, realiza su commit convencional y se detiene.              |
+| **Worker Agent (N instancias)**    | Ramas/Worktrees independientes (`worktree-task-A`, `worktree-task-B`). | Se le asigna **1 sola tarea paralela**. Solo puede editar sus `Exclusive Target Files`. Verifica con `pnpm run check && pnpm run review`. No ejecuta builds pesados (`nest build`). Al terminar, realiza su commit convencional y se detiene.              |
 | **Integrator Agent (1 instancia)** | Rama base de integración (`main` o `staging`).                         | Se asigna a tareas con etiqueta `Assigned Role: Integrator Agent`. No programa lógica de negocio nueva. Realiza merges/rebases, modifica archivos compartidos (`Shared / Integration Points`) como `app.module.ts` y valida la compilación global. |
 
 5. **Wave Sync Gate (`task-sync-wave-N.md`)**:
@@ -146,7 +148,7 @@ tasks/
    - Follows the integration checklist:
      1. Merge or rebase worker branches/worktrees into the base branch.
      2. Update shared integration hubs (e.g., register new feature modules in `src/app.module.ts`).
-     3. Run global repository verification (`pnpm run check && pnpm run review` and `pnpm run build:local` / `pnpm build`).
+     3. Run global repository verification (`pnpm run check && pnpm run review`, `pnpm exec tsc --noEmit -p tsconfig.build.json`, and `pnpm run test`).
      4. Resolve any interoperability or type conflicts as the sole authorized agent.
      5. Teardown temporary worktrees (`git worktree remove`).
 
@@ -191,7 +193,8 @@ tasks/
 ## Verification
 
 - Code Quality (Biome): `pnpm run check && pnpm run review`
-- Build & Tests: `pnpm run build:local` (or `pnpm build`)
+- Typecheck: `pnpm exec tsc --noEmit -p tsconfig.build.json`
+- Tests: `pnpm run test`
 ```
 
 <!-- BEGIN:nestjs-agent-rules -->

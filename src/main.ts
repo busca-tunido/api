@@ -2,13 +2,13 @@ import * as path from 'node:path';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
+import { env } from './env.js';
 
 async function bootstrap(): Promise<void> {
   const fastifyAdapter = new FastifyAdapter();
@@ -31,14 +31,8 @@ async function bootstrap(): Promise<void> {
     prefix: '/uploads/',
   });
 
-  const configService = app.get(ConfigService);
-  const corsOrigin = configService.getOrThrow<string>('PUBLIC_CORS_ORIGIN');
-  const allowedOrigins: Array<string | RegExp> = [
-    corsOrigin,
-    /https:\/\/.*\.vercel\.app$/,
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ];
+  const corsOrigin = env.PUBLIC_CORS_ORIGIN;
+  const allowedOrigins: Array<string | RegExp> = [corsOrigin];
 
   app.enableCors({
     origin: allowedOrigins,
@@ -64,8 +58,7 @@ async function bootstrap(): Promise<void> {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = configService.getOrThrow<number>('PUBLIC_PORT');
-  await app.listen(port, '0.0.0.0');
+  await app.listen(env.PORT, '0.0.0.0');
 }
 
 await bootstrap();
