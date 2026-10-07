@@ -1,9 +1,10 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "library"
 }
 
 enum Role {
@@ -78,28 +79,69 @@ enum StayDurationCategory {
   MORE_THAN_A_YEAR
 }
 
+type GeoPoint {
+  type        String   @default("Point")
+  coordinates Float[]
+}
+
+type EmbeddedPensionImage {
+  id           String   @default(cuid())
+  url          String
+  thumbnailUrl String
+  caption      String?
+  isFeatured   Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+type EmbeddedRoom {
+  id                 String    @default(cuid())
+  roomNumber         String?
+  title              String
+  description        String?
+  type               String    @default("SINGLE")
+  monthlyPrice       Int
+  deposit            Int?
+  hasPrivateBathroom Boolean   @default(false)
+  totalBeds          Int       @default(1)
+  availableBeds      Int       @default(1)
+  isAvailable        Boolean   @default(true)
+  images             String[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now())
+  deletedAt          DateTime?
+}
+
+type EmbeddedNearbyUniversity {
+  universityId   String  @db.ObjectId
+  name           String
+  shortName      String?
+  distanceMeters Int
+  walkingMinutes Int?
+  transitMinutes Int?
+}
+
 model User {
-  id              String      @id @default(uuid())
-  email           String      @unique
-  passwordHash    String
-  firstName       String
-  lastName        String
-  phone           String?     @db.VarChar(30)
-  avatarUrl       String?
-  role            Role        @default(STUDENT)
-  isEmailVerified Boolean     @default(false)
-  universityId    String?
-  university      University? @relation(fields: [universityId], references: [id], onDelete: SetNull)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  deletedAt       DateTime?
+  id                 String            @id @default(auto()) @map("_id") @db.ObjectId
+  email              String            @unique
+  passwordHash       String
+  firstName          String
+  lastName           String
+  phone              String?
+  avatarUrl          String?
+  role               Role              @default(STUDENT)
+  isEmailVerified    Boolean           @default(false)
+  universityId       String?           @db.ObjectId
+  university         University?       @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  favoritePensionIds String[]          @db.ObjectId
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  deletedAt          DateTime?
 
   managedPensions    Pension[]         @relation("LandlordPensions")
   submittedPensions  Pension[]         @relation("SubmittedPensions")
   reviews            Review[]
-  helpfulVotes       ReviewHelpfulVote[]
   reports            Report[]
-  favorites          Favorite[]
   submittedProposals PensionProposal[] @relation("SubmittedProposals")
   reviewedProposals  PensionProposal[] @relation("ReviewedProposals")
 
@@ -109,9 +151,9 @@ model User {
 }
 
 model University {
-  id           String    @id @default(uuid())
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   name         String
-  shortName    String?   @db.VarChar(50)
+  shortName    String?
   emailDomains String[]  @default([])
   city         String
   address      String
@@ -121,8 +163,7 @@ model University {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  students       User[]
-  nearbyPensions PensionUniversity[]
+  students User[]
 
   @@index([city])
   @@index([deletedAt])
@@ -130,8 +171,8 @@ model University {
 }
 
 model Pension {
-  id           String @id @default(uuid())
-  slug         String @unique
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  slug         String    @unique
   title        String
   description  String
   address      String
@@ -139,52 +180,54 @@ model Pension {
   neighborhood String
   latitude     Float
   longitude    Float
+  location     GeoPoint?
 
   contactName     String?
-  contactPhone    String? @db.VarChar(30)
-  contactWhatsapp String? @db.VarChar(30)
+  contactPhone    String?
+  contactWhatsapp String?
   contactEmail    String?
 
-  baseMonthlyPrice Decimal  @db.Decimal(10, 2)
-  deposit          Decimal? @db.Decimal(10, 2)
-  currency         String   @default("CLP") @db.VarChar(3)
+  baseMonthlyPrice Int
+  deposit          Int?
+  currency         String @default("CLP")
 
   waterIncluded       Boolean @default(true)
   electricityIncluded Boolean @default(true)
   gasIncluded         Boolean @default(true)
   internetIncluded    Boolean @default(true)
 
-  curfewTime       String?          @db.VarChar(5)
+  curfewTime       String?
   guestsAllowed    Boolean          @default(false)
   smokingAllowed   Boolean          @default(false)
   petsAllowed      Boolean          @default(false)
   genderPreference GenderPreference @default(ANY)
-  quietHoursStart  String?          @db.VarChar(5)
-  quietHoursEnd    String?          @db.VarChar(5)
+  quietHoursStart  String?
+  quietHoursEnd    String?
 
   verificationStatus VerificationStatus @default(UNVERIFIED)
-  ratingAverage      Decimal            @default(0) @db.Decimal(3, 2)
+  ratingAverage      Float              @default(0)
   ratingCount        Int                @default(0)
+  communityScore     Float              @default(0)
   isActive           Boolean            @default(true)
 
-  landlordId String?
+  landlordId String? @db.ObjectId
   landlord   User?   @relation("LandlordPensions", fields: [landlordId], references: [id], onDelete: SetNull)
 
-  submittedById String?
+  submittedById String? @db.ObjectId
   submittedBy   User?   @relation("SubmittedPensions", fields: [submittedById], references: [id], onDelete: SetNull)
+
+  amenities          String[]                    @default([])
+  rooms              EmbeddedRoom[]
+  images             EmbeddedPensionImage[]
+  nearbyUniversities EmbeddedNearbyUniversity[]
+
+  reviews   Review[]
+  reports   Report[]
+  proposals PensionProposal[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-
-  rooms              Room[]
-  images             PensionImage[]
-  amenities          Amenity[]
-  reviews            Review[]
-  reports            Report[]
-  favorites          Favorite[]
-  proposals          PensionProposal[]
-  nearbyUniversities PensionUniversity[]
 
   @@index([city, neighborhood])
   @@index([baseMonthlyPrice])
@@ -194,106 +237,46 @@ model Pension {
   @@map("pensions")
 }
 
-model PensionUniversity {
-  pensionId      String
-  universityId   String
-  distanceMeters Int
-  walkingMinutes Int?   @db.SmallInt
-  transitMinutes Int?   @db.SmallInt
-
-  pension    Pension    @relation(fields: [pensionId], references: [id], onDelete: Cascade)
-  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
-
-  @@id([pensionId, universityId])
-  @@index([universityId])
-  @@map("pension_universities")
-}
-
-model Room {
-  id                 String    @id @default(uuid())
-  pensionId          String
-  roomNumber         String?   @db.VarChar(20)
-  title              String
-  description        String?
-  type               RoomType  @default(SINGLE)
-  monthlyPrice       Decimal   @db.Decimal(10, 2)
-  deposit            Decimal?  @db.Decimal(10, 2)
-  hasPrivateBathroom Boolean   @default(false)
-  totalBeds          Int       @default(1) @db.SmallInt
-  availableBeds      Int       @default(1) @db.SmallInt
-  isAvailable        Boolean   @default(true)
-  images             String[]  @default([])
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  deletedAt          DateTime?
-
-  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
-
-  @@index([pensionId])
-  @@index([isAvailable])
-  @@index([deletedAt])
-  @@map("rooms")
-}
-
-model PensionImage {
-  id         String    @id @default(uuid())
-  pensionId  String
-  url        String
-  caption    String?
-  isFeatured Boolean   @default(false)
-  sortOrder  Int       @default(0) @db.SmallInt
-  createdAt  DateTime  @default(now())
-  deletedAt  DateTime?
-
-  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
-
-  @@index([pensionId])
-  @@index([deletedAt])
-  @@map("pension_images")
-}
-
 model Amenity {
-  id        String          @id @default(uuid())
-  slug      String          @unique @db.VarChar(60)
-  name      String          @db.VarChar(100)
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String          @unique
+  name      String
   category  AmenityCategory @default(BASIC_UTILITY)
-  iconKey   String?         @db.VarChar(50)
+  iconKey   String?
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   deletedAt DateTime?
-
-  pensions Pension[]
 
   @@index([deletedAt])
   @@map("amenities")
 }
 
 model Review {
-  id                   String                @id @default(uuid())
-  pensionId            String
-  userId               String
-  overallRating        Int                   @db.SmallInt
-  cleanlinessRating    Int?                  @db.SmallInt
-  landlordRating       Int?                  @db.SmallInt
-  quietnessRating      Int?                  @db.SmallInt
-  wifiRating           Int?                  @db.SmallInt
+  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
+  pensionId            String                @db.ObjectId
+  userId               String                @db.ObjectId
+  overallRating        Int
+  cleanlinessRating    Int?
+  landlordRating       Int?
+  quietnessRating      Int?
+  wifiRating           Int?
   comment              String
   images               String[]              @default([])
   stayDurationCategory StayDurationCategory?
   stayStartDate        DateTime?
   stayEndDate          DateTime?
-  exactStayDays        Int?                  @db.SmallInt
+  exactStayDays        Int?
   isResidentVerified   Boolean               @default(false)
   isHidden             Boolean               @default(false)
   moderationReason     String?
-  moderatedById        String?
+  moderatedById        String?               @db.ObjectId
+  helpfulUserIds       String[]              @db.ObjectId
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   deletedAt            DateTime?
 
   pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  helpfulVotes ReviewHelpfulVote[]
 
   @@unique([pensionId, userId])
   @@index([pensionId])
@@ -303,24 +286,10 @@ model Review {
   @@map("reviews")
 }
 
-model ReviewHelpfulVote {
-  userId    String
-  reviewId  String
-  createdAt DateTime @default(now())
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-
-  @@id([userId, reviewId])
-  @@index([reviewId])
-  @@index([userId])
-  @@map("review_helpful_votes")
-}
-
 model Report {
-  id              String       @id @default(uuid())
-  pensionId       String
-  userId          String
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  pensionId       String       @db.ObjectId
+  userId          String       @db.ObjectId
   reason          ReportReason
   description     String
   status          ReportStatus @default(PENDING)
@@ -338,23 +307,11 @@ model Report {
   @@map("reports")
 }
 
-model Favorite {
-  userId    String
-  pensionId String
-  createdAt DateTime @default(now())
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pension Pension @relation(fields: [pensionId], references: [id], onDelete: Cascade)
-
-  @@id([userId, pensionId])
-  @@map("favorites")
-}
-
 model PensionProposal {
-  id              String         @id @default(uuid())
-  pensionId       String
-  submittedById   String
-  reviewedById    String?
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  pensionId       String         @db.ObjectId
+  submittedById   String         @db.ObjectId
+  reviewedById    String?        @db.ObjectId
   type            ProposalType   @default(BASIC_INFO)
   status          ProposalStatus @default(PENDING)
   proposedChanges Json

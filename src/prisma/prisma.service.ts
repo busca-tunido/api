@@ -1,8 +1,5 @@
 import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
-import { Pool } from 'pg';
-import { env } from '../env.js';
 import { createSoftDeleteExtension } from './prisma.extension.js';
 
 const createExtendedClient = (baseClient: PrismaClient): unknown => {
@@ -11,17 +8,8 @@ const createExtendedClient = (baseClient: PrismaClient): unknown => {
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  private readonly pool: Pool;
-
   constructor() {
-    const isProduction = env.NODE_ENV === 'production';
-    const pool = new Pool({
-      connectionString: env.DATABASE_URL,
-      ssl: isProduction ? { rejectUnauthorized: true } : undefined,
-    });
-    const adapter = new PrismaPg(pool);
-    super({ adapter });
-    this.pool = pool;
+    super();
 
     const extended = createExtendedClient(this);
     Object.assign(this, extended);
@@ -33,6 +21,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleDestroy(): Promise<void> {
     await this.$disconnect();
-    await this.pool.end();
   }
 }
