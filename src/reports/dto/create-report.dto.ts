@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ReportReason } from '@prisma/client';
-import { IsEnum, IsString, IsUUID, MinLength } from 'class-validator';
+import { IsEnum, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class CreateReportDto {
   @ApiProperty({ example: '00000000-0000-0000-0000-000000000000' })
@@ -14,5 +14,6 @@ export class CreateReportDto {
   @ApiProperty({ example: 'El precio cobrado no coincide con el publicado en el sitio web.' })
   @IsString()
   @MinLength(10)
+  @MaxLength(2000)
   description!: string;
 }

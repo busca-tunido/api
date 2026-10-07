@@ -147,7 +147,7 @@ export class AuthService {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await this.prisma.user.findUnique({
       where: { email: normalizedEmail },
-      select: { id: true, role: true, deletedAt: true },
+      select: { id: true, deletedAt: true },
     });
 
     if (!user || user.deletedAt !== null) {
@@ -156,7 +156,6 @@ export class AuthService {
 
     return {
       exists: true,
-      role: user.role,
     };
   }
 

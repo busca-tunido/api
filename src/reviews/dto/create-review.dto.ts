@@ -1,7 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { StayDurationCategory } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class CreateReviewDto {
   @ApiProperty({ example: 5, minimum: 1, maximum: 5 })
@@ -46,6 +56,7 @@ export class CreateReviewDto {
   @ApiProperty({ example: 'Excelente pensión y ambiente de estudio.' })
   @IsString()
   @MinLength(10)
+  @MaxLength(2000)
   comment!: string;
 
   @ApiPropertyOptional({ example: ['https://example.com/review1.jpg'] })
