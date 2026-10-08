@@ -78,6 +78,46 @@ async function bootstrap(): Promise<void> {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
+  if (env.NODE_ENV !== 'production') {
+    app.enableShutdownHooks();
+
+    let isTerminating = false;
+    const handleShutdown = async (): Promise<void> => {
+      if (isTerminating) {
+        process.exit(1);
+      }
+      isTerminating = true;
+
+      try {
+        await app.close();
+      } catch {
+      } finally {
+        process.exit(0);
+      }
+    };
+
+    process.on('SIGINT', () => {
+      void handleShutdown();
+    });
+    process.on('SIGTERM', () => {
+      void handleShutdown();
+    });
+
+    if (process.platform === 'win32' && process.stdin.isTTY) {
+      import('node:readline')
+        .then(({ createInterface }) => {
+          const rl = createInterface({
+            input: process.stdin,
+            output: process.stdout,
+          });
+          rl.on('SIGINT', () => {
+            process.emit('SIGINT');
+          });
+        })
+        .catch(() => {});
+    }
+  }
+
   await app.listen(env.PORT, '0.0.0.0');
 }
 
