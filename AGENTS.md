@@ -56,6 +56,9 @@ The backend connects directly to MongoDB Atlas M0 clusters (`DATABASE_URL`) with
 1. **Conventional Commits (Concise, Single-Line Only)**:
    - All git commit messages must strictly follow the Conventional Commits specification (e.g., `feat`, `fix`, `chore`, `refactor`, `test`, `docs`).
    - Commit messages must be concise, single-line only, and omit any extended body description.
+1. **Feature Branching & Integration to Main**:
+   - Every significant change, new feature, or non-trivial bug fix must be grouped and developed within a dedicated branch (e.g., `feat/<name>`, `fix/<name>`).
+   - Upon completion, testing, and verification, integrate (merge) the branch cleanly into `main` and delete the feature branch. Direct uncoordinated work on `main` is prohibited for major tasks.
 1. **Strictly for Registered & Authenticated Users (No Guests Allowed)**:
    - The platform does not permit unauthenticated/guest interactions or guest contributions.
    - All community actions (publishing reviews, submitting edit proposals, saving favorites, filing reports, uploading photos) strictly require authenticated session JWT tokens (`JwtAuthGuard`).
