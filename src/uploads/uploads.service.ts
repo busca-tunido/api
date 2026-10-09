@@ -1,6 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import { promises as fs } from 'node:fs';
-import * as path from 'node:path';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   BadRequestException,
@@ -35,14 +33,11 @@ const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
 
 @Injectable()
 export class UploadsService {
-  private readonly uploadDir: string;
   private readonly s3Client: S3Client | null = null;
   private readonly bucketName: string;
   private readonly publicBaseUrl: string | null = null;
 
   constructor(@Optional() storageConfig?: UploadsStorageConfig) {
-    this.uploadDir = path.resolve(process.cwd(), 'uploads');
-
     const endpoint =
       storageConfig !== undefined
         ? (storageConfig.endpoint ?? undefined)
@@ -85,13 +80,7 @@ export class UploadsService {
     return this.s3Client !== null;
   }
 
-  async ensureUploadDir(): Promise<void> {
-    try {
-      await fs.mkdir(this.uploadDir, { recursive: true });
-    } catch {
-      // Ignore if already exists
-    }
-  }
+  async ensureUploadDir(): Promise<void> {}
 
   async processImage(buffer: Buffer, _originalFilename?: string): Promise<ProcessedImageResult> {
     if (!buffer || buffer.length === 0) {
@@ -132,7 +121,11 @@ export class UploadsService {
       .toBuffer();
 
     const folderPrefix =
-      env.NODE_ENV === 'production' ? 'prod' : env.NODE_ENV === 'test' ? 'test' : 'dev';
+      env.NODE_ENV === 'production'
+        ? 'v1/production'
+        : env.NODE_ENV === 'test'
+          ? 'v1/staging'
+          : 'v1/local';
     const primaryKey = `${folderPrefix}/pensions/${primaryFilename}`;
     const thumbnailKey = `${folderPrefix}/pensions/${thumbnailFilename}`;
 
@@ -171,24 +164,6 @@ export class UploadsService {
       };
     }
 
-    const localTargetDir = path.join(this.uploadDir, folderPrefix, 'pensions');
-    await fs.mkdir(localTargetDir, { recursive: true });
-
-    const primaryFilePath = path.join(localTargetDir, primaryFilename);
-    const thumbnailFilePath = path.join(localTargetDir, thumbnailFilename);
-
-    await Promise.all([
-      fs.writeFile(primaryFilePath, primaryProcessed.data),
-      fs.writeFile(thumbnailFilePath, thumbProcessed),
-    ]);
-
-    return {
-      url: `/uploads/${primaryKey}`,
-      thumbnailUrl: `/uploads/${thumbnailKey}`,
-      width: primaryProcessed.info.width,
-      height: primaryProcessed.info.height,
-      format: 'webp',
-      size: primaryProcessed.info.size,
-    };
+    throw new InternalServerErrorException('Remote storage client is not configured');
   }
 }

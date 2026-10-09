@@ -1,8 +1,6 @@
-import * as path from 'node:path';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyRateLimit from '@fastify/rate-limit';
-import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
@@ -37,17 +35,6 @@ async function bootstrap(): Promise<void> {
     limits: {
       fileSize: 15 * 1024 * 1024,
       files: 5,
-    },
-  });
-
-  await registerPlugin(fastifyStatic, {
-    root: path.resolve(process.cwd(), 'uploads'),
-    prefix: '/uploads/',
-    dotfiles: 'ignore',
-    index: false,
-    setHeaders: (res: { setHeader: (name: string, value: string) => void }) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     },
   });
 

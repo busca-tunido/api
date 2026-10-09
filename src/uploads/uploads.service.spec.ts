@@ -11,8 +11,8 @@ describe('UploadsService', () => {
     service = new UploadsService({ endpoint: null });
   });
 
-  describe('processImage - local fallback mode', () => {
-    it('should convert a valid PNG image to WebP with responsive variants and local path', async () => {
+  describe('processImage - storage not configured', () => {
+    it('should throw InternalServerErrorException if storage client is disabled', async () => {
       const samplePng = await sharp({
         create: {
           width: 50,
@@ -24,17 +24,10 @@ describe('UploadsService', () => {
         .png()
         .toBuffer();
 
-      const result = await service.processImage(samplePng, 'test-room.png');
-
       expect(service.isRemoteStorageEnabled()).toBe(false);
-      expect(result.format).toBe('webp');
-      expect(result.url).toMatch(/^\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+\.webp$/);
-      expect(result.thumbnailUrl).toMatch(
-        /^\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+-thumb\.webp$/,
+      await expect(service.processImage(samplePng, 'test-room.png')).rejects.toThrow(
+        InternalServerErrorException,
       );
-      expect(result.width).toBe(50);
-      expect(result.height).toBe(50);
-      expect(result.size).toBeGreaterThan(0);
     });
 
     it('should throw BadRequestException if buffer is empty', async () => {
@@ -53,7 +46,7 @@ describe('UploadsService', () => {
   });
 
   describe('processImage - Neon S3 storage mode', () => {
-    it('should upload to S3 and return absolute public URLs', async () => {
+    it('should upload to S3 and return absolute public URLs with v1 path', async () => {
       const storageConfig: UploadsStorageConfig = {
         endpoint: 'https://br-sample.storage.c-2.us-east-2.aws.neon.tech',
         accessKeyId: 'test-key',
@@ -83,10 +76,10 @@ describe('UploadsService', () => {
       expect(sendSpy).toHaveBeenCalledTimes(2);
       expect(result.format).toBe('webp');
       expect(result.url).toMatch(
-        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+\.webp$/,
+        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/v1\/(local|staging|production)\/pensions\/[a-f0-9-]+\.webp$/,
       );
       expect(result.thumbnailUrl).toMatch(
-        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/(dev|test|prod)\/pensions\/[a-f0-9-]+-thumb\.webp$/,
+        /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/v1\/(local|staging|production)\/pensions\/[a-f0-9-]+-thumb\.webp$/,
       );
 
       sendSpy.mockRestore();

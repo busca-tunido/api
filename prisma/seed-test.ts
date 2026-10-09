@@ -1,6 +1,4 @@
 import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
 import { fakerES_MX as faker } from '@faker-js/faker';
 import type {
   GenderPreference,
@@ -23,28 +21,34 @@ import {
   slugify,
 } from './seed-utils.js';
 
-interface AssetsManifest {
-  hogares: {
-    alta: string[];
-    media: string[];
-    baja: string[];
-  };
-  habitaciones: {
-    alta: string[];
-    media: string[];
-    baja: string[];
-  };
-  perfiles: {
-    duenos: {
-      hombres: string[];
-      mujeres: string[];
-    };
-    estudiantes: {
-      hombres: string[];
-      mujeres: string[];
-    };
-  };
-}
+const TIER_MAP = {
+  alta: 'high',
+  media: 'mid',
+  baja: 'budget',
+} as const;
+
+const CURATED_COUNTS = {
+  houses: {
+    high: 56,
+    mid: 56,
+    budget: 58,
+  },
+  rooms: {
+    high: 75,
+    mid: 75,
+    budget: 76,
+  },
+  profiles: {
+    landlords: {
+      men: 150,
+      women: 150,
+    },
+    students: {
+      men: 150,
+      women: 150,
+    },
+  },
+} as const;
 
 interface EmbeddedPensionImageSeed {
   id: string;
@@ -83,14 +87,22 @@ interface EmbeddedNearbyUniversitySeed {
   transitMinutes: number;
 }
 
-const STORAGE_BASE_URL =
+const STORAGE_BASE_URL = (
   process.env.PUBLIC_NEON_STORAGE_BASE_URL ||
-  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads';
-const ENV_PREFIX = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads'
+).replace(/\/+$/, '');
 
-const getAssetUrl = (relPath: string): string => {
-  return `${STORAGE_BASE_URL}/${ENV_PREFIX}/${relPath}`;
-};
+const getHouseImageUrl = (tier: 'alta' | 'media' | 'baja', index: number): string =>
+  `${STORAGE_BASE_URL}/v1/shared/curated/houses/${TIER_MAP[tier]}/${index}.webp`;
+
+const getRoomImageUrl = (tier: 'alta' | 'media' | 'baja', index: number): string =>
+  `${STORAGE_BASE_URL}/v1/shared/curated/rooms/${TIER_MAP[tier]}/${index}.webp`;
+
+const getLandlordAvatarUrl = (isMale: boolean, index: number): string =>
+  `${STORAGE_BASE_URL}/v1/shared/curated/profiles/landlords/${isMale ? 'men' : 'women'}/${(index % 150) + 1}.webp`;
+
+const getStudentAvatarUrl = (isMale: boolean, index: number): string =>
+  `${STORAGE_BASE_URL}/v1/shared/curated/profiles/students/${isMale ? 'men' : 'women'}/${(index % 150) + 1}.webp`;
 
 const CITY_BASE_MEDIAN: Record<string, number> = {
   Santiago: 290000,
@@ -372,12 +384,6 @@ const REVIEW_COMMENTS = [
 const run = async (): Promise<void> => {
   console.log('=== Starting Enhanced Seed Pipeline on MongoDB Atlas ===');
 
-  const manifestPath = path.resolve(process.cwd(), 'prisma', 'data', 'assets-manifest.json');
-  if (!fs.existsSync(manifestPath)) {
-    throw new Error(`Assets manifest not found at ${manifestPath}`);
-  }
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')) as AssetsManifest;
-
   const { prisma } = createPrismaClient();
 
   console.log('--- Cleaning MongoDB Collections ---');
@@ -490,7 +496,7 @@ const run = async (): Promise<void> => {
       lastName: 'Moderador',
       role: 'MODERATOR' as Role,
       isEmailVerified: true,
-      avatarUrl: getAssetUrl(manifest.perfiles.duenos.hombres[0]),
+      avatarUrl: `${STORAGE_BASE_URL}/v1/shared/avatars/avatar-moderator.webp`,
       deletedAt: null,
     },
   });
@@ -512,7 +518,7 @@ const run = async (): Promise<void> => {
       phone: '+56912345678',
       role: 'LANDLORD' as Role,
       isEmailVerified: true,
-      avatarUrl: getAssetUrl(manifest.perfiles.duenos.hombres[0]),
+      avatarUrl: getLandlordAvatarUrl(true, 0),
       deletedAt: null,
     },
   });
@@ -533,10 +539,6 @@ const run = async (): Promise<void> => {
       ? MALE_NAMES[i % MALE_NAMES.length]
       : FEMALE_NAMES[i % FEMALE_NAMES.length];
     const lastName = LAST_NAMES[i % LAST_NAMES.length];
-    const avatarRel = isMale
-      ? manifest.perfiles.duenos.hombres[i % manifest.perfiles.duenos.hombres.length]
-      : manifest.perfiles.duenos.mujeres[i % manifest.perfiles.duenos.mujeres.length];
-
     const email = `${slugify(`arrendador.${firstName}.${lastName}.${i + 1}`)}@gmail.com`;
     const phone = `+569${faker.string.numeric(8)}`;
 
@@ -549,7 +551,7 @@ const run = async (): Promise<void> => {
         phone,
         role: 'LANDLORD' as Role,
         isEmailVerified: true,
-        avatarUrl: getAssetUrl(avatarRel),
+        avatarUrl: getLandlordAvatarUrl(isMale, i),
         deletedAt: null,
       },
     });
@@ -582,7 +584,7 @@ const run = async (): Promise<void> => {
       role: 'STUDENT' as Role,
       isEmailVerified: true,
       universityId: uchileUni.id,
-      avatarUrl: getAssetUrl(manifest.perfiles.estudiantes.mujeres[0]),
+      avatarUrl: getStudentAvatarUrl(false, 0),
       deletedAt: null,
     },
   });
@@ -601,10 +603,6 @@ const run = async (): Promise<void> => {
       ? MALE_NAMES[i % MALE_NAMES.length]
       : FEMALE_NAMES[i % FEMALE_NAMES.length];
     const lastName = LAST_NAMES[i % LAST_NAMES.length];
-    const avatarRel = isMale
-      ? manifest.perfiles.estudiantes.hombres[i % manifest.perfiles.estudiantes.hombres.length]
-      : manifest.perfiles.estudiantes.mujeres[i % manifest.perfiles.estudiantes.mujeres.length];
-
     const uni = universityRecords[i % universityRecords.length];
     const domain = uni.emailDomains[0] || 'alumnos.cl';
     const email = `${slugify(`${firstName}.${lastName}.${i + 1}`)}@${domain}`;
@@ -618,7 +616,7 @@ const run = async (): Promise<void> => {
         role: 'STUDENT' as Role,
         isEmailVerified: Math.random() < 0.85,
         universityId: uni.id,
-        avatarUrl: getAssetUrl(avatarRel),
+        avatarUrl: getStudentAvatarUrl(isMale, i),
         deletedAt: null,
       },
     });
@@ -691,21 +689,27 @@ const run = async (): Promise<void> => {
       selectedAmenities = faker.helpers.arrayElements(altaPool, { min: 10, max: 15 });
     }
 
-    const tierHouseCatalog = manifest.hogares[tier];
+    const tierHouseMax = CURATED_COUNTS.houses[TIER_MAP[tier]];
     const numHouseImgs = faker.number.int({ min: 3, max: 5 });
-    const chosenHouseImgs = faker.helpers.arrayElements(tierHouseCatalog, numHouseImgs);
+    const pickedHouseIndices = faker.helpers.arrayElements(
+      Array.from({ length: tierHouseMax }, (_, idx) => idx + 1),
+      numHouseImgs,
+    );
 
-    const embeddedImages: EmbeddedPensionImageSeed[] = chosenHouseImgs.map((relPath, idx) => ({
-      id: crypto.randomUUID(),
-      url: getAssetUrl(relPath),
-      thumbnailUrl: getAssetUrl(relPath),
-      caption: idx === 0 ? 'Fachada principal' : `Área compartida ${idx}`,
-      isFeatured: idx === 0,
-      sortOrder: idx,
-      createdAt: new Date(),
-    }));
+    const embeddedImages: EmbeddedPensionImageSeed[] = pickedHouseIndices.map((imgIdx, idx) => {
+      const imgUrl = getHouseImageUrl(tier, imgIdx);
+      return {
+        id: crypto.randomUUID(),
+        url: imgUrl,
+        thumbnailUrl: imgUrl,
+        caption: idx === 0 ? 'Fachada principal' : `Área compartida ${idx}`,
+        isFeatured: idx === 0,
+        sortOrder: idx,
+        createdAt: new Date(),
+      };
+    });
 
-    const tierRoomCatalog = manifest.habitaciones[tier];
+    const tierRoomMax = CURATED_COUNTS.rooms[TIER_MAP[tier]];
     const numRooms = faker.number.int({ min: 2, max: 4 });
     const embeddedRooms: EmbeddedRoomSeed[] = [];
     const allRoomPhotos: string[] = [];
@@ -720,8 +724,11 @@ const run = async (): Promise<void> => {
       const hasPrivateBath = roomType === 'STUDIO' ? true : Math.random() < 0.4;
       const roomPrice = calculateRoomPrice(basePrice, roomType, hasPrivateBath);
 
-      const pickedRoomRelPaths = faker.helpers.arrayElements(tierRoomCatalog, { min: 1, max: 2 });
-      const roomPhotoUrls = pickedRoomRelPaths.map(getAssetUrl);
+      const pickedRoomIndices = faker.helpers.arrayElements(
+        Array.from({ length: tierRoomMax }, (_, idx) => idx + 1),
+        { min: 1, max: 2 },
+      );
+      const roomPhotoUrls = pickedRoomIndices.map((idx) => getRoomImageUrl(tier, idx));
       allRoomPhotos.push(...roomPhotoUrls);
 
       embeddedRooms.push({
