@@ -38,7 +38,7 @@ const envSchema = z
       .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {
         message: 'DATABASE_URL environment variable is required.',
       })
-      .transform((val) => (val as string).trim()),
+      .transform((val) => (val as string).trim().replace(/^["']|["']$/g, '')),
     JWT_SECRET: z
       .unknown()
       .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {

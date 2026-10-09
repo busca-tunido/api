@@ -37,10 +37,7 @@ describe('HttpExceptionFilter', () => {
     const exception = new HttpException('Forbidden resource', HttpStatus.FORBIDDEN);
     filter.catch(exception, mockHost);
 
-    expect(mockHeader).toHaveBeenCalledWith(
-      'Cache-Control',
-      'no-store, no-cache, must-revalidate',
-    );
+    expect(mockHeader).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache, must-revalidate');
     expect(mockStatus).toHaveBeenCalledWith(HttpStatus.FORBIDDEN);
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
