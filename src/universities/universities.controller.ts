@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Header,
   Param,
   Patch,
   Post,
@@ -32,7 +31,6 @@ export class UniversitiesController {
   @Get()
   @UseInterceptors(CacheControlInterceptor)
   @CacheControl(3600, 86400)
-  @Header('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400')
   @ApiOperation({ summary: 'List all universities with optional city filter' })
   @ApiQuery({ name: 'city', required: false, type: String })
   @ApiResponse({ status: 200, description: 'List of universities' })
@@ -43,7 +41,6 @@ export class UniversitiesController {
   @Get(':id')
   @UseInterceptors(CacheControlInterceptor)
   @CacheControl(3600, 86400)
-  @Header('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400')
   @ApiOperation({ summary: 'Get university by ID' })
   @ApiResponse({ status: 200, description: 'University details' })
   @ApiResponse({ status: 404, description: 'University not found' })
