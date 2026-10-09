@@ -38,6 +38,11 @@ export const PRIMARY_CITIES: readonly string[] = [
   'Valparaíso',
   'Concepción',
   'Valdivia',
+  'Viña del Mar',
+  'Temuco',
+  'Antofagasta',
+  'La Serena',
+  'Talca',
 ];
 
 export const AMENITY_DEFINITIONS: readonly AmenityDefinition[] = [
@@ -297,6 +302,10 @@ export const assignCityToUniversity = (
     const found = cities.find((c) => c.city.toLowerCase().includes('valpara'));
     if (found) return found;
   }
+  if (lower.includes('viña') || lower.includes('vina')) {
+    const found = cities.find((c) => c.city.toLowerCase().includes('viña'));
+    if (found) return found;
+  }
   if (lower.includes('concepci') || lower.includes('bio') || lower.includes('bío')) {
     const found = cities.find((c) => c.city.toLowerCase().includes('concepci'));
     if (found) return found;
@@ -309,8 +318,16 @@ export const assignCityToUniversity = (
     const found = cities.find((c) => c.city.toLowerCase().includes('antofagasta'));
     if (found) return found;
   }
-  if (lower.includes('temuco') || lower.includes('frontera')) {
+  if (lower.includes('temuco') || lower.includes('frontera') || lower.includes('araucan')) {
     const found = cities.find((c) => c.city.toLowerCase().includes('temuco'));
+    if (found) return found;
+  }
+  if (lower.includes('serena') || lower.includes('coquimbo')) {
+    const found = cities.find((c) => c.city.toLowerCase().includes('serena'));
+    if (found) return found;
+  }
+  if (lower.includes('talca') || lower.includes('maule')) {
+    const found = cities.find((c) => c.city.toLowerCase().includes('talca'));
     if (found) return found;
   }
   const santiago = cities.find((c) => c.city.toLowerCase() === 'santiago');

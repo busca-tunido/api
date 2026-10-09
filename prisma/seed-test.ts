@@ -95,8 +95,70 @@ const getAssetUrl = (relPath: string): string => {
 const CITY_BASE_MEDIAN: Record<string, number> = {
   Santiago: 290000,
   Valparaíso: 260000,
+  'Viña del Mar': 275000,
   Concepción: 240000,
   Valdivia: 250000,
+  Temuco: 230000,
+  Antofagasta: 310000,
+  'La Serena': 255000,
+  Talca: 220000,
+};
+
+const CITY_NEIGHBORHOODS: Record<string, string[]> = {
+  Santiago: [
+    'Santiago Centro',
+    'Providencia',
+    'Ñuñoa',
+    'San Joaquín',
+    'Recoleta',
+    'Macul',
+    'Quinta Normal',
+    'Barrio República',
+    'Barrio Universitario',
+  ],
+  Valparaíso: [
+    'Cerro Alegre',
+    'Cerro Concepción',
+    'Playa Ancha',
+    'El Plan',
+    'Cerro Bellavista',
+    'Cerro Barón',
+  ],
+  'Viña del Mar': [
+    'Recreo',
+    'Miraflores',
+    'Santa Inés',
+    'Poniente',
+    'Plan de Viña',
+    'Gómez Carreño',
+    'Chorrillos',
+  ],
+  Concepción: [
+    'Barrio Universitario',
+    'Centro',
+    'Collao',
+    'Plaza Perú',
+    'San Pedro de la Paz',
+    'Lorenzo Arenas',
+    'Agüita de la Perdiz',
+  ],
+  Valdivia: ['Isla Teja', 'Centro', 'Las Ánimas', 'Regional', 'Miraflores', 'Collico'],
+  Temuco: ['Centro', 'Avenida Alemania', 'Pueblo Nuevo', 'Las Encinas', 'Dreves', 'Estación'],
+  Antofagasta: ['Coviefi', 'Playa Blanca', 'Centro', 'Parque Inglés', 'Gran Vía', 'Brasil'],
+  'La Serena': ['Centro', 'Colina El Pino', 'San Joaquín', 'La Pampa', 'El Milagro', 'La Florida'],
+  Talca: ['Centro', 'San Miguel', 'Las Rastras', 'La Florida', 'Lircay'],
+};
+
+const IMPORTANT_CITY_TARGETS: Record<string, number> = {
+  Santiago: 35,
+  Valparaíso: 25,
+  Concepción: 25,
+  'Viña del Mar': 20,
+  Valdivia: 20,
+  Temuco: 16,
+  Antofagasta: 16,
+  'La Serena': 15,
+  Talca: 12,
 };
 
 const TIER_MULTIPLIER: Record<'alta' | 'media' | 'baja', number> = {
@@ -569,7 +631,25 @@ const run = async (): Promise<void> => {
   }
 
   console.log('--- Seeding Multi-Tier Pensions and Embedded Subdocuments ---');
-  const TOTAL_PENSIONS = 60;
+  const pensionCityList: ValidatedCity[] = [];
+  for (const [cityName, targetCount] of Object.entries(IMPORTANT_CITY_TARGETS)) {
+    const cityObj = validCities.find((c) => c.city.toLowerCase() === cityName.toLowerCase());
+    if (cityObj) {
+      for (let i = 0; i < targetCount; i++) {
+        pensionCityList.push(cityObj);
+      }
+    }
+  }
+
+  const otherCities = validCities.filter(
+    (c) =>
+      !Object.keys(IMPORTANT_CITY_TARGETS).some((k) => k.toLowerCase() === c.city.toLowerCase()),
+  );
+  for (let i = 0; i < 16; i++) {
+    pensionCityList.push(otherCities[i % otherCities.length]);
+  }
+
+  const TOTAL_PENSIONS = pensionCityList.length;
   const pensionRecords: Array<{
     id: string;
     tier: 'alta' | 'media' | 'baja';
@@ -577,15 +657,17 @@ const run = async (): Promise<void> => {
   }> = [];
 
   for (let i = 0; i < TOTAL_PENSIONS; i++) {
-    const tier: 'alta' | 'media' | 'baja' = i < 15 ? 'alta' : i < 45 ? 'media' : 'baja';
+    const tier: 'alta' | 'media' | 'baja' = i % 3 === 0 ? 'alta' : i % 3 === 1 ? 'media' : 'baja';
 
-    const cityObj = validCities[i % validCities.length];
+    const cityObj = pensionCityList[i];
     const city = cityObj.city;
     const landlord = landlordUsers[i % landlordUsers.length];
 
     const basePrice = calculateBasePrice(city, tier);
     const street = faker.location.street();
-    const title = `Residencia ${city} ${street} #${i + 1}`;
+    const neighborhoodList = CITY_NEIGHBORHOODS[city];
+    const neighborhood = neighborhoodList ? faker.helpers.arrayElement(neighborhoodList) : city;
+    const title = `Pensión ${neighborhood} ${street} #${i + 1}`;
     const slug = `${slugify(title)}-${i + 1}`;
 
     const latOffset = (Math.random() - 0.5) * 0.02;
@@ -664,7 +746,13 @@ const run = async (): Promise<void> => {
     const nearbyUnisInCity = universityRecords.filter(
       (u) => u.city.toLowerCase() === city.toLowerCase(),
     );
-    const assignedUnis = nearbyUnisInCity.slice(0, 2);
+    const assignedUnis =
+      nearbyUnisInCity.length > 0
+        ? faker.helpers.arrayElements(nearbyUnisInCity, {
+            min: 1,
+            max: Math.min(3, nearbyUnisInCity.length),
+          })
+        : universityRecords.slice(0, 1);
     const embeddedUnis: EmbeddedNearbyUniversitySeed[] = assignedUnis.map((uni) => {
       const distMeters = calculateHaversineMeters(latitude, longitude, uni.latitude, uni.longitude);
       return {
@@ -681,10 +769,10 @@ const run = async (): Promise<void> => {
       data: {
         slug,
         title,
-        description: `Excelente pensión universitaria ubicada en ${city}, ideal para alumnos que buscan tranquilidad y cercanía al campus. Conectividad expedita y servicios incluidos.`,
+        description: `Excelente pensión universitaria ubicada en ${neighborhood}, ${city}, ideal para alumnos que buscan tranquilidad y cercanía al campus. Conectividad expedita y servicios incluidos.`,
         address: `${street} ${faker.number.int({ min: 100, max: 2500 })}`,
         city,
-        neighborhood: city,
+        neighborhood,
         latitude,
         longitude,
         location: {
