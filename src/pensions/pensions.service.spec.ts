@@ -18,6 +18,7 @@ type MockPrismaService = {
   };
   university: {
     findUnique: ReturnType<typeof vi.fn>;
+    findMany: ReturnType<typeof vi.fn>;
   };
 };
 
@@ -81,6 +82,7 @@ describe('PensionsService', () => {
       },
       university: {
         findUnique: vi.fn(),
+        findMany: vi.fn().mockResolvedValue([]),
       },
     };
 
@@ -384,6 +386,38 @@ describe('PensionsService', () => {
       });
 
       await expect(service.delete('pension-1', mockOtherUser)).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('getCitiesSummary', () => {
+    it('should return cities with absolute pension counts and coordinates', async () => {
+      mockPrisma.pension.groupBy.mockResolvedValue([
+        { city: 'Santiago', _count: { id: 35 } },
+        { city: 'Valparaíso', _count: { id: 25 } },
+      ]);
+      mockPrisma.pension.findMany.mockResolvedValue([
+        { city: 'Santiago', latitude: -33.45, longitude: -70.66 },
+        { city: 'Valparaíso', latitude: -33.04, longitude: -71.62 },
+      ]);
+      mockPrisma.university.findMany.mockResolvedValue([]);
+
+      const result = await service.getCitiesSummary();
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        id: 'santiago',
+        name: 'Santiago',
+        pensionsCount: 35,
+        latitude: -33.45,
+        longitude: -70.66,
+      });
+      expect(result[1]).toEqual({
+        id: 'valparaiso',
+        name: 'Valparaíso',
+        pensionsCount: 25,
+        latitude: -33.04,
+        longitude: -71.62,
+      });
     });
   });
 });

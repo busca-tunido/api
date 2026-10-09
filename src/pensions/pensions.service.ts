@@ -41,6 +41,14 @@ export type PriceHistogram = {
   bins: PriceHistogramBin[];
 };
 
+export type CitySummaryItem = {
+  id: string;
+  name: string;
+  pensionsCount: number;
+  latitude: number;
+  longitude: number;
+};
+
 export const calculateHaversineDistanceKm = (
   lat1: number,
   lon1: number,
@@ -903,5 +911,99 @@ export class PensionsService {
     });
 
     return { id, deleted: true };
+  }
+
+  async getCitiesSummary(): Promise<CitySummaryItem[]> {
+    const [pensionGroups, pensions, universities] = await Promise.all([
+      this.prisma.pension.groupBy({
+        by: ['city'],
+        where: {
+          deletedAt: null,
+          isActive: true,
+        },
+        _count: {
+          id: true,
+        },
+      }),
+      this.prisma.pension.findMany({
+        where: {
+          deletedAt: null,
+          isActive: true,
+        },
+        select: {
+          city: true,
+          latitude: true,
+          longitude: true,
+        },
+      }),
+      this.prisma.university.findMany({
+        where: {
+          deletedAt: null,
+        },
+        select: {
+          city: true,
+          latitude: true,
+          longitude: true,
+        },
+      }),
+    ]);
+
+    const countMap = new Map<string, number>();
+    for (const group of pensionGroups) {
+      if (group.city) {
+        countMap.set(group.city.trim().toLowerCase(), group._count.id);
+      }
+    }
+
+    const cityDataMap = new Map<string, { name: string; latitude: number; longitude: number }>();
+
+    for (const uni of universities) {
+      if (uni.city) {
+        const trimmed = uni.city.trim();
+        const key = trimmed.toLowerCase();
+        if (!cityDataMap.has(key)) {
+          cityDataMap.set(key, {
+            name: trimmed,
+            latitude: uni.latitude,
+            longitude: uni.longitude,
+          });
+        }
+      }
+    }
+
+    for (const pension of pensions) {
+      if (pension.city) {
+        const trimmed = pension.city.trim();
+        const key = trimmed.toLowerCase();
+        cityDataMap.set(key, {
+          name: trimmed,
+          latitude: pension.latitude,
+          longitude: pension.longitude,
+        });
+      }
+    }
+
+    const slugify = (name: string): string => {
+      return name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+    };
+
+    const result: CitySummaryItem[] = [];
+    for (const [key, data] of cityDataMap.entries()) {
+      const pensionsCount = countMap.get(key) ?? 0;
+      result.push({
+        id: slugify(data.name),
+        name: data.name,
+        pensionsCount,
+        latitude: data.latitude,
+        longitude: data.longitude,
+      });
+    }
+
+    return result.sort((a, b) => b.pensionsCount - a.pensionsCount || a.name.localeCompare(b.name));
   }
 }

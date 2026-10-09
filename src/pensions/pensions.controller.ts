@@ -21,6 +21,7 @@ import { CreatePensionDto } from './dto/create-pension.dto.js';
 import { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import { UpdatePensionDto } from './dto/update-pension.dto.js';
 import {
+  type CitySummaryItem,
   type PaginatedPensions,
   PensionsService,
   type PriceHistogram,
@@ -55,6 +56,13 @@ export class PensionsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async getMine(@CurrentUser('id') userId: string): Promise<unknown> {
     return this.pensionsService.findMine(userId);
+  }
+
+  @Get('cities')
+  @ApiOperation({ summary: 'List all cities with absolute pension counts and coordinates' })
+  @ApiResponse({ status: 200, description: 'List of cities with absolute pension counts' })
+  async getCities(): Promise<CitySummaryItem[]> {
+    return this.pensionsService.getCitiesSummary();
   }
 
   @Get(':idOrSlug')
