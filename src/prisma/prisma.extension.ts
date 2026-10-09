@@ -20,6 +20,26 @@ type ModelDelegate = {
   updateMany: (args: { where?: unknown; data: { deletedAt: Date } }) => Promise<{ count: number }>;
 };
 
+const applySoftDeleteFilter = (
+  where: Record<string, unknown> | undefined,
+): Record<string, unknown> => {
+  const currentWhere = where ?? {};
+  const notDeleted = {
+    OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+  };
+
+  if (currentWhere.deletedAt === null) {
+    const { deletedAt: _, ...rest } = currentWhere;
+    return Object.keys(rest).length === 0 ? notDeleted : { AND: [rest, notDeleted] };
+  }
+
+  if (currentWhere.deletedAt !== undefined) {
+    return currentWhere;
+  }
+
+  return Object.keys(currentWhere).length === 0 ? notDeleted : { AND: [currentWhere, notDeleted] };
+};
+
 export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
   return Prisma.defineExtension({
     name: 'softDelete',
@@ -27,19 +47,13 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
       $allModels: {
         async findMany({ model, args, query }) {
           if (SOFT_DELETE_MODELS.has(model)) {
-            const currentWhere = (args.where as Record<string, unknown> | undefined) ?? {};
-            if (currentWhere.deletedAt === undefined) {
-              args.where = { ...currentWhere, deletedAt: null };
-            }
+            args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }
           return query(args);
         },
         async findFirst({ model, args, query }) {
           if (SOFT_DELETE_MODELS.has(model)) {
-            const currentWhere = (args.where as Record<string, unknown> | undefined) ?? {};
-            if (currentWhere.deletedAt === undefined) {
-              args.where = { ...currentWhere, deletedAt: null };
-            }
+            args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }
           return query(args);
         },
@@ -49,7 +63,8 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
             SOFT_DELETE_MODELS.has(model) &&
             result &&
             'deletedAt' in result &&
-            result.deletedAt !== null
+            result.deletedAt !== null &&
+            result.deletedAt !== undefined
           ) {
             return null;
           }
@@ -57,10 +72,19 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
         },
         async count({ model, args, query }) {
           if (SOFT_DELETE_MODELS.has(model)) {
-            const currentWhere = (args.where as Record<string, unknown> | undefined) ?? {};
-            if (currentWhere.deletedAt === undefined) {
-              args.where = { ...currentWhere, deletedAt: null };
-            }
+            args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
+          }
+          return query(args);
+        },
+        async groupBy({ model, args, query }) {
+          if (SOFT_DELETE_MODELS.has(model)) {
+            args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
+          }
+          return query(args);
+        },
+        async aggregate({ model, args, query }) {
+          if (SOFT_DELETE_MODELS.has(model)) {
+            args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }
           return query(args);
         },

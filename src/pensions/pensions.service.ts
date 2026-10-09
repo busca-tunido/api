@@ -707,7 +707,7 @@ export class PensionsService {
     });
   }
 
-  async findBySlugOrId(idOrSlug: string, user?: SanitizedUser | null): Promise<unknown> {
+  async findBySlugOrId(idOrSlug: string, _user?: SanitizedUser | null): Promise<unknown> {
     const pension = await this.prisma.pension.findFirst({
       where: {
         deletedAt: null,
@@ -731,24 +731,7 @@ export class PensionsService {
       throw new NotFoundException(`Pension '${idOrSlug}' not found`);
     }
 
-    const formatted = this.formatPensionItem(pension as unknown as PensionDocRaw, 100);
-
-    if (!user) {
-      return {
-        ...formatted,
-        address: `${pension.neighborhood}, ${pension.city}`,
-        landlord: pension.landlord
-          ? {
-              id: pension.landlord.id,
-              firstName: pension.landlord.firstName,
-              avatarUrl: pension.landlord.avatarUrl,
-            }
-          : null,
-        rooms: [],
-      };
-    }
-
-    return formatted;
+    return this.formatPensionItem(pension as unknown as PensionDocRaw, 100);
   }
 
   async create(dto: CreatePensionDto, landlord: SanitizedUser): Promise<unknown> {

@@ -23,10 +23,10 @@ export class UniversitiesService {
       return null;
     }
 
-    const candidateDomains = [fullDomain];
+    const candidateDomains: string[] = [fullDomain];
     const domainSegments = fullDomain.split('.');
-    if (domainSegments.length > 2) {
-      candidateDomains.push(domainSegments.slice(1).join('.'));
+    for (let i = 1; i < domainSegments.length - 1; i++) {
+      candidateDomains.push(domainSegments.slice(i).join('.'));
     }
 
     return this.prisma.university.findFirst({

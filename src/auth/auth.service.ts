@@ -165,25 +165,25 @@ export class AuthService {
       select: { id: true, deletedAt: true },
     });
 
-    if (!user || user.deletedAt !== null) {
-      const detected = await this.universitiesService.findByEmailDomain(normalizedEmail);
-      const detectedUniversity: DetectedUniversityDto | null = detected
-        ? {
-            id: detected.id,
-            name: detected.name,
-            shortName: detected.shortName,
-            city: detected.city,
-          }
-        : null;
-
+    if (user && user.deletedAt === null) {
       return {
-        exists: false,
-        detectedUniversity,
+        exists: true,
       };
     }
 
+    const detected = await this.universitiesService.findByEmailDomain(normalizedEmail);
+    const detectedUniversity: DetectedUniversityDto | null = detected
+      ? {
+          id: detected.id,
+          name: detected.name,
+          shortName: detected.shortName,
+          city: detected.city,
+        }
+      : null;
+
     return {
-      exists: true,
+      exists: false,
+      detectedUniversity,
     };
   }
 

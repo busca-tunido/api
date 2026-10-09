@@ -350,22 +350,75 @@ const run = async (): Promise<void> => {
   const universityRecords = await Promise.all(
     rawUnis.map((uni) => {
       const city = assignCityToUniversity(uni.name, validCities);
+      const enrichedDomains = new Set<string>(uni.domains);
+      for (const d of uni.domains) {
+        enrichedDomains.add(`alumnos.${d}`);
+        enrichedDomains.add(`estudiantes.${d}`);
+      }
+      const lower = uni.name.toLowerCase();
+      if (lower.includes('chile')) {
+        enrichedDomains.add('uchile.cl');
+        enrichedDomains.add('alumnos.uchile.cl');
+        enrichedDomains.add('fen.uchile.cl');
+        enrichedDomains.add('fcfm.cl');
+      }
+      if (lower.includes('catolica de chile') || lower.includes('católica de chile')) {
+        enrichedDomains.add('uc.cl');
+        enrichedDomains.add('alumnos.uc.cl');
+      }
+      if (lower.includes('santa mar') || lower.includes('federico')) {
+        enrichedDomains.add('usm.cl');
+        enrichedDomains.add('alumnos.usm.cl');
+        enrichedDomains.add('sansano.usm.cl');
+      }
+      if (lower.includes('concepcion') || lower.includes('concepción')) {
+        enrichedDomains.add('udec.cl');
+        enrichedDomains.add('alumnos.udec.cl');
+      }
+      if (lower.includes('andes')) {
+        enrichedDomains.add('uandes.cl');
+        enrichedDomains.add('alumnos.uandes.cl');
+        enrichedDomains.add('miuandes.cl');
+      }
+      if (lower.includes('santiago de chile')) {
+        enrichedDomains.add('usach.cl');
+        enrichedDomains.add('alumnos.usach.cl');
+      }
+      if (lower.includes('diego portales')) {
+        enrichedDomains.add('udp.cl');
+        enrichedDomains.add('mail.udp.cl');
+        enrichedDomains.add('alumnos.udp.cl');
+      }
+      if (lower.includes('austral')) {
+        enrichedDomains.add('uach.cl');
+        enrichedDomains.add('alumnos.uach.cl');
+      }
+      if (lower.includes('valpara')) {
+        enrichedDomains.add('uv.cl');
+        enrichedDomains.add('alumnos.uv.cl');
+      }
+      if (lower.includes('ibanez') || lower.includes('ibáñez')) {
+        enrichedDomains.add('uai.cl');
+        enrichedDomains.add('alumnos.uai.cl');
+      }
+
       return prisma.university.create({
         data: {
           name: uni.name,
           shortName: generateShortName(uni.name),
-          emailDomains: uni.domains,
+          emailDomains: Array.from(enrichedDomains),
           city: city.city,
           address: `Campus Central ${uni.name}, ${city.city}`,
           latitude: city.latitude + (Math.random() - 0.5) * 0.015,
           longitude: city.longitude + (Math.random() - 0.5) * 0.015,
+          deletedAt: null,
         },
       });
     }),
   );
 
   console.log('--- Seeding Landlords and Moderator ---');
-  const defaultPasswordHash = await bcrypt.hash('ContrasenaSegura123!', 10);
+  const defaultPasswordHash = await bcrypt.hash('Password123!', 10);
 
   await prisma.user.create({
     data: {
@@ -376,6 +429,7 @@ const run = async (): Promise<void> => {
       role: 'MODERATOR' as Role,
       isEmailVerified: true,
       avatarUrl: getAssetUrl(manifest.perfiles.duenos.hombres[0]),
+      deletedAt: null,
     },
   });
 
@@ -386,6 +440,29 @@ const run = async (): Promise<void> => {
     email: string;
     phone: string;
   }> = [];
+
+  const demoLandlord = await prisma.user.create({
+    data: {
+      email: 'propietario.demo@buscatunido.cl',
+      passwordHash: defaultPasswordHash,
+      firstName: 'Propietario',
+      lastName: 'Demo',
+      phone: '+56912345678',
+      role: 'LANDLORD' as Role,
+      isEmailVerified: true,
+      avatarUrl: getAssetUrl(manifest.perfiles.duenos.hombres[0]),
+      deletedAt: null,
+    },
+  });
+
+  landlordUsers.push({
+    id: demoLandlord.id,
+    firstName: demoLandlord.firstName,
+    lastName: demoLandlord.lastName,
+    email: demoLandlord.email,
+    phone: demoLandlord.phone || '+56912345678',
+  });
+
   const TOTAL_LANDLORDS = 40;
 
   for (let i = 0; i < TOTAL_LANDLORDS; i++) {
@@ -411,6 +488,7 @@ const run = async (): Promise<void> => {
         role: 'LANDLORD' as Role,
         isEmailVerified: true,
         avatarUrl: getAssetUrl(avatarRel),
+        deletedAt: null,
       },
     });
 
@@ -425,6 +503,34 @@ const run = async (): Promise<void> => {
 
   console.log('--- Seeding Student Users with Gender-Aligned Avatars ---');
   const studentUsers: Array<{ id: string; email: string; isEmailVerified: boolean }> = [];
+
+  const uchileUni =
+    universityRecords.find(
+      (u) =>
+        u.name.toLowerCase().includes('universidad de chile') ||
+        u.emailDomains.includes('uchile.cl'),
+    ) || universityRecords[0];
+
+  const demoStudent = await prisma.user.create({
+    data: {
+      email: 'estudiante.demo@uchile.cl',
+      passwordHash: defaultPasswordHash,
+      firstName: 'Estudiante',
+      lastName: 'Demo',
+      role: 'STUDENT' as Role,
+      isEmailVerified: true,
+      universityId: uchileUni.id,
+      avatarUrl: getAssetUrl(manifest.perfiles.estudiantes.mujeres[0]),
+      deletedAt: null,
+    },
+  });
+
+  studentUsers.push({
+    id: demoStudent.id,
+    email: demoStudent.email,
+    isEmailVerified: demoStudent.isEmailVerified,
+  });
+
   const TOTAL_STUDENTS = 200;
 
   for (let i = 0; i < TOTAL_STUDENTS; i++) {
@@ -451,6 +557,7 @@ const run = async (): Promise<void> => {
         isEmailVerified: Math.random() < 0.85,
         universityId: uni.id,
         avatarUrl: getAssetUrl(avatarRel),
+        deletedAt: null,
       },
     });
 
@@ -726,11 +833,11 @@ const run = async (): Promise<void> => {
 
   console.log('--- Seeding Sample Proposals ---');
   const demoPension = pensionRecords[0];
-  const demoStudent = studentUsers[0];
+  const proposalSubmitter = studentUsers[0];
   await prisma.pensionProposal.create({
     data: {
       pensionId: demoPension.id,
-      submittedById: demoStudent.id,
+      submittedById: proposalSubmitter.id,
       type: 'AMENITIES_UPDATE' as ProposalType,
       status: 'PENDING' as ProposalStatus,
       proposedChanges: {
