@@ -7,6 +7,7 @@ describe('HttpExceptionFilter', () => {
   let filter: HttpExceptionFilter;
   let mockStatus: ReturnType<typeof vi.fn>;
   let mockSend: ReturnType<typeof vi.fn>;
+  let mockHeader: ReturnType<typeof vi.fn>;
   let mockResponse: FastifyReply;
   let mockRequest: FastifyRequest;
   let mockHost: ArgumentsHost;
@@ -14,9 +15,11 @@ describe('HttpExceptionFilter', () => {
   beforeEach(() => {
     filter = new HttpExceptionFilter();
     mockSend = vi.fn();
+    mockHeader = vi.fn().mockReturnThis();
     mockStatus = vi.fn().mockReturnValue({ send: mockSend });
     mockResponse = {
       status: mockStatus,
+      header: mockHeader,
     } as unknown as FastifyReply;
     mockRequest = {
       url: '/test-endpoint',
@@ -34,6 +37,10 @@ describe('HttpExceptionFilter', () => {
     const exception = new HttpException('Forbidden resource', HttpStatus.FORBIDDEN);
     filter.catch(exception, mockHost);
 
+    expect(mockHeader).toHaveBeenCalledWith(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate',
+    );
     expect(mockStatus).toHaveBeenCalledWith(HttpStatus.FORBIDDEN);
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({

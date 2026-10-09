@@ -90,9 +90,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       errors,
     };
 
-    response
-      .status(status)
-      .header('Cache-Control', 'no-store, no-cache, must-revalidate')
-      .send(errorPayload);
+    if (typeof response?.header === 'function') {
+      response.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+
+    response.status(status).send(errorPayload);
   }
 }
