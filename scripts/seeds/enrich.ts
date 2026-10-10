@@ -1,5 +1,5 @@
 import { createPrismaClient } from '../../prisma/seed-utils.js';
-import { saveEnrichedTextsCache } from './ai/cache-store.js';
+import { loadEnrichedTextsCache, saveEnrichedTextsCache } from './ai/cache-store.js';
 import { createModelPipeline } from './ai/model-runner.js';
 import {
   buildPensionDescriptionPrompt,
@@ -34,12 +34,16 @@ const run = async (): Promise<void> => {
   console.log('=== Iniciando Enriquecimiento Inteligente de Base de Datos (buscatunido_dev) ===');
   const { prisma } = createPrismaClient();
 
+  const notDeleted = {
+    OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+  };
+
   const pensions = await prisma.pension.findMany({
-    where: { deletedAt: null },
+    where: notDeleted,
   });
 
   const reviews = await prisma.review.findMany({
-    where: { deletedAt: null },
+    where: notDeleted,
     include: {
       user: true,
       pension: true,
@@ -59,9 +63,16 @@ const run = async (): Promise<void> => {
   console.log(`Cargando modelo ${AI_CONFIG.modelId} en CPU...`);
   const generator = await createModelPipeline();
 
-  const generatedDescriptions: Record<string, string> = {};
-  const generatedReviews: Record<string, string> = {};
-  const generatedRooms: Record<string, string> = {};
+  const existingCache = loadEnrichedTextsCache();
+  const generatedDescriptions: Record<string, string> = {
+    ...(existingCache?.descriptions || {}),
+  };
+  const generatedReviews: Record<string, string> = {
+    ...(existingCache?.reviews || {}),
+  };
+  const generatedRooms: Record<string, string> = {
+    ...(existingCache?.rooms || {}),
+  };
 
   console.log(`--- [1/2] Enriqueciendo ${pensions.length} pensiones y sus habitaciones ---`);
   for (let idx = 0; idx < pensions.length; idx++) {
@@ -90,51 +101,56 @@ const run = async (): Promise<void> => {
     };
 
     try {
-      const pPrompt = buildPensionDescriptionPrompt(pCtx);
-      const pResult = await generator(pPrompt, {
-        max_new_tokens: AI_CONFIG.maxNewTokensDescription,
-        temperature: 0.7,
-        do_sample: true,
-        return_full_text: false,
-      });
+      let finalDescription = generatedDescriptions[pension.id];
+      if (!finalDescription) {
+        const pPrompt = buildPensionDescriptionPrompt(pCtx);
+        const pResult = await generator(pPrompt, {
+          max_new_tokens: AI_CONFIG.maxNewTokensDescription,
+          temperature: 0.7,
+          do_sample: true,
+          return_full_text: false,
+        });
 
-      const pRaw = Array.isArray(pResult) ? pResult[0]?.generated_text || '' : '';
-      const pClean = cleanGeneratedResponse(pRaw);
-      const finalDescription = pClean.length > 20 ? pClean : pension.description;
-      generatedDescriptions[pension.id] = finalDescription;
+        const pRaw = Array.isArray(pResult) ? pResult[0]?.generated_text || '' : '';
+        const pClean = cleanGeneratedResponse(pRaw);
+        finalDescription = pClean.length > 20 ? pClean : pension.description;
+        generatedDescriptions[pension.id] = finalDescription;
+      }
 
       const updatedRooms = await Promise.all(
         pension.rooms.map(async (room) => {
-          const rCtx: RoomAiPromptContext = {
-            id: room.id,
-            roomType:
-              room.type === 'SINGLE'
-                ? 'Pieza individual'
-                : room.type === 'SHARED'
-                  ? 'Pieza compartida'
-                  : 'Estudio independiente',
-            hasPrivateBathroom: room.hasPrivateBathroom,
-            totalBeds: room.totalBeds,
-            city: pension.city,
-            neighborhood: pension.neighborhood,
-          };
+          let roomDesc = generatedRooms[room.id];
+          if (!roomDesc) {
+            const rCtx: RoomAiPromptContext = {
+              id: room.id,
+              roomType:
+                room.type === 'SINGLE'
+                  ? 'Pieza individual'
+                  : room.type === 'SHARED'
+                    ? 'Pieza compartida'
+                    : 'Estudio independiente',
+              hasPrivateBathroom: room.hasPrivateBathroom,
+              totalBeds: room.totalBeds,
+              city: pension.city,
+              neighborhood: pension.neighborhood,
+            };
 
-          const rPrompt = buildRoomPrompt(rCtx);
-          const rResult = await generator(rPrompt, {
-            max_new_tokens: AI_CONFIG.maxNewTokensRoom,
-            temperature: 0.7,
-            do_sample: true,
-            return_full_text: false,
-          });
+            const rPrompt = buildRoomPrompt(rCtx);
+            const rResult = await generator(rPrompt, {
+              max_new_tokens: AI_CONFIG.maxNewTokensRoom,
+              temperature: 0.7,
+              do_sample: true,
+              return_full_text: false,
+            });
 
-          const rRaw = Array.isArray(rResult) ? rResult[0]?.generated_text || '' : '';
-          const rClean = cleanGeneratedResponse(rRaw);
-          const roomDesc =
-            rClean.length > 15
-              ? rClean
-              : `Habitación ${room.type.toLowerCase()} con escritorio y clóset. ${room.hasPrivateBathroom ? 'Baño privado.' : 'Baño compartido.'}`;
-
-          generatedRooms[room.id] = roomDesc;
+            const rRaw = Array.isArray(rResult) ? rResult[0]?.generated_text || '' : '';
+            const rClean = cleanGeneratedResponse(rRaw);
+            roomDesc =
+              rClean.length > 15
+                ? rClean
+                : `Habitación ${room.type.toLowerCase()} con escritorio y clóset. ${room.hasPrivateBathroom ? 'Baño privado.' : 'Baño compartido.'}`;
+            generatedRooms[room.id] = roomDesc;
+          }
 
           return {
             ...room,
@@ -152,7 +168,8 @@ const run = async (): Promise<void> => {
       });
 
       if ((idx + 1) % 10 === 0 || idx + 1 === pensions.length) {
-        console.log(`Pensiones enriquecidas: ${idx + 1}/${pensions.length}`);
+        saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
+        console.log(`Pensiones procesadas: ${idx + 1}/${pensions.length}`);
       }
     } catch (err) {
       console.error(`Error enriqueciendo pensión ${pension.id}:`, err);
@@ -203,18 +220,21 @@ const run = async (): Promise<void> => {
     };
 
     try {
-      const rPrompt = buildReviewCommentPrompt(rCtx);
-      const rResult = await generator(rPrompt, {
-        max_new_tokens: AI_CONFIG.maxNewTokensReview,
-        temperature: 0.7,
-        do_sample: true,
-        return_full_text: false,
-      });
+      let finalComment = generatedReviews[rev.id];
+      if (!finalComment) {
+        const rPrompt = buildReviewCommentPrompt(rCtx);
+        const rResult = await generator(rPrompt, {
+          max_new_tokens: AI_CONFIG.maxNewTokensReview,
+          temperature: 0.7,
+          do_sample: true,
+          return_full_text: false,
+        });
 
-      const rRaw = Array.isArray(rResult) ? rResult[0]?.generated_text || '' : '';
-      const rClean = cleanGeneratedResponse(rRaw);
-      const finalComment = rClean.length > 10 ? rClean : rev.comment;
-      generatedReviews[rev.id] = finalComment;
+        const rRaw = Array.isArray(rResult) ? rResult[0]?.generated_text || '' : '';
+        const rClean = cleanGeneratedResponse(rRaw);
+        finalComment = rClean.length > 10 ? rClean : rev.comment;
+        generatedReviews[rev.id] = finalComment;
+      }
 
       await prisma.review.update({
         where: { id: rev.id },
@@ -222,7 +242,8 @@ const run = async (): Promise<void> => {
       });
 
       if ((idx + 1) % 25 === 0 || idx + 1 === reviews.length) {
-        console.log(`Reseñas enriquecidas: ${idx + 1}/${reviews.length}`);
+        saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
+        console.log(`Reseñas procesadas: ${idx + 1}/${reviews.length}`);
       }
     } catch (err) {
       console.error(`Error enriqueciendo reseña ${rev.id}:`, err);
