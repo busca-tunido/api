@@ -69,7 +69,7 @@ export const loadStaticCatalogs = async (): Promise<StaticCatalogData> => {
 
   const universityRecords: UniversityRecord[] = [];
   for (const uni of rawUniversities) {
-    const assignedCity = assignCityToUniversity(uni, validCities);
+    const assignedCity = assignCityToUniversity(uni.name, validCities);
     const shortName = generateShortName(uni.name);
 
     const created = await prisma.university.create({
