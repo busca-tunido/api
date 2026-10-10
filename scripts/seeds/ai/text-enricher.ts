@@ -50,8 +50,20 @@ export const enrichDatasetWithAi = async (
       }
     }
 
+    let matchedRooms = 0;
+    if (existingCache.rooms) {
+      for (const pension of dataset.pensions) {
+        for (const room of pension.rooms) {
+          if (existingCache.rooms[room.id]) {
+            room.description = existingCache.rooms[room.id];
+            matchedRooms++;
+          }
+        }
+      }
+    }
+
     console.log(
-      `--- [AI Enricher] Caché aplicada: ${matchedDesc} descripciones y ${matchedRev} reseñas enriquecidas ---`,
+      `--- [AI Enricher] Caché aplicada: ${matchedDesc} descripciones, ${matchedRev} reseñas y ${matchedRooms} piezas enriquecidas ---`,
     );
     return;
   }

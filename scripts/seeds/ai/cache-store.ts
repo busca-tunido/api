@@ -22,6 +22,7 @@ export const loadEnrichedTextsCache = (): EnrichedSeedTextsCache | null => {
 export const saveEnrichedTextsCache = (
   descriptions: Record<string, string>,
   reviews: Record<string, string>,
+  rooms: Record<string, string> = {},
 ): void => {
   const dir = path.dirname(AI_CONFIG.enrichedTextsFile);
   if (!fs.existsSync(dir)) {
@@ -33,6 +34,7 @@ export const saveEnrichedTextsCache = (
     generatedAt: new Date().toISOString(),
     descriptions,
     reviews,
+    rooms,
   };
 
   fs.writeFileSync(AI_CONFIG.enrichedTextsFile, JSON.stringify(payload, null, 2), 'utf-8');

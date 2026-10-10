@@ -1,4 +1,8 @@
-import type { PensionAiPromptContext, ReviewAiPromptContext } from '../types.js';
+import type {
+  PensionAiPromptContext,
+  ReviewAiPromptContext,
+  RoomAiPromptContext,
+} from '../types.js';
 
 export const buildPensionDescriptionPrompt = (ctx: PensionAiPromptContext): string => {
   return `<|im_start|>system
@@ -11,6 +15,21 @@ Habitaciones: ${ctx.roomsSummary}
 Comodidades: ${ctx.amenitiesList.join(', ')}
 Normas: ${ctx.rulesSummary}
 Anfitrión: ${ctx.landlordName}
+Descripción:
+<|im_end|>
+<|im_start|>assistant
+`;
+};
+
+export const buildRoomPrompt = (ctx: RoomAiPromptContext): string => {
+  const bath = ctx.hasPrivateBathroom ? 'con baño privado' : 'con baño compartido';
+  return `<|im_start|>system
+Eres redactor inmobiliario en Chile. Escribe una descripción breve y natural de 1 o 2 oraciones para una habitación de pensión universitaria.
+<|im_end|>
+<|im_start|>user
+Tipo: ${ctx.roomType} ${bath}
+Camas: ${ctx.totalBeds}
+Ubicación: ${ctx.neighborhood}, ${ctx.city}
 Descripción:
 <|im_end|>
 <|im_start|>assistant
@@ -44,5 +63,15 @@ export const cleanGeneratedResponse = (raw: string): string => {
   cleaned = cleaned.replace(/<\|endoftext\|>/g, '');
   cleaned = cleaned.replace(/^[\r\n\s]+/, '').replace(/[\r\n\s]+$/, '');
   const lines = cleaned.split('\n').filter((l) => l.trim().length > 0);
-  return lines.join(' ').trim();
+  const text = lines.join(' ').trim();
+
+  const lastPunctuation = Math.max(
+    text.lastIndexOf('.'),
+    text.lastIndexOf('!'),
+    text.lastIndexOf('?'),
+  );
+  if (lastPunctuation > 20) {
+    return text.substring(0, lastPunctuation + 1).trim();
+  }
+  return text;
 };
