@@ -21,6 +21,25 @@ Descripción:
 `;
 };
 
+export interface RoomArchetypeContext {
+  roomType: string;
+  hasPrivateBathroom: boolean;
+  vibe: string;
+}
+
+export const buildRoomArchetypePrompt = (ctx: RoomArchetypeContext): string => {
+  const bath = ctx.hasPrivateBathroom ? 'con baño privado' : 'con baño compartido';
+  return `<|im_start|>system
+Eres redactor inmobiliario en Chile. Escribe una descripción atractiva y breve de 1 o 2 oraciones para una pieza universitaria (${ctx.vibe}). No uses listas ni saludos.
+<|im_end|>
+<|im_start|>user
+Tipo: ${ctx.roomType} ${bath}
+Descripción:
+<|im_end|>
+<|im_start|>assistant
+`;
+};
+
 export const buildRoomPrompt = (ctx: RoomAiPromptContext): string => {
   const bath = ctx.hasPrivateBathroom ? 'con baño privado' : 'con baño compartido';
   return `<|im_start|>system
