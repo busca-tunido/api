@@ -120,6 +120,7 @@ export const AI_CONFIG = {
   device: 'cpu' as const,
   maxNewTokensDescription: 55,
   maxNewTokensReview: 35,
+  maxNewTokensRoom: 40,
   batchSize: 6,
   cacheDir: path.resolve(process.cwd(), '.cache/huggingface'),
   enrichedTextsFile: path.resolve(process.cwd(), '.cache/enriched-seed-texts.json'),

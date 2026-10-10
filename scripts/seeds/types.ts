@@ -130,9 +130,19 @@ export interface ReviewAiPromptContext {
   highlightAspect: string;
 }
 
+export interface RoomAiPromptContext {
+  id: string;
+  roomType: string;
+  hasPrivateBathroom: boolean;
+  totalBeds: number;
+  city: string;
+  neighborhood: string;
+}
+
 export interface EnrichedSeedTextsCache {
   version: number;
   generatedAt: string;
   descriptions: Record<string, string>;
   reviews: Record<string, string>;
+  rooms?: Record<string, string>;
 }

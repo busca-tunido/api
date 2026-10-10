@@ -25,7 +25,9 @@
     "lint": "biome lint .",
     "check": "biome check --write .",
     "review": "biome check .",
-    "generate:postman": "tsx scripts/generate-postman-collection.ts"
+    "generate:postman": "tsx scripts/generate-postman-collection.ts",
+    "db:enrich": "tsx scripts/seeds/enrich.ts",
+    "db:enrichment": "tsx scripts/seeds/enrich.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1132.0",
