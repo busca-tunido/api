@@ -1,18 +1,15 @@
-import { createPrismaClient } from '../../prisma/seed-utils.js';
+import { chunkArray, createPrismaClient } from '../../prisma/seed-utils.js';
 import { loadEnrichedTextsCache, saveEnrichedTextsCache } from './ai/cache-store.js';
-import { createModelPipeline } from './ai/model-runner.js';
+import { createModelPipeline, runBatchInference } from './ai/model-runner.js';
 import {
   buildPensionDescriptionPrompt,
   buildReviewCommentPrompt,
-  buildRoomPrompt,
+  buildRoomArchetypePrompt,
   cleanGeneratedResponse,
+  type RoomArchetypeContext,
 } from './ai/prompt-builder.js';
 import { AI_CONFIG, type TierKey } from './config.js';
-import type {
-  PensionAiPromptContext,
-  ReviewAiPromptContext,
-  RoomAiPromptContext,
-} from './types.js';
+import type { PensionAiPromptContext, ReviewAiPromptContext } from './types.js';
 
 try {
   process.loadEnvFile?.();
@@ -28,10 +25,25 @@ const assertDevDatabaseOnly = (): void => {
   }
 };
 
+const ROOM_VIBES = [
+  'ambiente tranquilo y luminoso para estudio',
+  'espacio cómodo con amplio clóset y escritorio',
+  'habitación acogedora con excelente luz natural',
+  'ambiente funcional y silencioso para concentración',
+] as const;
+
+const ROOM_TYPES = [
+  { raw: 'SINGLE', label: 'Pieza individual' },
+  { raw: 'SHARED', label: 'Pieza compartida' },
+  { raw: 'STUDIO', label: 'Estudio independiente' },
+] as const;
+
 const run = async (): Promise<void> => {
   assertDevDatabaseOnly();
 
-  console.log('=== Iniciando Enriquecimiento Inteligente de Base de Datos (buscatunido_dev) ===');
+  console.log(
+    '=== Iniciando Enriquecimiento Optimizado (Batching + Memoria + Gran Update NoSQL) ===',
+  );
   const { prisma } = createPrismaClient();
 
   const notDeleted = {
@@ -40,13 +52,37 @@ const run = async (): Promise<void> => {
 
   const pensions = await prisma.pension.findMany({
     where: notDeleted,
+    select: {
+      id: true,
+      city: true,
+      neighborhood: true,
+      verificationStatus: true,
+      amenities: true,
+      rooms: true,
+      curfewTime: true,
+      contactName: true,
+      nearbyUniversities: true,
+      description: true,
+    },
   });
 
   const reviews = await prisma.review.findMany({
     where: notDeleted,
-    include: {
-      user: true,
-      pension: true,
+    select: {
+      id: true,
+      overallRating: true,
+      comment: true,
+      user: {
+        select: {
+          firstName: true,
+        },
+      },
+      pension: {
+        select: {
+          city: true,
+          nearbyUniversities: true,
+        },
+      },
     },
   });
 
@@ -58,10 +94,8 @@ const run = async (): Promise<void> => {
   }
 
   console.log(
-    `Detectadas ${pensions.length} pensiones y ${reviews.length} reseñas para enriquecer.`,
+    `Cargados en memoria: ${pensions.length} pensiones y ${reviews.length} reseñas desde buscatunido_dev.`,
   );
-  console.log(`Cargando modelo ${AI_CONFIG.modelId} en CPU...`);
-  const generator = await createModelPipeline();
 
   const existingCache = loadEnrichedTextsCache();
   const generatedDescriptions: Record<string, string> = {
@@ -74,188 +108,254 @@ const run = async (): Promise<void> => {
     ...(existingCache?.rooms || {}),
   };
 
-  console.log(`--- [1/2] Enriqueciendo ${pensions.length} pensiones y sus habitaciones ---`);
-  for (let idx = 0; idx < pensions.length; idx++) {
-    const pension = pensions[idx];
-    const nearest = pension.nearbyUniversities[0];
-    const tier: TierKey =
-      pension.verificationStatus === 'OFFICIALLY_VERIFIED'
-        ? 'alta'
-        : pension.verificationStatus === 'COMMUNITY_VERIFIED'
-          ? 'media'
-          : 'baja';
+  const pendingPensions = pensions.filter((p) => !generatedDescriptions[p.id]);
+  const pendingReviews = reviews.filter((r) => !generatedReviews[r.id]);
 
-    const pCtx: PensionAiPromptContext = {
-      id: pension.id,
-      city: pension.city,
-      neighborhood: pension.neighborhood,
-      tier,
-      nearestUniName: nearest?.shortName || nearest?.name || 'la universidad local',
-      walkingMinutes: nearest?.walkingMinutes || 8,
-      amenitiesList: pension.amenities.slice(0, 5),
-      roomsSummary: `${pension.rooms.length} habitaciones`,
-      rulesSummary: pension.curfewTime
-        ? `toque de queda ${pension.curfewTime}`
-        : 'convivencia estudiantil tranquila',
-      landlordName: pension.contactName || 'Anfitrión',
-    };
+  let generator: Awaited<ReturnType<typeof createModelPipeline>> | null = null;
+  const getGenerator = async () => {
+    if (!generator) {
+      console.log(`Inicializando modelo ${AI_CONFIG.modelId}...`);
+      generator = await createModelPipeline();
+    }
+    return generator;
+  };
 
-    try {
-      let finalDescription = generatedDescriptions[pension.id];
-      if (!finalDescription) {
-        const pPrompt = buildPensionDescriptionPrompt(pCtx);
-        const pResult = await generator(pPrompt, {
-          max_new_tokens: AI_CONFIG.maxNewTokensDescription,
-          temperature: 0.7,
-          do_sample: true,
-          return_full_text: false,
+  console.log('--- [1/3] Evaluando Pool de Arquetipos IA para Habitaciones ---');
+  const archetypePool: Record<string, string[]> = {};
+  const archetypeContexts: Array<RoomArchetypeContext & { key: string }> = [];
+
+  for (const t of ROOM_TYPES) {
+    for (const bath of [true, false]) {
+      const key = `${t.raw}_${bath ? 'PRIVATE' : 'SHARED'}`;
+      archetypePool[key] = [];
+      for (const vibe of ROOM_VIBES) {
+        archetypeContexts.push({
+          key,
+          roomType: t.label,
+          hasPrivateBathroom: bath,
+          vibe,
         });
-
-        const pRaw = Array.isArray(pResult) ? pResult[0]?.generated_text || '' : '';
-        const pClean = cleanGeneratedResponse(pRaw);
-        finalDescription = pClean.length > 20 ? pClean : pension.description;
-        generatedDescriptions[pension.id] = finalDescription;
       }
-
-      const updatedRooms = await Promise.all(
-        pension.rooms.map(async (room) => {
-          let roomDesc = generatedRooms[room.id];
-          if (!roomDesc) {
-            const rCtx: RoomAiPromptContext = {
-              id: room.id,
-              roomType:
-                room.type === 'SINGLE'
-                  ? 'Pieza individual'
-                  : room.type === 'SHARED'
-                    ? 'Pieza compartida'
-                    : 'Estudio independiente',
-              hasPrivateBathroom: room.hasPrivateBathroom,
-              totalBeds: room.totalBeds,
-              city: pension.city,
-              neighborhood: pension.neighborhood,
-            };
-
-            const rPrompt = buildRoomPrompt(rCtx);
-            const rResult = await generator(rPrompt, {
-              max_new_tokens: AI_CONFIG.maxNewTokensRoom,
-              temperature: 0.7,
-              do_sample: true,
-              return_full_text: false,
-            });
-
-            const rRaw = Array.isArray(rResult) ? rResult[0]?.generated_text || '' : '';
-            const rClean = cleanGeneratedResponse(rRaw);
-            roomDesc =
-              rClean.length > 15
-                ? rClean
-                : `Habitación ${room.type.toLowerCase()} con escritorio y clóset. ${room.hasPrivateBathroom ? 'Baño privado.' : 'Baño compartido.'}`;
-            generatedRooms[room.id] = roomDesc;
-          }
-
-          return {
-            ...room,
-            description: roomDesc,
-          };
-        }),
-      );
-
-      await prisma.pension.update({
-        where: { id: pension.id },
-        data: {
-          description: finalDescription,
-          rooms: updatedRooms,
-        },
-      });
-
-      if ((idx + 1) % 10 === 0 || idx + 1 === pensions.length) {
-        saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
-        console.log(`Pensiones procesadas: ${idx + 1}/${pensions.length}`);
-      }
-    } catch (err) {
-      console.error(`Error enriqueciendo pensión ${pension.id}:`, err);
     }
   }
 
-  console.log(`--- [2/2] Enriqueciendo ${reviews.length} reseñas estudiantiles ---`);
-  for (let idx = 0; idx < reviews.length; idx++) {
-    const rev = reviews[idx];
-    const userGender =
-      rev.user?.firstName &&
-      [
-        'camila',
-        'valentina',
-        'sofia',
-        'fernanda',
-        'javiera',
-        'francisca',
-        'catalina',
-        'isidora',
-        'daniela',
-        'paula',
-        'estudiante',
-      ].some((n) => rev.user?.firstName.toLowerCase().includes(n))
-        ? 'FEMALE'
-        : 'MALE';
+  const needsRoomArchetypes = pensions.some((p) => p.rooms.some((r) => !generatedRooms[r.id]));
 
-    const nearest = rev.pension?.nearbyUniversities?.[0];
-    const sentiment =
-      rev.overallRating <= 2 ? 'enojado' : rev.overallRating === 3 ? 'neutral' : 'contento';
+  if (needsRoomArchetypes) {
+    const gen = await getGenerator();
+    const archetypePrompts = archetypeContexts.map(buildRoomArchetypePrompt);
+    const archetypeOutputs = await runBatchInference(gen, archetypePrompts, {
+      max_new_tokens: AI_CONFIG.maxNewTokensRoom,
+    });
 
-    const highlightAspect =
-      rev.overallRating >= 4
-        ? 'excelente conectividad, amabilidad y ambiente de estudio'
-        : rev.overallRating === 3
-          ? 'cumple lo básico pero hay detalles de mantención'
-          : 'problemas de frío, ruidos y wifi intermitente';
+    for (let i = 0; i < archetypeContexts.length; i++) {
+      const clean = cleanGeneratedResponse(archetypeOutputs[i] || '');
+      const item = archetypeContexts[i];
+      const desc =
+        clean.length > 15
+          ? clean
+          : `Habitación ${item.roomType.toLowerCase()} con escritorio y clóset. ${item.hasPrivateBathroom ? 'Baño privado.' : 'Baño compartido.'}`;
+      archetypePool[item.key].push(desc);
+    }
 
-    const rCtx: ReviewAiPromptContext = {
-      id: rev.id,
-      city: rev.pension?.city || 'la ciudad',
-      nearestUniName: nearest?.shortName || nearest?.name || 'la universidad',
-      authorName: rev.user?.firstName || 'Estudiante',
-      authorGender: userGender,
-      overallRating: rev.overallRating,
-      sentiment,
-      highlightAspect,
-    };
+    for (const p of pensions) {
+      p.rooms.forEach((room, roomIdx) => {
+        if (!generatedRooms[room.id]) {
+          const key = `${room.type}_${room.hasPrivateBathroom ? 'PRIVATE' : 'SHARED'}`;
+          const options = archetypePool[key] || [];
+          const selected =
+            options[roomIdx % Math.max(options.length, 1)] ||
+            `Habitación ${room.type.toLowerCase()} con escritorio y clóset. ${room.hasPrivateBathroom ? 'Baño privado.' : 'Baño compartido.'}`;
+          generatedRooms[room.id] = selected;
+        }
+      });
+    }
+    console.log(`Arquetipos generados y asignados para todas las habitaciones en memoria.`);
+  } else {
+    console.log('Habitaciones recuperadas directamente de la caché en memoria.');
+  }
 
-    try {
-      let finalComment = generatedReviews[rev.id];
-      if (!finalComment) {
-        const rPrompt = buildReviewCommentPrompt(rCtx);
-        const rResult = await generator(rPrompt, {
-          max_new_tokens: AI_CONFIG.maxNewTokensReview,
-          temperature: 0.7,
-          do_sample: true,
-          return_full_text: false,
-        });
+  console.log(
+    `--- [2/3] Procesando Descripciones de Pensiones en Lotes (Pendientes: ${pendingPensions.length}) ---`,
+  );
+  if (pendingPensions.length > 0) {
+    const gen = await getGenerator();
+    const pensionBatches = chunkArray(pendingPensions, AI_CONFIG.batchSize);
 
-        const rRaw = Array.isArray(rResult) ? rResult[0]?.generated_text || '' : '';
-        const rClean = cleanGeneratedResponse(rRaw);
-        finalComment = rClean.length > 10 ? rClean : rev.comment;
-        generatedReviews[rev.id] = finalComment;
-      }
+    for (let b = 0; b < pensionBatches.length; b++) {
+      const currentBatch = pensionBatches[b];
+      const prompts = currentBatch.map((pension) => {
+        const nearest = pension.nearbyUniversities[0];
+        const tier: TierKey =
+          pension.verificationStatus === 'OFFICIALLY_VERIFIED'
+            ? 'alta'
+            : pension.verificationStatus === 'COMMUNITY_VERIFIED'
+              ? 'media'
+              : 'baja';
 
-      await prisma.review.update({
-        where: { id: rev.id },
-        data: { comment: finalComment },
+        const pCtx: PensionAiPromptContext = {
+          id: pension.id,
+          city: pension.city,
+          neighborhood: pension.neighborhood,
+          tier,
+          nearestUniName: nearest?.shortName || nearest?.name || 'la universidad local',
+          walkingMinutes: nearest?.walkingMinutes || 8,
+          amenitiesList: pension.amenities.slice(0, 5),
+          roomsSummary: `${pension.rooms.length} habitaciones`,
+          rulesSummary: pension.curfewTime
+            ? `toque de queda ${pension.curfewTime}`
+            : 'convivencia estudiantil tranquila',
+          landlordName: pension.contactName || 'Anfitrión',
+        };
+
+        return buildPensionDescriptionPrompt(pCtx);
       });
 
-      if ((idx + 1) % 25 === 0 || idx + 1 === reviews.length) {
-        saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
-        console.log(`Reseñas procesadas: ${idx + 1}/${reviews.length}`);
+      const outputs = await runBatchInference(gen, prompts, {
+        max_new_tokens: AI_CONFIG.maxNewTokensDescription,
+      });
+
+      for (let i = 0; i < currentBatch.length; i++) {
+        const clean = cleanGeneratedResponse(outputs[i] || '');
+        generatedDescriptions[currentBatch[i].id] =
+          clean.length > 20 ? clean : currentBatch[i].description;
       }
-    } catch (err) {
-      console.error(`Error enriqueciendo reseña ${rev.id}:`, err);
+
+      console.log(
+        `Pensiones completadas: ${Math.min((b + 1) * AI_CONFIG.batchSize, pendingPensions.length)}/${pendingPensions.length}`,
+      );
+    }
+  }
+
+  console.log(
+    `--- [3/3] Procesando Reseñas Estudiantiles en Lotes (Pendientes: ${pendingReviews.length}) ---`,
+  );
+  if (pendingReviews.length > 0) {
+    const gen = await getGenerator();
+    const reviewBatches = chunkArray(pendingReviews, AI_CONFIG.batchSize);
+
+    for (let b = 0; b < reviewBatches.length; b++) {
+      const currentBatch = reviewBatches[b];
+      const prompts = currentBatch.map((rev) => {
+        const userGender =
+          rev.user?.firstName &&
+          [
+            'camila',
+            'valentina',
+            'sofia',
+            'fernanda',
+            'javiera',
+            'francisca',
+            'catalina',
+            'isidora',
+            'daniela',
+            'paula',
+            'estudiante',
+          ].some((n) => rev.user?.firstName.toLowerCase().includes(n))
+            ? 'FEMALE'
+            : 'MALE';
+
+        const nearest = rev.pension?.nearbyUniversities?.[0];
+        const sentiment =
+          rev.overallRating <= 2 ? 'enojado' : rev.overallRating === 3 ? 'neutral' : 'contento';
+
+        const highlightAspect =
+          rev.overallRating >= 4
+            ? 'excelente conectividad, amabilidad y ambiente de estudio'
+            : rev.overallRating === 3
+              ? 'cumple lo básico pero hay detalles de mantención'
+              : 'problemas de frío, ruidos y wifi intermitente';
+
+        const rCtx: ReviewAiPromptContext = {
+          id: rev.id,
+          city: rev.pension?.city || 'la ciudad',
+          nearestUniName: nearest?.shortName || nearest?.name || 'la universidad',
+          authorName: rev.user?.firstName || 'Estudiante',
+          authorGender: userGender,
+          overallRating: rev.overallRating,
+          sentiment,
+          highlightAspect,
+        };
+
+        return buildReviewCommentPrompt(rCtx);
+      });
+
+      const outputs = await runBatchInference(gen, prompts, {
+        max_new_tokens: AI_CONFIG.maxNewTokensReview,
+      });
+
+      for (let i = 0; i < currentBatch.length; i++) {
+        const clean = cleanGeneratedResponse(outputs[i] || '');
+        generatedReviews[currentBatch[i].id] = clean.length > 10 ? clean : currentBatch[i].comment;
+      }
+
+      console.log(
+        `Reseñas completadas: ${Math.min((b + 1) * AI_CONFIG.batchSize, pendingReviews.length)}/${pendingReviews.length}`,
+      );
     }
   }
 
   saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
-  console.log('=== Enriquecimiento Completado Exitosamente en MongoDB Atlas ===');
-  console.log(`Snapshot de respaldo actualizado en ${AI_CONFIG.enrichedTextsFile}`);
+  console.log(`Caché local sincronizada en ${AI_CONFIG.enrichedTextsFile}`);
+
+  console.log('=== Ejecutando Gran Update NoSQL por Lotes en MongoDB Atlas ===');
+  const now = new Date();
+
+  const pensionBulkOps = pensions.map((p) => {
+    const finalDescription = generatedDescriptions[p.id] || p.description;
+    const updatedRooms = p.rooms.map((room) => ({
+      ...room,
+      description: generatedRooms[room.id] || room.description,
+    }));
+
+    return {
+      q: { _id: { $oid: p.id } },
+      u: {
+        $set: {
+          description: finalDescription,
+          rooms: updatedRooms,
+          updatedAt: now,
+        },
+      },
+    };
+  });
+
+  const pensionChunks = chunkArray(pensionBulkOps, 100);
+  for (let i = 0; i < pensionChunks.length; i++) {
+    await prisma.$runCommandRaw({
+      update: 'pensions',
+      updates: pensionChunks[i],
+    });
+    console.log(
+      `Actualización masiva de pensiones: ${Math.min((i + 1) * 100, pensionBulkOps.length)}/${pensionBulkOps.length}`,
+    );
+  }
+
+  const reviewBulkOps = reviews.map((r) => ({
+    q: { _id: { $oid: r.id } },
+    u: {
+      $set: {
+        comment: generatedReviews[r.id] || r.comment,
+        updatedAt: now,
+      },
+    },
+  }));
+
+  const reviewChunks = chunkArray(reviewBulkOps, 200);
+  for (let i = 0; i < reviewChunks.length; i++) {
+    await prisma.$runCommandRaw({
+      update: 'reviews',
+      updates: reviewChunks[i],
+    });
+    console.log(
+      `Actualización masiva de reseñas: ${Math.min((i + 1) * 200, reviewBulkOps.length)}/${reviewBulkOps.length}`,
+    );
+  }
+
+  console.log('=== Enriquecimiento Completado con Éxito en Memoria y MongoDB Atlas ===');
 };
 
 run().catch((error: unknown) => {
-  console.error('Error fatal durante el enriquecimiento:', error);
+  console.error('Error fatal durante el enriquecimiento optimizado:', error);
   process.exit(1);
 });
