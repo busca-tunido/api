@@ -36,7 +36,7 @@ BuscaTuNido API is a modular backend service written in TypeScript using [NestJS
 
 The backend connects directly to MongoDB Atlas M0 clusters (`DATABASE_URL`) with environment-isolated databases (`buscatunido_dev` for local development and `buscatunido_test` for Vitest):
 
-- `pnpm db:seed`: Seeds MongoDB with amenities, universities, and listings (`prisma db seed` via `prisma/seed-test.ts`).
+- `pnpm db:seed`: Seeds MongoDB with amenities, universities, and listings (`prisma db seed` via `scripts/seeds/main.ts`).
 - `pnpm db:view`: Launches Prisma Studio for visual inspection (`prisma studio`).
 
 ---
