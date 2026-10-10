@@ -299,13 +299,15 @@ const run = async (): Promise<void> => {
   console.log(`Caché local sincronizada en ${AI_CONFIG.enrichedTextsFile}`);
 
   console.log('=== Ejecutando Gran Update NoSQL por Lotes en MongoDB Atlas ===');
-  const now = new Date();
+  const nowIso = new Date().toISOString();
 
   const pensionBulkOps = pensions.map((p) => {
     const finalDescription = generatedDescriptions[p.id] || p.description;
     const updatedRooms = p.rooms.map((room) => ({
       ...room,
       description: generatedRooms[room.id] || room.description,
+      createdAt: { $date: new Date(room.createdAt).toISOString() },
+      updatedAt: { $date: nowIso },
     }));
 
     return {
@@ -314,7 +316,7 @@ const run = async (): Promise<void> => {
         $set: {
           description: finalDescription,
           rooms: updatedRooms,
-          updatedAt: now,
+          updatedAt: { $date: nowIso },
         },
       },
     };
@@ -336,7 +338,7 @@ const run = async (): Promise<void> => {
     u: {
       $set: {
         comment: generatedReviews[r.id] || r.comment,
-        updatedAt: now,
+        updatedAt: { $date: nowIso },
       },
     },
   }));
