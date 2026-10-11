@@ -276,7 +276,7 @@ const generateTestScript = (extractions: Record<string, string>): string[] => {
     '    if (typeof postman !== "undefined" && postman.setEnvironmentVariable) {',
     '      postman.setEnvironmentVariable(key, str);',
     '    }',
-    '    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);',
+    '    console.log("[BuscaTuNido] Variable asignada {{" + key + "}}: " + str);',
     '  };',
     '  const first = (arrOrObj) => {',
     '    if (!arrOrObj) return null;',
@@ -300,7 +300,9 @@ const generateTestScript = (extractions: Record<string, string>): string[] => {
   }
 
   lines.push('} catch (e) {');
-  lines.push('  console.warn("[BuscaTuNido] Error al extraer variables de respuesta:", e.message);');
+  lines.push(
+    '  console.warn("[BuscaTuNido] Error al extraer variables de respuesta:", e.message);',
+  );
   lines.push('}');
 
   return lines;
@@ -501,7 +503,8 @@ const DEFAULT_ENDPOINT_BODIES: Record<string, Record<string, unknown>> = {
   'PATCH /reviews/{id}': {
     overallRating: 5,
     cleanlinessRating: 5,
-    comment: 'Actualización: completé mi segundo semestre aquí y sigo recomendando este lugar 100%.',
+    comment:
+      'Actualización: completé mi segundo semestre aquí y sigo recomendando este lugar 100%.',
     wifiRating: 5,
   },
   'POST /reports': {
@@ -714,7 +717,7 @@ const main = async (): Promise<void> => {
       }
 
       const headers: Array<{ key: string; value: string; type: 'text' }> = [];
-      let requestBody: PostmanItem['request']['body'] = undefined;
+      let requestBody: PostmanItem['request']['body'];
 
       if (operation.requestBody?.content) {
         const jsonContent = operation.requestBody.content['application/json'];
@@ -778,7 +781,9 @@ const main = async (): Promise<void> => {
           body: requestBody,
           url: {
             raw: `{{baseUrl}}${pathSegments.length > 0 ? `/${pathSegments.join('/')}` : ''}${
-              queryParams.length > 0 ? `?${queryParams.map((q) => `${q.key}=${q.value}`).join('&')}` : ''
+              queryParams.length > 0
+                ? `?${queryParams.map((q) => `${q.key}=${q.value}`).join('&')}`
+                : ''
             }`,
             host: ['{{baseUrl}}'],
             path: pathSegments,
@@ -800,12 +805,6 @@ const main = async (): Promise<void> => {
               },
         },
       };
-
-      const authExtractions = {
-        token: 'data.accessToken || (res && res.accessToken)',
-        userId: 'data.user?.id || data.userId',
-      };
-      const authTestScript = generateTestScript(authExtractions);
 
       if (routePath === '/auth/register' && method === 'POST') {
         const registerPresets = [

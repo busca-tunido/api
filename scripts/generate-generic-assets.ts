@@ -77,7 +77,16 @@ const generateFallbackSvg = (): string => `
 </svg>
 `;
 
-const generateAvatarSvg = (variant: 'default' | 'student-male' | 'student-female' | 'landlord-male' | 'landlord-female' | 'moderator' | 'admin'): string => {
+const generateAvatarSvg = (
+  variant:
+    | 'default'
+    | 'student-male'
+    | 'student-female'
+    | 'landlord-male'
+    | 'landlord-female'
+    | 'moderator'
+    | 'admin',
+): string => {
   const getBadge = () => {
     if (variant === 'moderator') {
       return `
@@ -306,8 +315,9 @@ async function main() {
   });
 
   if (keysToDelete.length > 0) {
-    console.log(`  Deleting ${keysToDelete.length} obsolete/stray keys:`);
-    keysToDelete.forEach((k) => console.log(`    - ${k.Key}`));
+    for (const k of keysToDelete) {
+      console.log(`    - ${k.Key}`);
+    }
     await s3.send(
       new DeleteObjectsCommand({
         Bucket: BUCKET,
