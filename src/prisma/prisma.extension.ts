@@ -58,7 +58,21 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
           return query(args);
         },
         async findUnique({ model, args, query }) {
-          const result = (await query(args)) as SoftDeleteRecord | null;
+          if (SOFT_DELETE_MODELS.has(model) && args.where) {
+            const { deletedAt: _, ...cleanWhere } = args.where as Record<string, unknown>;
+            args.where = cleanWhere as typeof args.where;
+          }
+          const hasCustomSelect =
+            SOFT_DELETE_MODELS.has(model) &&
+            args.select &&
+            typeof args.select === 'object' &&
+            !('deletedAt' in (args.select as Record<string, unknown>));
+
+          if (hasCustomSelect) {
+            (args.select as Record<string, unknown>).deletedAt = true;
+          }
+
+          const result = (await query(args)) as (SoftDeleteRecord & Record<string, unknown>) | null;
           if (
             SOFT_DELETE_MODELS.has(model) &&
             result &&
@@ -68,6 +82,12 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
           ) {
             return null;
           }
+
+          if (hasCustomSelect && result && 'deletedAt' in result) {
+            const { deletedAt: _, ...cleanResult } = result;
+            return cleanResult as SoftDeleteRecord & Record<string, unknown>;
+          }
+
           return result;
         },
         async count({ model, args, query }) {

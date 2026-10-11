@@ -29,8 +29,9 @@ export class RoomsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByPension(pensionId: string): Promise<unknown[]> {
-    const pension = await this.prisma.pension.findUnique({
-      where: { id: pensionId, deletedAt: null },
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(pensionId);
+    const pension = await this.prisma.pension.findFirst({
+      where: isObjectId ? { OR: [{ id: pensionId }, { slug: pensionId }] } : { slug: pensionId },
       select: { id: true, rooms: true },
     });
 
@@ -91,8 +92,9 @@ export class RoomsService {
   }
 
   async create(pensionId: string, dto: CreateRoomDto, user: SanitizedUser): Promise<unknown> {
-    const pension = await this.prisma.pension.findUnique({
-      where: { id: pensionId, deletedAt: null },
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(pensionId);
+    const pension = await this.prisma.pension.findFirst({
+      where: isObjectId ? { OR: [{ id: pensionId }, { slug: pensionId }] } : { slug: pensionId },
     });
 
     if (!pension) {
@@ -123,7 +125,7 @@ export class RoomsService {
     };
 
     await this.prisma.pension.update({
-      where: { id: pensionId },
+      where: { id: pension.id },
       data: {
         rooms: {
           push: newRoom,
@@ -133,7 +135,7 @@ export class RoomsService {
 
     return {
       ...newRoom,
-      pensionId,
+      pensionId: pension.id,
     };
   }
 
