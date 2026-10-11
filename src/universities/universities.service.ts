@@ -103,7 +103,7 @@ export class UniversitiesService {
 
   async findById(id: string): Promise<unknown> {
     const university = await this.prisma.university.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
       select: {
         id: true,
         name: true,
@@ -182,7 +182,7 @@ export class UniversitiesService {
 
   async update(id: string, dto: UpdateUniversityDto): Promise<unknown> {
     const existing = await this.prisma.university.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!existing) {
@@ -197,7 +197,7 @@ export class UniversitiesService {
 
   async delete(id: string): Promise<{ id: string; deleted: boolean }> {
     const existing = await this.prisma.university.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!existing) {

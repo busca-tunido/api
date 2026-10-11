@@ -40,24 +40,64 @@ const applySoftDeleteFilter = (
   return Object.keys(currentWhere).length === 0 ? notDeleted : { AND: [currentWhere, notDeleted] };
 };
 
+const sanitizeNestedWhereFilters = (obj: unknown): void => {
+  if (!obj || typeof obj !== 'object') return;
+  const record = obj as Record<string, unknown>;
+
+  if (record.where && typeof record.where === 'object') {
+    const whereObj = record.where as Record<string, unknown>;
+    if (whereObj.deletedAt === null) {
+      const { deletedAt: _, ...rest } = whereObj;
+      const notDeleted = {
+        OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+      };
+      record.where = Object.keys(rest).length === 0 ? notDeleted : { AND: [rest, notDeleted] };
+    }
+  }
+
+  if (record.include && typeof record.include === 'object') {
+    for (const val of Object.values(record.include as Record<string, unknown>)) {
+      sanitizeNestedWhereFilters(val);
+    }
+  }
+
+  if (record.select && typeof record.select === 'object') {
+    for (const val of Object.values(record.select as Record<string, unknown>)) {
+      sanitizeNestedWhereFilters(val);
+    }
+  }
+};
+
 export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
   return Prisma.defineExtension({
     name: 'softDelete',
     query: {
       $allModels: {
         async findMany({ model, args, query }) {
+          sanitizeNestedWhereFilters(args);
           if (SOFT_DELETE_MODELS.has(model)) {
             args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }
           return query(args);
         },
         async findFirst({ model, args, query }) {
+          sanitizeNestedWhereFilters(args);
           if (SOFT_DELETE_MODELS.has(model)) {
             args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }
           return query(args);
         },
         async findUnique({ model, args, query }) {
+          sanitizeNestedWhereFilters(args);
+          if (
+            args.where &&
+            typeof args.where === 'object' &&
+            'id' in args.where &&
+            typeof (args.where as Record<string, unknown>).id === 'string' &&
+            !/^[0-9a-fA-F]{24}$/.test((args.where as Record<string, unknown>).id as string)
+          ) {
+            return null;
+          }
           if (SOFT_DELETE_MODELS.has(model) && args.where) {
             const { deletedAt: _, ...cleanWhere } = args.where as Record<string, unknown>;
             args.where = cleanWhere as typeof args.where;
@@ -91,18 +131,21 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
           return result;
         },
         async count({ model, args, query }) {
+          sanitizeNestedWhereFilters(args);
           if (SOFT_DELETE_MODELS.has(model)) {
             args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }
           return query(args);
         },
         async groupBy({ model, args, query }) {
+          sanitizeNestedWhereFilters(args);
           if (SOFT_DELETE_MODELS.has(model)) {
             args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }
           return query(args);
         },
         async aggregate({ model, args, query }) {
+          sanitizeNestedWhereFilters(args);
           if (SOFT_DELETE_MODELS.has(model)) {
             args.where = applySoftDeleteFilter(args.where as Record<string, unknown> | undefined);
           }

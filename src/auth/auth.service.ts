@@ -54,7 +54,7 @@ export class AuthService {
       universityId = detectedUniversity.id;
     } else if (dto.universityId) {
       const university = await this.prisma.university.findUnique({
-        where: { id: dto.universityId, deletedAt: null },
+        where: { id: dto.universityId },
       });
       if (!university) {
         throw new NotFoundException('University not found');

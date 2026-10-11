@@ -18,7 +18,7 @@ export class ModerationService {
     moderator: SanitizedUser,
   ): Promise<unknown> {
     const review = await this.prisma.review.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!review) {
@@ -45,7 +45,7 @@ export class ModerationService {
     _moderator: SanitizedUser,
   ): Promise<unknown> {
     const pension = await this.prisma.pension.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!pension) {
@@ -53,7 +53,7 @@ export class ModerationService {
     }
 
     return this.prisma.pension.update({
-      where: { id },
+      where: { id: pension.id },
       data: {
         ...(dto.verificationStatus !== undefined
           ? { verificationStatus: dto.verificationStatus }

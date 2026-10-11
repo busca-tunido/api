@@ -51,11 +51,9 @@ export class RoomsService {
   async findById(id: string): Promise<unknown> {
     const pension = await this.prisma.pension.findFirst({
       where: {
-        deletedAt: null,
         rooms: {
           some: {
             id,
-            deletedAt: null,
           },
         },
       },
@@ -142,11 +140,9 @@ export class RoomsService {
   async update(id: string, dto: UpdateRoomDto, user: SanitizedUser): Promise<unknown> {
     const pension = await this.prisma.pension.findFirst({
       where: {
-        deletedAt: null,
         rooms: {
           some: {
             id,
-            deletedAt: null,
           },
         },
       },
@@ -194,11 +190,9 @@ export class RoomsService {
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
     const pension = await this.prisma.pension.findFirst({
       where: {
-        deletedAt: null,
         rooms: {
           some: {
             id,
-            deletedAt: null,
           },
         },
       },
