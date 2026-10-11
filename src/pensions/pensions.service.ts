@@ -716,11 +716,9 @@ export class PensionsService {
   }
 
   async findBySlugOrId(idOrSlug: string, _user?: SanitizedUser | null): Promise<unknown> {
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrSlug);
     const pension = await this.prisma.pension.findFirst({
-      where: {
-        deletedAt: null,
-        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
-      },
+      where: isObjectId ? { OR: [{ id: idOrSlug }, { slug: idOrSlug }] } : { slug: idOrSlug },
       include: {
         landlord: {
           select: {
@@ -821,7 +819,7 @@ export class PensionsService {
 
   async update(id: string, dto: UpdatePensionDto, user: SanitizedUser): Promise<unknown> {
     const pension = await this.prisma.pension.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!pension) {
@@ -885,7 +883,7 @@ export class PensionsService {
     }
 
     const updated = await this.prisma.pension.update({
-      where: { id },
+      where: { id: pension.id },
       data: updateData,
     });
 
@@ -894,7 +892,7 @@ export class PensionsService {
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
     const pension = await this.prisma.pension.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!pension) {
@@ -906,7 +904,7 @@ export class PensionsService {
     }
 
     await this.prisma.pension.update({
-      where: { id },
+      where: { id: pension.id },
       data: { deletedAt: new Date() },
     });
 

@@ -63,7 +63,7 @@ export class FavoritesService {
 
   async addFavorite(userId: string, pensionId: string): Promise<{ added: boolean }> {
     const pension = await this.prisma.pension.findUnique({
-      where: { id: pensionId, deletedAt: null },
+      where: { id: pensionId },
       select: { id: true },
     });
 
@@ -81,14 +81,14 @@ export class FavoritesService {
     }
 
     const currentFavorites = user.favoritePensionIds || [];
-    if (currentFavorites.includes(pensionId)) {
+    if (currentFavorites.includes(pension.id)) {
       throw new ConflictException('Pension is already saved in favorites');
     }
 
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        favoritePensionIds: { push: pensionId },
+        favoritePensionIds: { push: pension.id },
       },
     });
 

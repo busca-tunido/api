@@ -227,7 +227,8 @@ export class ReviewsService {
 
   async create(pensionId: string, dto: CreateReviewDto, user: SanitizedUser): Promise<unknown> {
     const pension = await this.prisma.pension.findUnique({
-      where: { id: pensionId, deletedAt: null },
+      where: { id: pensionId },
+      select: { id: true },
     });
 
     if (!pension) {
@@ -236,9 +237,8 @@ export class ReviewsService {
 
     const existing = await this.prisma.review.findFirst({
       where: {
-        pensionId,
+        pensionId: pension.id,
         userId: user.id,
-        deletedAt: null,
       },
     });
 
@@ -249,21 +249,21 @@ export class ReviewsService {
     const review = await this.prisma.review.create({
       data: {
         ...dto,
-        pensionId,
+        pensionId: pension.id,
         userId: user.id,
         isVerifiedResident: user.isEmailVerified,
         helpfulUserIds: [],
       },
     });
 
-    await this.recalculatePensionRating(pensionId);
+    await this.recalculatePensionRating(pension.id);
 
     return review;
   }
 
   async update(id: string, dto: UpdateReviewDto, user: SanitizedUser): Promise<unknown> {
     const review = await this.prisma.review.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!review) {
@@ -286,7 +286,7 @@ export class ReviewsService {
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
     const review = await this.prisma.review.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!review) {

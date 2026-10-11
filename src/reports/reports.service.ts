@@ -43,7 +43,8 @@ export class ReportsService {
 
   async create(dto: CreateReportDto, user: SanitizedUser): Promise<unknown> {
     const pension = await this.prisma.pension.findUnique({
-      where: { id: dto.pensionId, deletedAt: null },
+      where: { id: dto.pensionId },
+      select: { id: true },
     });
 
     if (!pension) {
@@ -62,7 +63,7 @@ export class ReportsService {
 
   async update(id: string, dto: UpdateReportDto): Promise<unknown> {
     const report = await this.prisma.report.findUnique({
-      where: { id, deletedAt: null },
+      where: { id },
     });
 
     if (!report) {

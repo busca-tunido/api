@@ -43,6 +43,7 @@ export const loadStaticCatalogs = async (): Promise<StaticCatalogData> => {
           name: def.name,
           category: def.category,
           iconKey: def.iconKey,
+          deletedAt: null,
         },
       });
       return {
@@ -81,6 +82,7 @@ export const loadStaticCatalogs = async (): Promise<StaticCatalogData> => {
         address: `${assignedCity.city} Campus Principal`,
         latitude: assignedCity.latitude,
         longitude: assignedCity.longitude,
+        deletedAt: null,
       },
     });
 
@@ -167,6 +169,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
         verificationStatus: pension.verificationStatus,
         landlordId: realLandlordId,
         amenities: pension.amenities,
+        deletedAt: null,
         rooms: pension.rooms.map((r) => ({
           id: r.id,
           roomNumber: r.roomNumber,
@@ -230,6 +233,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
         stayStartDate: new Date('2025-03-01'),
         stayEndDate: new Date('2025-07-15'),
         exactStayDays: 136,
+        deletedAt: null,
       },
     });
 
@@ -273,6 +277,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
           reason: 'INACCURATE_PRICE' as ReportReason,
           description: 'El precio acordado presencialmente no concuerda con la publicación.',
           status: 'PENDING' as ReportStatus,
+          deletedAt: null,
         },
       });
     }
@@ -287,6 +292,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
           amenitiesToAdd: ['wifi-alta-velocidad', 'calefaccion'],
         },
         submissionNotes: 'Sugerencia de servicios adicionales disponibles en el inmueble.',
+        deletedAt: null,
       },
     });
   }
