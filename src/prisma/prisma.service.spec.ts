@@ -40,4 +40,12 @@ describe('PrismaService', () => {
     await service.onModuleDestroy();
     expect(disconnectSpy).toHaveBeenCalled();
   });
+
+  it('should return null immediately for invalid 24-hex ObjectId in findUnique without calling database', async () => {
+    const service = new PrismaService();
+    const result = await service.pension.findUnique({
+      where: { id: 'invalid-id' },
+    });
+    expect(result).toBeNull();
+  });
 });

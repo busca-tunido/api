@@ -40,10 +40,7 @@ const applySoftDeleteFilter = (
   return Object.keys(currentWhere).length === 0 ? notDeleted : { AND: [currentWhere, notDeleted] };
 };
 
-const sanitizeNestedWhereFilters = (obj: unknown): void => {
-  if (!obj || typeof obj !== 'object') return;
-  const record = obj as Record<string, unknown>;
-
+const sanitizeWhereObject = (record: Record<string, unknown>): void => {
   if (record.where && typeof record.where === 'object') {
     const whereObj = record.where as Record<string, unknown>;
     if (whereObj.deletedAt === null) {
@@ -54,16 +51,27 @@ const sanitizeNestedWhereFilters = (obj: unknown): void => {
       record.where = Object.keys(rest).length === 0 ? notDeleted : { AND: [rest, notDeleted] };
     }
   }
+};
+
+const sanitizeNestedWhereFilters = (args: unknown): void => {
+  if (!args || typeof args !== 'object') return;
+  const record = args as Record<string, unknown>;
 
   if (record.include && typeof record.include === 'object') {
     for (const val of Object.values(record.include as Record<string, unknown>)) {
-      sanitizeNestedWhereFilters(val);
+      if (val && typeof val === 'object') {
+        sanitizeWhereObject(val as Record<string, unknown>);
+        sanitizeNestedWhereFilters(val);
+      }
     }
   }
 
   if (record.select && typeof record.select === 'object') {
     for (const val of Object.values(record.select as Record<string, unknown>)) {
-      sanitizeNestedWhereFilters(val);
+      if (val && typeof val === 'object') {
+        sanitizeWhereObject(val as Record<string, unknown>);
+        sanitizeNestedWhereFilters(val);
+      }
     }
   }
 };
@@ -98,9 +106,23 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
           ) {
             return null;
           }
-          if (SOFT_DELETE_MODELS.has(model) && args.where) {
-            const { deletedAt: _, ...cleanWhere } = args.where as Record<string, unknown>;
-            args.where = cleanWhere as typeof args.where;
+          if (SOFT_DELETE_MODELS.has(model) && args.where && typeof args.where === 'object') {
+            const whereObj = args.where as Record<string, unknown>;
+            if ('AND' in whereObj && Array.isArray(whereObj.AND)) {
+              const uniqueClause = whereObj.AND.find(
+                (clause) =>
+                  clause &&
+                  typeof clause === 'object' &&
+                  ('id' in clause || 'email' in clause || 'slug' in clause),
+              );
+              if (uniqueClause) {
+                const { deletedAt: _, ...cleanUnique } = uniqueClause as Record<string, unknown>;
+                args.where = cleanUnique as typeof args.where;
+              }
+            } else {
+              const { deletedAt: _, ...cleanWhere } = whereObj;
+              args.where = cleanWhere as typeof args.where;
+            }
           }
           const hasCustomSelect =
             SOFT_DELETE_MODELS.has(model) &&
