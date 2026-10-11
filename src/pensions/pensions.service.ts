@@ -1,8 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { ProposalStatus, Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { UniversitiesCacheService } from '../universities/universities-cache.service.js';
 import type { CreatePensionDto } from './dto/create-pension.dto.js';
 import type { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import type { UpdatePensionDto } from './dto/update-pension.dto.js';
@@ -199,7 +200,10 @@ interface PensionDocRaw {
 
 @Injectable()
 export class PensionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly universitiesCache?: UniversitiesCacheService,
+  ) {}
 
   private formatPensionItem(
     pension: PensionDocRaw,
@@ -790,6 +794,25 @@ export class PensionsService {
           },
         ];
       }
+    } else if (
+      this.universitiesCache &&
+      typeof dto.latitude === 'number' &&
+      typeof dto.longitude === 'number'
+    ) {
+      const nearbyList = this.universitiesCache.findNearby(dto.latitude, dto.longitude, {
+        city: dto.city,
+        maxDistanceMeters: 5000,
+        limit: 3,
+      });
+
+      nearbyUniversitiesData = nearbyList.map((u) => ({
+        universityId: u.universityId,
+        name: u.name,
+        shortName: u.shortName,
+        distanceMeters: u.distanceMeters,
+        walkingMinutes: u.walkingMinutes,
+        transitMinutes: u.transitMinutes,
+      }));
     }
 
     const location =
@@ -879,6 +902,30 @@ export class PensionsService {
               typeof distMeters === 'number' ? Math.round(distMeters / 250 + 4) : null,
           },
         ];
+      }
+    } else if (
+      (dto.latitude !== undefined || dto.longitude !== undefined) &&
+      this.universitiesCache
+    ) {
+      const lat = dto.latitude ?? pension.latitude;
+      const lng = dto.longitude ?? pension.longitude;
+      const city = dto.city ?? pension.city;
+
+      if (typeof lat === 'number' && typeof lng === 'number') {
+        const nearbyList = this.universitiesCache.findNearby(lat, lng, {
+          city,
+          maxDistanceMeters: 5000,
+          limit: 3,
+        });
+
+        updateData.nearbyUniversities = nearbyList.map((u) => ({
+          universityId: u.universityId,
+          name: u.name,
+          shortName: u.shortName,
+          distanceMeters: u.distanceMeters,
+          walkingMinutes: u.walkingMinutes,
+          transitMinutes: u.transitMinutes,
+        }));
       }
     }
 

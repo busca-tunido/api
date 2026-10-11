@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateUniversityDto } from './dto/create-university.dto.js';
 import type { UpdateUniversityDto } from './dto/update-university.dto.js';
+import { UniversitiesCacheService } from './universities-cache.service.js';
 
 export type UniversityDomainMatch = {
   id: string;
@@ -14,7 +15,10 @@ export type UniversityDomainMatch = {
 
 @Injectable()
 export class UniversitiesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly cache?: UniversitiesCacheService,
+  ) {}
 
   async findByEmailDomain(email: string): Promise<UniversityDomainMatch | null> {
     const parts = email.toLowerCase().trim().split('@');
@@ -175,9 +179,11 @@ export class UniversitiesService {
   }
 
   async create(dto: CreateUniversityDto): Promise<unknown> {
-    return this.prisma.university.create({
+    const created = await this.prisma.university.create({
       data: dto,
     });
+    await this.cache?.refresh();
+    return created;
   }
 
   async update(id: string, dto: UpdateUniversityDto): Promise<unknown> {
@@ -189,10 +195,12 @@ export class UniversitiesService {
       throw new NotFoundException(`University '${id}' not found`);
     }
 
-    return this.prisma.university.update({
+    const updated = await this.prisma.university.update({
       where: { id },
       data: dto,
     });
+    await this.cache?.refresh();
+    return updated;
   }
 
   async delete(id: string): Promise<{ id: string; deleted: boolean }> {
@@ -208,6 +216,7 @@ export class UniversitiesService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+    await this.cache?.refresh();
 
     return { id, deleted: true };
   }
