@@ -125,3 +125,20 @@ export const AI_CONFIG = {
   cacheDir: path.resolve(process.cwd(), '.cache/huggingface'),
   enrichedTextsFile: path.resolve(process.cwd(), '.cache/enriched-seed-texts.json'),
 };
+
+export const DEMO_USERS = {
+  landlord: {
+    email: 'propietario.demo@buscatunido.cl',
+    password: 'Password123!',
+    firstName: 'Propietario',
+    lastName: 'Demo',
+    phone: '+56912345678',
+  },
+  student: {
+    email: 'estudiante.demo@uchile.cl',
+    password: 'Password123!',
+    firstName: 'Estudiante',
+    lastName: 'Demo',
+    phone: '+56987654321',
+  },
+} as const;

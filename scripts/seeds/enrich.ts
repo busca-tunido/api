@@ -1,4 +1,3 @@
-import { chunkArray, createPrismaClient } from '../../prisma/seed-utils.js';
 import { loadEnrichedTextsCache, saveEnrichedTextsCache } from './ai/cache-store.js';
 import { createModelPipeline, runBatchInference } from './ai/model-runner.js';
 import {
@@ -9,6 +8,7 @@ import {
   type RoomArchetypeContext,
 } from './ai/prompt-builder.js';
 import { AI_CONFIG, type TierKey } from './config.js';
+import { chunkArray, createPrismaClient } from './seed-utils.js';
 import type { PensionAiPromptContext, ReviewAiPromptContext } from './types.js';
 
 try {
