@@ -7,7 +7,8 @@ const ENDPOINT = 'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws
 const REGION = 'us-east-2';
 const BUCKET = 'uploads';
 const ACCESS_KEY_ID = 'nak_live_9c5bfe8530bc42578f7920b49b2e1d34';
-const SECRET_ACCESS_KEY = 'nsk_live_6e3ba69871f790c39ed0c96b3af1ca2df0f30c120459a067cc16cb738e28effe';
+const SECRET_ACCESS_KEY =
+  'nsk_live_6e3ba69871f790c39ed0c96b3af1ca2df0f30c120459a067cc16cb738e28effe';
 
 const s3 = new S3Client({
   endpoint: ENDPOINT,
@@ -35,7 +36,8 @@ const IMAGES: ImageEntry[] = [
   { file: 'student_single_room_1789518061517.jpg', key: 'room-single-cozy.webp' },
 ];
 
-const BASE_DIR = 'C:\\Users\\tkdgi\\.gemini\\antigravity-ide\\brain\\4c552b6b-ceea-487c-a9a5-3eb572342a90';
+const BASE_DIR =
+  'C:\\Users\\tkdgi\\.gemini\\antigravity-ide\\brain\\4c552b6b-ceea-487c-a9a5-3eb572342a90';
 
 const run = async (): Promise<void> => {
   const uploadedUrls: string[] = [];

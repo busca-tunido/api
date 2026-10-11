@@ -66,7 +66,7 @@ const executePool = async <T>(
 
 const listAllKeys = async (prefix?: string): Promise<string[]> => {
   const keys: string[] = [];
-  let token: string | undefined = undefined;
+  let token: string | undefined;
 
   do {
     const res = await s3.send(

@@ -1,11 +1,7 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {
-  HeadObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 if (typeof process.loadEnvFile === 'function') {
   process.loadEnvFile();
@@ -46,8 +42,7 @@ const ENDPOINT =
   'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech';
 const REGION = process.env.AWS_REGION || 'us-east-2';
 const BUCKET = process.env.PUBLIC_STORAGE_BUCKET || 'uploads';
-const ACCESS_KEY_ID =
-  process.env.AWS_ACCESS_KEY_ID || 'nak_live_5119d554e20e489985285a1b82735d4a';
+const ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || 'nak_live_5119d554e20e489985285a1b82735d4a';
 const SECRET_ACCESS_KEY =
   process.env.AWS_SECRET_ACCESS_KEY ||
   'nsk_live_54448ce989196e9fe59fba014565858d1157f0dfbab8d88bb56366550ca72350';
@@ -76,9 +71,7 @@ const scanCategoryFiles = async (
     .sort();
 
   return {
-    relativePaths: webpFiles.map((file) =>
-      path.posix.join(...subDir.split(path.sep), file),
-    ),
+    relativePaths: webpFiles.map((file) => path.posix.join(...subDir.split(path.sep), file)),
     fullPaths: webpFiles.map((file) => path.join(dirPath, file)),
   };
 };
@@ -206,10 +199,7 @@ const run = async (): Promise<void> => {
     estudiantesMujeres,
   ];
 
-  const totalCatalogFiles = allScanResults.reduce(
-    (sum, res) => sum + res.relativePaths.length,
-    0,
-  );
+  const totalCatalogFiles = allScanResults.reduce((sum, res) => sum + res.relativePaths.length, 0);
   console.log(`Total curated catalog WebP files discovered: ${totalCatalogFiles}`);
 
   const uploadTasks: UploadTask[] = [];
