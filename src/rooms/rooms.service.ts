@@ -122,12 +122,19 @@ export class RoomsService {
       deletedAt: null,
     };
 
+    const allRooms = [...(pension.rooms || []), newRoom];
+    const availablePrices = allRooms
+      .filter((r) => !r.deletedAt && r.isAvailable)
+      .map((r) => r.monthlyPrice);
+    const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
+
     await this.prisma.pension.update({
       where: { id: pension.id },
       data: {
         rooms: {
           push: newRoom,
         },
+        ...(minMonthlyPrice !== undefined ? { baseMonthlyPrice: minMonthlyPrice } : {}),
       },
     });
 
@@ -172,12 +179,18 @@ export class RoomsService {
     const updatedRooms = [...pension.rooms];
     updatedRooms[roomIndex] = updatedRoom;
 
+    const availablePrices = updatedRooms
+      .filter((r) => !r.deletedAt && r.isAvailable)
+      .map((r) => r.monthlyPrice);
+    const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
+
     await this.prisma.pension.update({
       where: { id: pension.id },
       data: {
         rooms: {
           set: updatedRooms,
         },
+        ...(minMonthlyPrice !== undefined ? { baseMonthlyPrice: minMonthlyPrice } : {}),
       },
     });
 
@@ -215,12 +228,18 @@ export class RoomsService {
       r.id === id ? { ...r, deletedAt: new Date(), updatedAt: new Date() } : r,
     );
 
+    const availablePrices = updatedRooms
+      .filter((r) => !r.deletedAt && r.isAvailable)
+      .map((r) => r.monthlyPrice);
+    const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
+
     await this.prisma.pension.update({
       where: { id: pension.id },
       data: {
         rooms: {
           set: updatedRooms,
         },
+        ...(minMonthlyPrice !== undefined ? { baseMonthlyPrice: minMonthlyPrice } : {}),
       },
     });
 
