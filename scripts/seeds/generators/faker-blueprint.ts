@@ -12,6 +12,7 @@ import {
   CITY_BASE_MEDIAN,
   CITY_NEIGHBORHOODS,
   CURATED_COUNTS,
+  DEMO_USERS,
   IMPORTANT_CITY_TARGETS,
   STORAGE_BASE_URL,
   TIER_MAP,
@@ -142,16 +143,16 @@ export const generateBlueprintDataset = async (
   universityRecords: UniversityRecord[],
   amenityRecords: AmenityRecord[],
 ): Promise<BlueprintDataset> => {
-  const defaultPasswordHash = await bcrypt.hash('Student123!', 10);
+  const defaultPasswordHash = await bcrypt.hash(DEMO_USERS.student.password, 10);
   const users: DraftUser[] = [];
 
   const demoLandlord: DraftUser = {
     id: createDeterministicObjectId('landlord-demo'),
-    email: 'arrendador.demo@gmail.com',
+    email: DEMO_USERS.landlord.email,
     passwordHash: defaultPasswordHash,
-    firstName: 'Arrendador',
-    lastName: 'Demo',
-    phone: '+56912345678',
+    firstName: DEMO_USERS.landlord.firstName,
+    lastName: DEMO_USERS.landlord.lastName,
+    phone: DEMO_USERS.landlord.phone,
     avatarUrl: getLandlordAvatarUrl(true, 0),
     role: 'LANDLORD' as Role,
     gender: 'MALE',
@@ -194,11 +195,11 @@ export const generateBlueprintDataset = async (
 
   const demoStudent: DraftUser = {
     id: createDeterministicObjectId('student-demo'),
-    email: 'estudiante.demo@uchile.cl',
+    email: DEMO_USERS.student.email,
     passwordHash: defaultPasswordHash,
-    firstName: 'Estudiante',
-    lastName: 'Demo',
-    phone: '+56987654321',
+    firstName: DEMO_USERS.student.firstName,
+    lastName: DEMO_USERS.student.lastName,
+    phone: DEMO_USERS.student.phone,
     avatarUrl: getStudentAvatarUrl(false, 0),
     role: 'STUDENT' as Role,
     gender: 'FEMALE',
@@ -344,28 +345,34 @@ export const generateBlueprintDataset = async (
       });
     }
 
-    const nearbyUnisInCity = universityRecords.filter(
-      (u) => u.city.toLowerCase() === city.toLowerCase(),
-    );
-    const assignedUnis =
-      nearbyUnisInCity.length > 0
-        ? faker.helpers.arrayElements(nearbyUnisInCity, {
-            min: 1,
-            max: Math.min(3, nearbyUnisInCity.length),
-          })
-        : universityRecords.slice(0, 1);
+    const universitiesWithDistance = universityRecords
+      .map((uni) => {
+        const distMeters = calculateHaversineMeters(
+          latitude,
+          longitude,
+          uni.latitude,
+          uni.longitude,
+        );
+        return {
+          universityId: uni.id,
+          name: uni.name,
+          shortName: uni.shortName,
+          distanceMeters: distMeters,
+          walkingMinutes: calculateWalkingMinutes(distMeters),
+          transitMinutes: calculateTransitMinutes(distMeters),
+        };
+      })
+      .sort((a, b) => a.distanceMeters - b.distanceMeters);
 
-    const nearbyUniversities: DraftNearbyUniversity[] = assignedUnis.map((uni) => {
-      const distMeters = calculateHaversineMeters(latitude, longitude, uni.latitude, uni.longitude);
-      return {
-        universityId: uni.id,
-        name: uni.name,
-        shortName: uni.shortName,
-        distanceMeters: distMeters,
-        walkingMinutes: calculateWalkingMinutes(distMeters),
-        transitMinutes: calculateTransitMinutes(distMeters),
-      };
-    });
+    const in5kmRadius = universitiesWithDistance.filter((u) => u.distanceMeters <= 5000);
+    const nearbyUniversities: DraftNearbyUniversity[] =
+      in5kmRadius.length > 0 ? in5kmRadius.slice(0, 4) : universitiesWithDistance.slice(0, 1);
+
+    const availableRooms = rooms.filter((r) => r.isAvailable);
+    const resolvedBasePrice =
+      availableRooms.length > 0
+        ? Math.min(...availableRooms.map((r) => r.monthlyPrice))
+        : basePrice;
 
     const pension: DraftPension = {
       id: createDeterministicObjectId(`pension-${i}`),
@@ -381,8 +388,8 @@ export const generateBlueprintDataset = async (
       contactPhone: landlord.phone,
       contactWhatsapp: landlord.phone,
       contactEmail: landlord.email,
-      baseMonthlyPrice: basePrice,
-      deposit: basePrice,
+      baseMonthlyPrice: resolvedBasePrice,
+      deposit: resolvedBasePrice,
       currency: 'CLP',
       waterIncluded: true,
       electricityIncluded: true,

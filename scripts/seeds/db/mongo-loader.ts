@@ -1,4 +1,10 @@
 import type { ProposalStatus, ProposalType, ReportReason, ReportStatus } from '@prisma/client';
+import type {
+  AmenityRecord,
+  BlueprintDataset,
+  UniversityRecord,
+  ValidatedCity,
+} from '../generators/faker-blueprint.js';
 import {
   AMENITY_DEFINITIONS,
   type AmenityDefinition,
@@ -8,13 +14,7 @@ import {
   fetchAndValidateUniversities,
   generateShortName,
   type ValidatedCity as RawValidatedCity,
-} from '../../../prisma/seed-utils.js';
-import type {
-  AmenityRecord,
-  BlueprintDataset,
-  UniversityRecord,
-  ValidatedCity,
-} from '../generators/faker-blueprint.js';
+} from '../seed-utils.js';
 
 export interface StaticCatalogData {
   validCities: ValidatedCity[];
@@ -292,7 +292,6 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
           amenitiesToAdd: ['wifi-alta-velocidad', 'calefaccion'],
         },
         submissionNotes: 'Sugerencia de servicios adicionales disponibles en el inmueble.',
-        deletedAt: null,
       },
     });
   }
