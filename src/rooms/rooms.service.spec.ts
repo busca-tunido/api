@@ -59,7 +59,7 @@ describe('RoomsService', () => {
 
   describe('findByPension', () => {
     it('should return rooms belonging to pension', async () => {
-      mockPrisma.pension.findUnique.mockResolvedValue({
+      mockPrisma.pension.findFirst.mockResolvedValue({
         id: 'pension-1',
         rooms: [{ id: 'room-1', title: 'Hab 101', monthlyPrice: 200000, deletedAt: null }],
       });
@@ -71,7 +71,7 @@ describe('RoomsService', () => {
 
   describe('create', () => {
     it('should allow pension owner to create room', async () => {
-      mockPrisma.pension.findUnique.mockResolvedValue({
+      mockPrisma.pension.findFirst.mockResolvedValue({
         id: 'pension-1',
         landlordId: 'landlord-1',
         rooms: [],
@@ -95,7 +95,7 @@ describe('RoomsService', () => {
     });
 
     it('should throw ForbiddenException if user is not pension owner', async () => {
-      mockPrisma.pension.findUnique.mockResolvedValue({
+      mockPrisma.pension.findFirst.mockResolvedValue({
         id: 'pension-1',
         landlordId: 'landlord-1',
         rooms: [],

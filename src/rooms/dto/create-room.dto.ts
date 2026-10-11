@@ -4,9 +4,10 @@ import { Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateRoomDto {
-  @ApiProperty({ example: 'Hab 101' })
+  @ApiPropertyOptional({ example: 'Hab 101' })
+  @IsOptional()
   @IsString()
-  roomNumber!: string;
+  roomNumber?: string;
 
   @ApiProperty({ example: 'Habitación Individual Luminosa' })
   @IsString()
