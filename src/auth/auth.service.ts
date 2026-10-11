@@ -100,7 +100,7 @@ export class AuthService {
   async login(dto: LoginDto): Promise<AuthResponse> {
     const normalizedEmail = dto.email.toLowerCase().trim();
     const user = await this.prisma.user.findUnique({
-      where: { email: normalizedEmail, deletedAt: null },
+      where: { email: normalizedEmail },
     });
 
     if (!user) {
