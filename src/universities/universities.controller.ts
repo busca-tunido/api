@@ -19,6 +19,7 @@ import {
   CacheControl,
   CacheControlInterceptor,
 } from '../common/interceptors/cache-control.interceptor.js';
+import { CampusAreaResponseDto } from './dto/campus-area.dto.js';
 import { CreateUniversityDto } from './dto/create-university.dto.js';
 import { UpdateUniversityDto } from './dto/update-university.dto.js';
 import { UniversitiesService } from './universities.service.js';
@@ -36,6 +37,20 @@ export class UniversitiesController {
   @ApiResponse({ status: 200, description: 'List of universities' })
   async findAll(@Query('city') city?: string): Promise<unknown[]> {
     return this.universitiesService.findAll(city);
+  }
+
+  @Get('campuses')
+  @UseInterceptors(CacheControlInterceptor)
+  @CacheControl(3600, 86400)
+  @ApiOperation({ summary: 'List all university campus areas with perimeter polygons' })
+  @ApiQuery({ name: 'city', required: false, type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'List of campus areas with polygons',
+    type: [CampusAreaResponseDto],
+  })
+  async findCampusAreas(@Query('city') city?: string): Promise<CampusAreaResponseDto[]> {
+    return this.universitiesService.findCampusAreas(city);
   }
 
   @Get(':id')

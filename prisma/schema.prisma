@@ -121,6 +121,20 @@ type EmbeddedNearbyUniversity {
   transitMinutes Int?
 }
 
+type GeoCoordinate {
+  latitude  Float
+  longitude Float
+}
+
+type EmbeddedCampusArea {
+  id        String          @default(cuid())
+  name      String
+  acronym   String
+  centerLat Float
+  centerLng Float
+  polygon   GeoCoordinate[]
+}
+
 model User {
   id                 String            @id @default(auto()) @map("_id") @db.ObjectId
   email              String            @unique
@@ -159,8 +173,9 @@ model University {
   address      String
   latitude     Float
   longitude    Float
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  campuses     EmbeddedCampusArea[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
   deletedAt    DateTime?
 
   students User[]

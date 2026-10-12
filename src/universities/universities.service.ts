@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
+import type { CampusAreaResponseDto } from './dto/campus-area.dto.js';
 import type { CreateUniversityDto } from './dto/create-university.dto.js';
 import type { UpdateUniversityDto } from './dto/update-university.dto.js';
 import { UniversitiesCacheService } from './universities-cache.service.js';
@@ -70,6 +71,7 @@ export class UniversitiesService {
           address: true,
           latitude: true,
           longitude: true,
+          campuses: true,
           _count: {
             select: {
               students: true,
@@ -105,6 +107,47 @@ export class UniversitiesService {
     }));
   }
 
+  async findCampusAreas(city?: string): Promise<CampusAreaResponseDto[]> {
+    const where: Prisma.UniversityWhereInput = {
+      deletedAt: null,
+    };
+
+    if (city) {
+      where.city = { contains: city, mode: 'insensitive' };
+    }
+
+    const universities = await this.prisma.university.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        city: true,
+        campuses: true,
+      },
+    });
+
+    const areas: CampusAreaResponseDto[] = [];
+    for (const u of universities) {
+      if (Array.isArray(u.campuses)) {
+        for (const c of u.campuses) {
+          areas.push({
+            id: c.id,
+            name: c.name,
+            acronym: c.acronym,
+            centerLat: c.centerLat,
+            centerLng: c.centerLng,
+            polygon: c.polygon ?? [],
+            universityId: u.id,
+            universityName: u.name,
+            city: u.city,
+          });
+        }
+      }
+    }
+
+    return areas;
+  }
+
   async findById(id: string): Promise<unknown> {
     const university = await this.prisma.university.findUnique({
       where: { id },
@@ -117,6 +160,7 @@ export class UniversitiesService {
         address: true,
         latitude: true,
         longitude: true,
+        campuses: true,
         createdAt: true,
         updatedAt: true,
         _count: {
