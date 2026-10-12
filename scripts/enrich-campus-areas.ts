@@ -15,7 +15,8 @@ type CampusDefinition = {
   osmQuery: string;
   fallbackLat: number;
   fallbackLng: number;
-  radiusMeters: number;
+  sizeMeters?: number;
+  radiusMeters?: number;
 };
 
 type UniversityCampusMap = {
@@ -60,17 +61,17 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         name: 'Casa Central PUCV (Facultad de Derecho)',
         acronym: 'Derecho PUCV',
         osmQuery: 'Pontificia Universidad Católica de Valparaíso Casa Central, Valparaíso, Chile',
-        fallbackLat: -33.0445,
+        fallbackLat: -33.045,
         fallbackLng: -71.6052,
-        radiusMeters: 200,
+        sizeMeters: 85,
       },
       {
         name: 'Facultad de Ingeniería PUCV (FIN)',
         acronym: 'FIN PUCV',
         osmQuery: 'Facultad de Ingeniería PUCV, Avenida Brasil, Valparaíso, Chile',
-        fallbackLat: -33.0448,
+        fallbackLat: -33.0452,
         fallbackLng: -71.6143,
-        radiusMeters: 210,
+        sizeMeters: 90,
       },
       {
         name: 'Campus Sausalito PUCV (Filosofía y Educación)',
@@ -78,7 +79,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Campus Sausalito PUCV, Viña del Mar, Chile',
         fallbackLat: -33.0205,
         fallbackLng: -71.5365,
-        radiusMeters: 280,
+        sizeMeters: 120,
       },
       {
         name: 'Campus Curauma PUCV (Facultad de Ciencias)',
@@ -86,31 +87,31 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Campus Curauma PUCV, Valparaíso, Chile',
         fallbackLat: -33.136,
         fallbackLng: -71.5975,
-        radiusMeters: 360,
+        sizeMeters: 140,
       },
       {
         name: 'Escuela de Negocios y Economía PUCV',
         acronym: 'Negocios PUCV',
         osmQuery: 'Escuela de Negocios y Economía PUCV, Recreo, Viña del Mar, Chile',
-        fallbackLat: -33.0258,
-        fallbackLng: -71.5832,
-        radiusMeters: 170,
+        fallbackLat: -33.028,
+        fallbackLng: -71.5785,
+        sizeMeters: 85,
       },
       {
         name: 'Facultad de Arquitectura y Urbanismo PUCV',
         acronym: 'Arte PUCV',
         osmQuery: 'Escuela de Arquitectura y Diseño PUCV, Recreo, Viña del Mar, Chile',
-        fallbackLat: -33.0272,
-        fallbackLng: -71.5815,
-        radiusMeters: 180,
+        fallbackLat: -33.029,
+        fallbackLng: -71.577,
+        sizeMeters: 85,
       },
       {
         name: 'Instituto de Música PUCV (Cerro Concepción)',
         acronym: 'Música PUCV',
         osmQuery: 'Instituto de Música PUCV, Pilcomayo, Valparaíso, Chile',
-        fallbackLat: -33.0415,
+        fallbackLat: -33.0425,
         fallbackLng: -71.6275,
-        radiusMeters: 170,
+        sizeMeters: 80,
       },
     ],
   },
@@ -121,49 +122,49 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         name: 'Casa Central Universidad de Valparaíso',
         acronym: 'Central UV',
         osmQuery: 'Rectoría Universidad de Valparaíso, Blanco, Chile',
-        fallbackLat: -33.0378,
-        fallbackLng: -71.6272,
-        radiusMeters: 180,
+        fallbackLat: -33.0398,
+        fallbackLng: -71.6265,
+        sizeMeters: 80,
       },
       {
         name: 'Facultad de Medicina y Salud UV (Campus Reñaca)',
         acronym: 'Salud UV',
         osmQuery: 'Facultad de Medicina Universidad de Valparaíso, Reñaca, Viña del Mar, Chile',
         fallbackLat: -32.9772,
-        fallbackLng: -71.5435,
-        radiusMeters: 260,
+        fallbackLng: -71.5415,
+        sizeMeters: 110,
       },
       {
         name: 'Facultad de Derecho UV',
         acronym: 'Derecho UV',
         osmQuery: 'Facultad de Derecho y Ciencias Sociales Universidad de Valparaíso, Chile',
-        fallbackLat: -33.0402,
-        fallbackLng: -71.6185,
-        radiusMeters: 190,
+        fallbackLat: -33.044,
+        fallbackLng: -71.6195,
+        sizeMeters: 85,
       },
       {
         name: 'Facultad de Ingeniería UV',
         acronym: 'FIN UV',
         osmQuery: 'Facultad de Ingeniería Universidad de Valparaíso, General Cruz, Chile',
-        fallbackLat: -33.0465,
-        fallbackLng: -71.6092,
-        radiusMeters: 200,
+        fallbackLat: -33.0468,
+        fallbackLng: -71.6105,
+        sizeMeters: 85,
       },
       {
         name: 'Campus Playa Ancha UV (Arquitectura y Odontología)',
         acronym: 'Playa Ancha UV',
         osmQuery: 'Facultad de Arquitectura Universidad de Valparaíso Playa Ancha, Chile',
-        fallbackLat: -33.0245,
-        fallbackLng: -71.6375,
-        radiusMeters: 290,
+        fallbackLat: -33.0255,
+        fallbackLng: -71.6365,
+        sizeMeters: 110,
       },
       {
         name: 'Facultad de Farmacia y Ciencias UV (Playa Ancha)',
         acronym: 'Ciencias UV',
         osmQuery: 'Facultad de Farmacia Universidad de Valparaíso, Gran Bretaña, Chile',
-        fallbackLat: -33.0225,
-        fallbackLng: -71.6415,
-        radiusMeters: 230,
+        fallbackLat: -33.0235,
+        fallbackLng: -71.6395,
+        sizeMeters: 90,
       },
       {
         name: 'Facultad de Ciencias Económicas y Administrativas UV (FACEA)',
@@ -171,15 +172,15 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'FACEA Universidad de Valparaíso, Pasaje La Paz, Viña del Mar, Chile',
         fallbackLat: -33.0295,
         fallbackLng: -71.5625,
-        radiusMeters: 180,
+        sizeMeters: 85,
       },
       {
         name: 'Facultad de Humanidades y Educación UV',
         acronym: 'Humanidades UV',
         osmQuery: 'Facultad de Humanidades Universidad de Valparaíso, Serrano, Chile',
-        fallbackLat: -33.0375,
-        fallbackLng: -71.6285,
-        radiusMeters: 160,
+        fallbackLat: -33.0388,
+        fallbackLng: -71.6305,
+        sizeMeters: 80,
       },
       {
         name: 'Campus Santiago UV (San Miguel)',
@@ -187,7 +188,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Campus Santiago Universidad de Valparaíso, Gran Avenida, Chile',
         fallbackLat: -33.4925,
         fallbackLng: -70.6515,
-        radiusMeters: 230,
+        sizeMeters: 95,
       },
     ],
   },
@@ -198,9 +199,9 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         name: 'USM Casa Central (Valparaíso)',
         acronym: 'USM Central',
         osmQuery: 'Universidad Técnica Federico Santa María Casa Central, Valparaíso, Chile',
-        fallbackLat: -33.0355,
-        fallbackLng: -71.5948,
-        radiusMeters: 330,
+        fallbackLat: -33.0365,
+        fallbackLng: -71.5935,
+        sizeMeters: 125,
       },
       {
         name: 'USM Sede Viña del Mar',
@@ -208,7 +209,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad Técnica Federico Santa María Sede Viña del Mar, Chile',
         fallbackLat: -33.0035,
         fallbackLng: -71.527,
-        radiusMeters: 250,
+        sizeMeters: 110,
       },
       {
         name: 'USM Campus San Joaquín (Santiago)',
@@ -216,7 +217,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad Técnica Federico Santa María Campus San Joaquín, Santiago, Chile',
         fallbackLat: -33.4862,
         fallbackLng: -70.6225,
-        radiusMeters: 240,
+        sizeMeters: 110,
       },
       {
         name: 'USM Campus Vitacura (Santiago)',
@@ -224,7 +225,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad Técnica Federico Santa María Campus Vitacura, Santiago, Chile',
         fallbackLat: -33.3855,
         fallbackLng: -70.5732,
-        radiusMeters: 210,
+        sizeMeters: 100,
       },
     ],
   },
@@ -235,9 +236,9 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         name: 'Campus Central UPLA',
         acronym: 'UPLA Central',
         osmQuery: 'Universidad de Playa Ancha, Playa Ancha, Valparaíso, Chile',
-        fallbackLat: -33.0225,
-        fallbackLng: -71.6385,
-        radiusMeters: 270,
+        fallbackLat: -33.0235,
+        fallbackLng: -71.638,
+        sizeMeters: 100,
       },
       {
         name: 'Facultad de Ciencias Naturales y Exactas UPLA',
@@ -245,7 +246,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad de Playa Ancha Ciencias Naturales, Valparaíso, Chile',
         fallbackLat: -33.0252,
         fallbackLng: -71.642,
-        radiusMeters: 210,
+        sizeMeters: 90,
       },
       {
         name: 'Campus San Felipe UPLA',
@@ -253,7 +254,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad de Playa Ancha Sede San Felipe, Chile',
         fallbackLat: -32.7485,
         fallbackLng: -70.7285,
-        radiusMeters: 280,
+        sizeMeters: 110,
       },
     ],
   },
@@ -266,7 +267,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad de Viña del Mar Campus Rodelillo, Viña del Mar, Chile',
         fallbackLat: -33.0645,
         fallbackLng: -71.545,
-        radiusMeters: 330,
+        sizeMeters: 130,
       },
       {
         name: 'Campus Miraflores UVM',
@@ -274,15 +275,15 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad de Viña del Mar Campus Miraflores, Viña del Mar, Chile',
         fallbackLat: -33.027,
         fallbackLng: -71.539,
-        radiusMeters: 200,
+        sizeMeters: 95,
       },
       {
         name: 'Campus Recreo UVM',
         acronym: 'UVM Recreo',
         osmQuery: 'Universidad de Viña del Mar Campus Recreo, Viña del Mar, Chile',
-        fallbackLat: -33.0255,
-        fallbackLng: -71.582,
-        radiusMeters: 170,
+        fallbackLat: -33.0285,
+        fallbackLng: -71.5775,
+        sizeMeters: 85,
       },
       {
         name: 'Campus Diego Portales UVM (Viña Centro)',
@@ -290,7 +291,7 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
         osmQuery: 'Universidad de Viña del Mar Diego Portales, Viña del Mar, Chile',
         fallbackLat: -33.0225,
         fallbackLng: -71.5545,
-        radiusMeters: 190,
+        sizeMeters: 85,
       },
     ],
   },
@@ -1513,22 +1514,39 @@ const KNOWN_UNIVERSITY_CAMPUSES: UniversityCampusMap[] = [
 function generateFallbackPolygon(
   centerLat: number,
   centerLng: number,
-  radiusMeters = 300,
+  sizeMeters = 95,
+  aspectRatio = 1.35,
 ): GeoCoordinate[] {
-  const points: GeoCoordinate[] = [];
-  const sides = 10;
+  const halfWidth = (sizeMeters * aspectRatio) / 2;
+  const halfHeight = sizeMeters / 2;
   const latOffsetPerMeter = 1 / 111320;
   const lngOffsetPerMeter = 1 / (111320 * Math.cos((centerLat * Math.PI) / 180));
 
-  for (let i = 0; i < sides; i++) {
-    const angle = (i * 2 * Math.PI) / sides;
-    const r = radiusMeters * (0.86 + 0.16 * Math.sin(i * 1.9));
-    const lat = Number((centerLat + r * Math.sin(angle) * latOffsetPerMeter).toFixed(6));
-    const lng = Number((centerLng + r * Math.cos(angle) * lngOffsetPerMeter).toFixed(6));
-    points.push({ latitude: lat, longitude: lng });
-  }
-  points.push(points[0]);
-  return points;
+  const dLat = halfHeight * latOffsetPerMeter;
+  const dLng = halfWidth * lngOffsetPerMeter;
+
+  return [
+    {
+      latitude: Number((centerLat + dLat).toFixed(6)),
+      longitude: Number((centerLng + dLng).toFixed(6)),
+    },
+    {
+      latitude: Number((centerLat - dLat).toFixed(6)),
+      longitude: Number((centerLng + dLng).toFixed(6)),
+    },
+    {
+      latitude: Number((centerLat - dLat).toFixed(6)),
+      longitude: Number((centerLng - dLng).toFixed(6)),
+    },
+    {
+      latitude: Number((centerLat + dLat).toFixed(6)),
+      longitude: Number((centerLng - dLng).toFixed(6)),
+    },
+    {
+      latitude: Number((centerLat + dLat).toFixed(6)),
+      longitude: Number((centerLng + dLng).toFixed(6)),
+    },
+  ];
 }
 
 async function fetchOSMPolygon(
@@ -1581,6 +1599,18 @@ async function fetchOSMPolygon(
 
     const centerLat = Number((sumLat / (polygon.length - 1 || 1)).toFixed(6));
     const centerLng = Number((sumLng / (polygon.length - 1 || 1)).toFixed(6));
+
+    const minLat = Math.min(...polygon.map((p) => p.latitude));
+    const maxLat = Math.max(...polygon.map((p) => p.latitude));
+    const minLng = Math.min(...polygon.map((p) => p.longitude));
+    const maxLng = Math.max(...polygon.map((p) => p.longitude));
+
+    const latSpanMeters = (maxLat - minLat) * 111320;
+    const lngSpanMeters = (maxLng - minLng) * (111320 * Math.cos((centerLat * Math.PI) / 180));
+
+    if (latSpanMeters > 550 || lngSpanMeters > 550 || latSpanMeters < 25 || lngSpanMeters < 25) {
+      return null;
+    }
 
     return { polygon, centerLat, centerLng };
   } catch {
@@ -1644,10 +1674,13 @@ async function main(): Promise<void> {
           console.log(
             `    ✓ Geometría precisa generada en [${campusDef.fallbackLat}, ${campusDef.fallbackLng}]`,
           );
+          const targetSize =
+            campusDef.sizeMeters ??
+            Math.min(130, Math.max(75, Math.round((campusDef.radiusMeters || 200) * 0.42)));
           const fallbackPoly = generateFallbackPolygon(
             campusDef.fallbackLat,
             campusDef.fallbackLng,
-            campusDef.radiusMeters,
+            targetSize,
           );
           campusesData.push({
             name: campusDef.name,
@@ -1677,7 +1710,7 @@ async function main(): Promise<void> {
               .slice(0, 4)
               .join(''));
 
-      const fallbackPoly = generateFallbackPolygon(baseLat, baseLng, 270);
+      const fallbackPoly = generateFallbackPolygon(baseLat, baseLng, 95);
       campusesData.push({
         name: `${uni.name} - Sede Principal`,
         acronym: acronym.slice(0, 12),
