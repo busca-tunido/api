@@ -36,6 +36,7 @@ import {
   calculateTransitMinutes,
   calculateWalkingMinutes,
 } from './haversine.js';
+import { generateSafePensionCoordinates } from './water-exclusion.js';
 
 export interface ValidatedCity {
   city: string;
@@ -269,10 +270,10 @@ export const generateBlueprintDataset = async (
     const genericTitle = `Pensión Universitaria ${neighborhood} #${i + 1}`;
     const slug = `pension-${faker.string.alphanumeric(8).toLowerCase()}-${i + 1}`;
 
-    const latOffset = (Math.random() - 0.5) * 0.02;
-    const lngOffset = (Math.random() - 0.5) * 0.02;
-    const latitude = Number((cityObj.latitude + latOffset).toFixed(6));
-    const longitude = Number((cityObj.longitude + lngOffset).toFixed(6));
+    const localUniversities = universityRecords.filter(
+      (u) => u.city.toLowerCase() === city.toLowerCase(),
+    );
+    const { latitude, longitude } = generateSafePensionCoordinates(cityObj, localUniversities);
 
     let selectedAmenities: string[] = [];
     if (tier === 'baja') {
