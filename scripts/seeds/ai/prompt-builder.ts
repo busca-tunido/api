@@ -21,6 +21,39 @@ Descripción:
 `;
 };
 
+export interface PensionArchetypeContext {
+  tier: string;
+  vibe: string;
+}
+
+export const buildPensionArchetypePrompt = (ctx: PensionArchetypeContext): string => {
+  return `<|im_start|>system
+Eres redactor inmobiliario estudiantil en Chile. Escribe una descripción atractiva y breve (1 o 2 oraciones) para una pensión universitaria con perfil ${ctx.tier} y ambiente ${ctx.vibe}. No incluyas saludos ni listas.
+<|im_end|>
+<|im_start|>user
+Escribe la descripción:
+<|im_end|>
+<|im_start|>assistant
+`;
+};
+
+export interface ReviewArchetypeContext {
+  rating: number;
+  sentiment: string;
+  focus: string;
+}
+
+export const buildReviewArchetypePrompt = (ctx: ReviewArchetypeContext): string => {
+  return `<|im_start|>system
+Eres un estudiante universitario en Chile. Escribe un comentario breve y natural de 1 o 2 oraciones sobre tu experiencia en una pensión universitaria. Tu calificación es ${ctx.rating}/5 estrellas (${ctx.sentiment}, enfocado en ${ctx.focus}).
+<|im_end|>
+<|im_start|>user
+Escribe tu reseña:
+<|im_end|>
+<|im_start|>assistant
+`;
+};
+
 export interface RoomArchetypeContext {
   roomType: string;
   hasPrivateBathroom: boolean;

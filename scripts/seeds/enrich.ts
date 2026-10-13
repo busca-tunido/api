@@ -1,15 +1,15 @@
 import { loadEnrichedTextsCache, saveEnrichedTextsCache } from './ai/cache-store.js';
 import { createModelPipeline, runBatchInference } from './ai/model-runner.js';
 import {
-  buildPensionDescriptionPrompt,
-  buildReviewCommentPrompt,
+  buildPensionArchetypePrompt,
+  buildReviewArchetypePrompt,
   buildRoomArchetypePrompt,
   cleanGeneratedResponse,
+  type PensionArchetypeContext,
   type RoomArchetypeContext,
 } from './ai/prompt-builder.js';
 import { AI_CONFIG, type TierKey } from './config.js';
 import { chunkArray, createPrismaClient } from './seed-utils.js';
-import type { PensionAiPromptContext, ReviewAiPromptContext } from './types.js';
 
 try {
   process.loadEnvFile?.();
@@ -170,132 +170,173 @@ const run = async (): Promise<void> => {
         }
       });
     }
+    saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
     console.log(`Arquetipos generados y asignados para todas las habitaciones en memoria.`);
   } else {
     console.log('Habitaciones recuperadas directamente de la caché en memoria.');
   }
 
   console.log(
-    `--- [2/3] Procesando Descripciones de Pensiones en Lotes (Pendientes: ${pendingPensions.length}) ---`,
+    `--- [2/3] Evaluando Pool de Arquetipos IA para Descripciones de Pensiones (Pendientes: ${pendingPensions.length}) ---`,
   );
   if (pendingPensions.length > 0) {
-    const gen = await getGenerator();
-    const pensionBatches = chunkArray(pendingPensions, AI_CONFIG.batchSize);
+    const PENSION_VIBES = [
+      'silencioso para estudio y concentración',
+      'excelente conectividad y cercanía al campus',
+      'ambiente familiar acogedor y grata convivencia',
+      'espacios modernos, funcionales e independientes',
+    ] as const;
 
-    for (let b = 0; b < pensionBatches.length; b++) {
-      const currentBatch = pensionBatches[b];
-      const prompts = currentBatch.map((pension) => {
-        const nearest = pension.nearbyUniversities[0];
-        const tier: TierKey =
-          pension.verificationStatus === 'OFFICIALLY_VERIFIED'
-            ? 'alta'
-            : pension.verificationStatus === 'COMMUNITY_VERIFIED'
-              ? 'media'
-              : 'baja';
+    const PENSION_TIERS: TierKey[] = ['alta', 'media', 'baja'];
+    const pensionArchetypePool: Record<string, string[]> = {};
+    const pensionContexts: Array<PensionArchetypeContext & { key: string }> = [];
 
-        const pCtx: PensionAiPromptContext = {
-          id: pension.id,
-          city: pension.city,
-          neighborhood: pension.neighborhood,
-          tier,
-          nearestUniName: nearest?.shortName || nearest?.name || 'la universidad local',
-          walkingMinutes: nearest?.walkingMinutes || 8,
-          amenitiesList: pension.amenities.slice(0, 5),
-          roomsSummary: `${pension.rooms.length} habitaciones`,
-          rulesSummary: pension.curfewTime
-            ? `toque de queda ${pension.curfewTime}`
-            : 'convivencia estudiantil tranquila',
-          landlordName: pension.contactName || 'Anfitrión',
-        };
-
-        return buildPensionDescriptionPrompt(pCtx);
-      });
-
-      const outputs = await runBatchInference(gen, prompts, {
-        max_new_tokens: AI_CONFIG.maxNewTokensDescription,
-      });
-
-      for (let i = 0; i < currentBatch.length; i++) {
-        const clean = cleanGeneratedResponse(outputs[i] || '');
-        generatedDescriptions[currentBatch[i].id] =
-          clean.length > 20 ? clean : currentBatch[i].description;
+    for (const tier of PENSION_TIERS) {
+      pensionArchetypePool[tier] = [];
+      for (const vibe of PENSION_VIBES) {
+        pensionContexts.push({ key: tier, tier, vibe });
       }
-
-      console.log(
-        `Pensiones completadas: ${Math.min((b + 1) * AI_CONFIG.batchSize, pendingPensions.length)}/${pendingPensions.length}`,
-      );
     }
+
+    const gen = await getGenerator();
+    const pensionPrompts = pensionContexts.map(buildPensionArchetypePrompt);
+    const pensionOutputs = await runBatchInference(gen, pensionPrompts, {
+      max_new_tokens: AI_CONFIG.maxNewTokensDescription,
+    });
+
+    for (let i = 0; i < pensionContexts.length; i++) {
+      const clean = cleanGeneratedResponse(pensionOutputs[i] || '');
+      const item = pensionContexts[i];
+      const desc =
+        clean.length > 20
+          ? clean
+          : `Residencia estudiantil en excelente ubicación con ambiente ${item.vibe}.`;
+      pensionArchetypePool[item.key].push(desc);
+    }
+
+    pendingPensions.forEach((pension, idx) => {
+      const tier: TierKey =
+        pension.verificationStatus === 'OFFICIALLY_VERIFIED'
+          ? 'alta'
+          : pension.verificationStatus === 'COMMUNITY_VERIFIED'
+            ? 'media'
+            : 'baja';
+      const options = pensionArchetypePool[tier] || [];
+      const baseDesc =
+        options[idx % Math.max(options.length, 1)] ||
+        'Residencia universitaria con excelente conectividad.';
+
+      const nearest = pension.nearbyUniversities[0];
+      const uniName = nearest?.shortName || nearest?.name || 'la universidad local';
+      const walkingText = nearest?.walkingMinutes
+        ? `a ${nearest.walkingMinutes} min caminando de ${uniName}`
+        : `a pasos de ${uniName}`;
+      const rules = pension.curfewTime
+        ? `toque de queda ${pension.curfewTime}`
+        : 'ambiente tranquilo de estudio';
+
+      const enriched = `${baseDesc} Ubicada en ${pension.neighborhood}, ${pension.city}, ${walkingText}. Cuenta con normas de convivencia claras (${rules}) y atención de ${pension.contactName || 'Anfitrión'}.`;
+
+      generatedDescriptions[pension.id] = enriched;
+    });
+
+    saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
+    console.log(
+      `Arquetipos generados y asignados para las ${pendingPensions.length} pensiones en memoria.`,
+    );
+  } else {
+    console.log('Descripciones de pensiones recuperadas directamente de la caché.');
   }
 
   console.log(
-    `--- [3/3] Procesando Reseñas Estudiantiles en Lotes (Pendientes: ${pendingReviews.length}) ---`,
+    `--- [3/3] Evaluando Pool de Arquetipos IA para Reseñas Estudiantiles (Pendientes: ${pendingReviews.length}) ---`,
   );
   if (pendingReviews.length > 0) {
+    const REVIEW_ARCHETYPES = [
+      {
+        rating: 5,
+        sentiment: 'muy satisfecho',
+        focus: 'excelente conectividad, amabilidad y comodidad',
+      },
+      {
+        rating: 5,
+        sentiment: 'contento',
+        focus: 'ambiente de estudio inmejorable y piezas impecables',
+      },
+      {
+        rating: 4,
+        sentiment: 'positivo',
+        focus: 'buena relación precio-calidad y cercanía al campus',
+      },
+      {
+        rating: 4,
+        sentiment: 'conforme',
+        focus: 'espacios limpios y servicios siempre funcionando',
+      },
+      {
+        rating: 3,
+        sentiment: 'neutral',
+        focus: 'cumple con lo básico aunque con detalles menores de mantención',
+      },
+      {
+        rating: 3,
+        sentiment: 'regular',
+        focus: 'buena ubicación pero algo ruidoso en horas punta',
+      },
+      {
+        rating: 2,
+        sentiment: 'disconforme',
+        focus: 'problemas de frío y wifi intermitente para estudiar',
+      },
+      {
+        rating: 1,
+        sentiment: 'molesto',
+        focus: 'mala experiencia con los servicios y poca respuesta del anfitrión',
+      },
+    ];
+
+    const reviewArchetypePool: Record<number, string[]> = {
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+    };
+
     const gen = await getGenerator();
-    const reviewBatches = chunkArray(pendingReviews, AI_CONFIG.batchSize);
+    const reviewPrompts = REVIEW_ARCHETYPES.map(buildReviewArchetypePrompt);
+    const reviewOutputs = await runBatchInference(gen, reviewPrompts, {
+      max_new_tokens: AI_CONFIG.maxNewTokensReview,
+    });
 
-    for (let b = 0; b < reviewBatches.length; b++) {
-      const currentBatch = reviewBatches[b];
-      const prompts = currentBatch.map((rev) => {
-        const userGender =
-          rev.user?.firstName &&
-          [
-            'camila',
-            'valentina',
-            'sofia',
-            'fernanda',
-            'javiera',
-            'francisca',
-            'catalina',
-            'isidora',
-            'daniela',
-            'paula',
-            'estudiante',
-          ].some((n) => rev.user?.firstName.toLowerCase().includes(n))
-            ? 'FEMALE'
-            : 'MALE';
-
-        const nearest = rev.pension?.nearbyUniversities?.[0];
-        const sentiment =
-          rev.overallRating <= 2 ? 'enojado' : rev.overallRating === 3 ? 'neutral' : 'contento';
-
-        const highlightAspect =
-          rev.overallRating >= 4
-            ? 'excelente conectividad, amabilidad y ambiente de estudio'
-            : rev.overallRating === 3
-              ? 'cumple lo básico pero hay detalles de mantención'
-              : 'problemas de frío, ruidos y wifi intermitente';
-
-        const rCtx: ReviewAiPromptContext = {
-          id: rev.id,
-          city: rev.pension?.city || 'la ciudad',
-          nearestUniName: nearest?.shortName || nearest?.name || 'la universidad',
-          authorName: rev.user?.firstName || 'Estudiante',
-          authorGender: userGender,
-          overallRating: rev.overallRating,
-          sentiment,
-          highlightAspect,
-        };
-
-        return buildReviewCommentPrompt(rCtx);
-      });
-
-      const outputs = await runBatchInference(gen, prompts, {
-        max_new_tokens: AI_CONFIG.maxNewTokensReview,
-      });
-
-      for (let i = 0; i < currentBatch.length; i++) {
-        const clean = cleanGeneratedResponse(outputs[i] || '');
-        generatedReviews[currentBatch[i].id] = clean.length > 10 ? clean : currentBatch[i].comment;
-      }
-
-      console.log(
-        `Reseñas completadas: ${Math.min((b + 1) * AI_CONFIG.batchSize, pendingReviews.length)}/${pendingReviews.length}`,
-      );
+    for (let i = 0; i < REVIEW_ARCHETYPES.length; i++) {
+      const clean = cleanGeneratedResponse(reviewOutputs[i] || '');
+      const item = REVIEW_ARCHETYPES[i];
+      const comment =
+        clean.length > 10
+          ? clean
+          : `Experiencia ${item.sentiment} viviendo en la pensión. ${item.focus}.`;
+      reviewArchetypePool[item.rating].push(comment);
     }
+
+    pendingReviews.forEach((rev, idx) => {
+      const rating = Math.max(1, Math.min(5, rev.overallRating || 4));
+      const options = reviewArchetypePool[rating] || [];
+      const baseComment =
+        options[idx % Math.max(options.length, 1)] ||
+        'Buena experiencia para vivir durante el año académico.';
+
+      generatedReviews[rev.id] = baseComment;
+    });
+
+    saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
+    console.log(
+      `Arquetipos generados y asignados para las ${pendingReviews.length} reseñas en memoria.`,
+    );
+  } else {
+    console.log('Reseñas recuperadas directamente de la caché en memoria.');
   }
 
-  saveEnrichedTextsCache(generatedDescriptions, generatedReviews, generatedRooms);
   console.log(`Caché local sincronizada en ${AI_CONFIG.enrichedTextsFile}`);
 
   console.log('=== Ejecutando Gran Update NoSQL por Lotes en MongoDB Atlas ===');
