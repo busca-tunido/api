@@ -8,6 +8,8 @@ export class CreateProposalDto {
   type!: ProposalType;
 
   @ApiProperty({
+    type: 'object',
+    additionalProperties: true,
     example: {
       curfewTime: '23:30',
       quietHoursStart: '22:00',

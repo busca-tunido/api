@@ -134,6 +134,12 @@ export class PensionItemResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true, example: '23:00' })
   curfewTime?: string | null;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: '23:00' })
+  quietHoursStart?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: '07:00' })
+  quietHoursEnd?: string | null;
+
   @ApiProperty({ type: Boolean, example: false })
   guestsAllowed!: boolean;
 

@@ -35,7 +35,11 @@ export class ProposalResponseDto {
   })
   status!: ProposalStatus;
 
-  @ApiProperty({ type: Object, example: { baseMonthlyPrice: 280000 } })
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: true,
+    example: { baseMonthlyPrice: 280000 },
+  })
   proposedChanges!: Record<string, unknown>;
 
   @ApiPropertyOptional({ type: String, nullable: true, example: 'El dueño actualizó los precios.' })

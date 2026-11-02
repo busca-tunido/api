@@ -42,6 +42,9 @@ export class RoomResponseDto {
   @ApiProperty({ type: Boolean, example: true })
   isAvailable!: boolean;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: '2026-03-01' })
+  availableFrom?: string | null;
+
   @ApiProperty({ type: [String], example: ['https://example.com/room1.jpg'] })
   images!: string[];
 
