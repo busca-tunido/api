@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum ApiErrorCode {
   EMAIL_ALREADY_EXISTS = 'EMAIL_ALREADY_EXISTS',
@@ -19,19 +19,19 @@ export enum ApiErrorCode {
 }
 
 export class ErrorEnvelopeDto {
-  @ApiProperty({ example: false })
-  success!: false;
+  @ApiProperty({ type: Boolean, example: false })
+  success!: boolean;
 
-  @ApiProperty({ example: 400 })
+  @ApiProperty({ type: Number, example: 400 })
   statusCode!: number;
 
-  @ApiProperty({ example: '2026-11-02T01:00:00.000Z' })
+  @ApiProperty({ type: String, example: '2026-11-02T01:00:00.000Z' })
   timestamp!: string;
 
-  @ApiProperty({ example: '/api/auth/login' })
+  @ApiProperty({ type: String, example: '/api/auth/login' })
   path!: string;
 
-  @ApiProperty({ example: 'Credenciales incorrectas' })
+  @ApiProperty({ type: String, example: 'Credenciales incorrectas' })
   message!: string;
 
   @ApiProperty({
@@ -41,6 +41,6 @@ export class ErrorEnvelopeDto {
   })
   errorCode!: ApiErrorCode;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiPropertyOptional({ type: Object, nullable: true })
   errors?: unknown;
 }
