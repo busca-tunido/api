@@ -1,0 +1,407 @@
+{
+  "pensions": {
+    "titlePrefixes": {
+      "alta": [
+        "Residencia Universitaria",
+        "Hogar Estudiantil Premium",
+        "Residencia Campus Central",
+        "Residencia Universitaria Bellavista",
+        "Hogar Estudiantil Los Robles",
+        "Residencia San Cristóbal",
+        "Villa Universitaria Premium",
+        "Residencia Estudiantil El Mirador",
+        "Hogar Universitario Los Canelos",
+        "Residencia Académica Los Aromos",
+        "Condominio Estudiantil Los Dominicos",
+        "Residencia Universitaria Santa María"
+      ],
+      "media": [
+        "Pensión Estudiantil",
+        "Casa Universitaria",
+        "Hogar Estudiantil Familiar",
+        "Pensión Familiar Las Lilas",
+        "Alojamiento Estudiantil Don Pedro",
+        "Casa Estudiantil Los Maitenes",
+        "Pensión Doña Carmen",
+        "Hogar Estudiantil Providencia",
+        "Residencia Juvenil Santa Lucía",
+        "Pensión Universitaria El Quillay",
+        "Casa de Estudiantes San Carlos",
+        "Hogar Universitario La Reconquista"
+      ],
+      "baja": [
+        "Alojamiento Universitario",
+        "Pensión Básica Estudiantil",
+        "Piezas Universitarias Centrales",
+        "Hogar Estudiantil Económico",
+        "Pensión Don Tito",
+        "Alojamiento Juvenil El Sol",
+        "Piezas Estudiantiles Las Araucarias",
+        "Hogar de Paso Estudiantil",
+        "Pensión Estudiantil Prat",
+        "Residencia Práctica Universitaria",
+        "Alojamiento Compartido Los Coigües",
+        "Habitaciones Universitarias Carrera"
+      ]
+    },
+    "descriptions": {
+      "alta": [
+        "Residencia de alto estándar diseñada para el descanso y la concentración académica. Ubicada en {neighborhood}, {city}, a solo {walkingMinutes} min caminando de {university}. Ofrece salas de estudio silenciosas, conectividad simétrica de alta velocidad, espacios comunes de recreación y normas claras de convivencia ({curfewRule}). Atención y soporte personalizado a cargo de {contactName}.",
+        "Moderna residencia estudiantil en pleno {neighborhood}, emplazada estratégicamente a pasos de {university} en {city}. Dispone de amplias áreas de coworking, cocina comunitaria completamente equipada, conserjería y cámaras de seguridad. Ambiente cálido y controlado con supervisión directa de {contactName}.",
+        "Hogar universitario premium en {neighborhood}, {city}. Su entorno destaca por la cercanía a {university} ({walkingMinutes} min a pie) y su excelente red de transporte. Las instalaciones cuentan con calefacción central, wifi optimizado para videoconferencias y normas de respeto mutuo ({curfewRule}). Administrado con dedicación por {contactName}.",
+        "Exclusiva residencia para estudiantes en el barrio {neighborhood}, {city}. Pensada para quienes buscan tranquilidad y comodidad a corta distancia de {university}. Incluye espacios de recreación, lavandería comunitaria y soporte constante de {contactName} para resolver cualquier inquietud.",
+        "Residencia académica de primer nivel en {neighborhood}, {city}. Emplazada a {walkingMinutes} min de {university}, ofrece un ambiente óptimo para estudiantes de carreras exigentes con áreas de lectura y biblioteca. Cuenta con normas ordenadas ({curfewRule}) y atención cercana de {contactName}.",
+        "Espacio residencial universitario moderno y seguro en {neighborhood}, {city}. A solo minutos a pie de {university}, con rápida conectividad al resto de la ciudad. Habitaciones y áreas compartidas impecables, seguridad reforzada y administración responsable encabezada por {contactName}.",
+        "Hogar estudiantil de categoría superior ubicado en el corazón de {neighborhood}, {city}. Diseñado para brindar confort total durante el año académico, a {walkingMinutes} min caminando de {university}. Normas claras de convivencia ({curfewRule}) y ambiente fraterno coordinado por {contactName}.",
+        "Residencia universitaria integral en {neighborhood}, {city}. Cercana a facultades clave de {university}, provista de zonas de estudio aisladas acústicamente y cocina compartida espaciosa. Excelente estándar de limpieza y gestión cordial por parte de {contactName}.",
+        "Alojamiento estudiantil premium con excelente conectividad en {neighborhood}, {city}. Ubicado a escasos minutos a pie de {university}, promueve un estilo de vida equilibrado entre estudio y bienestar. Respeto absoluto por horarios ({curfewRule}) y atención continua de {contactName}.",
+        "Residencia estudiantil contemporánea en {neighborhood}, {city}. Próxima al campus de {university} ({walkingMinutes} min caminando), ideal para estudiantes de pregrado y posgrado que valoran el silencio y el orden. Gestión personalizada y profesional a cargo de {contactName}.",
+        "Hogar universitario con equipamiento de vanguardia en {neighborhood}, {city}. Cercano a bibliotecas y sedes de {university}. Ofrece espacios luminosos, terraza compartida y convivencia regulada ({curfewRule}) bajo la supervisión de {contactName}."
+      ],
+      "media": [
+        "Pensión estudiantil acogedora con tradición familiar en {neighborhood}, {city}. Emplazada a {walkingMinutes} min a pie de {university}. Ofrece espacios comunes confortables, ambiente tranquilo para preparar certámenes y trato cálido de {contactName}.",
+        "Casa universitaria de ambiente grato y funcional en {neighborhood}, {city}. Su ubicación permite llegar caminando a {university} en apenas {walkingMinutes} minutos. Cuenta con cocina compartida, buena conexión a internet y normas de convivencia equilibradas ({curfewRule}) atendidas por {contactName}.",
+        "Hogar estudiantil confortable y seguro en {neighborhood}, {city}. Ideal para estudiantes de regiones que buscan un ambiente acogedor y fraterno cerca de {university}. Normas de respeto nocturno ({curfewRule}) y permanente disposición de {contactName}.",
+        "Pensión universitaria tradicional en {neighborhood}, {city}. Destaca por su cercanía al campus de {university} ({walkingMinutes} min a pie) y su barrio tranquilo. Posee espacios funcionales para estudiar y el respaldo cotidiano de {contactName}.",
+        "Residencia juvenil cómoda y bien iluminada en el sector de {neighborhood}, {city}. A pasos de {university}, garantiza una estadía tranquila y conectada durante todo el semestre. Normas claras ({curfewRule}) y gestión cercana de {contactName}.",
+        "Alojamiento estudiantil equilibrado y ordenado en {neighborhood}, {city}. Con excelente locomoción colectiva y a solo {walkingMinutes} min de {university}. Incluye cocina amoblada compartida, patio interior y administración atenta a cargo de {contactName}.",
+        "Pensión familiar con gran espíritu de comunidad en {neighborhood}, {city}. Próxima a {university}, proporciona un entorno de apoyo mutuo y tranquilidad indispensable para rendir académicamente. Reglas claras ({curfewRule}) y acogida de {contactName}.",
+        "Casa de estudiantes funcional en {neighborhood}, {city}. Emplazada a escasos minutos caminando de {university}. Ofrece piezas confortables, buena ventilación y acompañamiento constante de {contactName} para una estadía sin complicaciones.",
+        "Hogar universitario acogedor en {neighborhood}, {city}. Su proximidad a {university} ({walkingMinutes} min a pie) facilita los traslados diarios entre clases. Ambiente propicio para el estudio, normas de convivencia ({curfewRule}) y dedicación de {contactName}.",
+        "Residencia para universitarios en {neighborhood}, {city}. Diseñada para brindar comodidad y privacidad a pasos del campus de {university}. Cuenta con áreas compartidas limpias, conectividad estable y presencia permanente de {contactName}.",
+        "Pensión estudiantil práctica y bien ubicada en {neighborhood}, {city}. A corta distancia peatonal de {university}, con acceso expedito a servicios, supermercados y transporte. Buen ambiente de convivencia bajo el cuidado de {contactName}."
+      ],
+      "baja": [
+        "Alojamiento universitario económico y práctico en {neighborhood}, {city}. Pensado para estudiantes que buscan optimizar presupuesto sin perder cercanía a {university} ({walkingMinutes} min a pie). Servicios básicos garantizados y trato directo con {contactName}.",
+        "Pensión estudiantil sencilla y funcional en {neighborhood}, {city}. A minutos de {university}, ofrece lo esencial para una estadía universitaria cómoda: cama confortable, escritorio y normas estándar ({curfewRule}) coordinadas por {contactName}.",
+        "Piezas universitarias asequibles en {neighborhood}, {city}. Excelente alternativa para estudiantes de regiones con fácil acceso a {university} y locomoción pública. Convivencia respetuosa y administración responsable a cargo de {contactName}.",
+        "Hogar estudiantil básico y tranquilo en {neighborhood}, {city}. Emplazado a {walkingMinutes} min a pie de {university}. Dispone de cocina compartida, agua caliente y ambiente adecuado para descansar y estudiar. Trato directo con {contactName}.",
+        "Alojamiento para jóvenes universitarios en {neighborhood}, {city}. Próximo a sedes de {university}, con tarifas convenientes para estadías semestrales o anuales. Normas de convivencia básicas ({curfewRule}) y atención de {contactName}.",
+        "Pensión económica con ambiente solidario en {neighborhood}, {city}. Muy bien ubicada con respecto a {university} ({walkingMinutes} min caminando). Ofrece servicios esenciales y supervisión de {contactName}.",
+        "Piezas amobladas para estudiantes en {neighborhood}, {city}. Alternativa práctica y accesible a corta distancia de {university}. Espacio higiénico, silencioso y con normas razonables ({curfewRule}) bajo la gestión de {contactName}.",
+        "Residencia universitaria básica y funcional en {neighborhood}, {city}. Permite trasladarse a pie a {university} en apenas {walkingMinutes} minutos. Ideal para quienes priorizan el estudio y la cercanía al menor costo. Atendido por {contactName}.",
+        "Alojamiento estudiantil conveniente en {neighborhood}, {city}. Cercano al campus de {university} y al comercio local. Cuenta con servicios básicos funcionales y ambiente de convivencia cuidado por {contactName}.",
+        "Pensión práctica para estudiantes en {neighborhood}, {city}. Conectividad expedita hacia {university} ({walkingMinutes} min caminando) y espacios pensados para el descanso diario. Trato amable y directo con {contactName}.",
+        "Piezas universitarias económicas en {neighborhood}, {city}. Barrio residencial accesible y seguro a minutos de {university}. Incluye servicios básicos indispensables y convivencia fraterna coordinada por {contactName}."
+      ]
+    }
+  },
+  "rooms": {
+    "SINGLE": {
+      "PRIVATE_BATH": [
+        "Habitación individual luminosa con baño privado en suite, escritorio amplio para computador y apuntes, silla ergonómica y clóset empotrado.",
+        "Pieza individual amoblada con baño privado completo, cama de plaza y media, repisas para libros y excelente iluminación natural.",
+        "Dormitorio individual con baño en suite, piso flotante, escritorio espacioso con enchufes dedicados y armario de dos puertas.",
+        "Habitación individual con baño privado, ventana termopanel para aislamiento de ruidos, velador, escritorio de estudio y amplio clóset.",
+        "Pieza individual con baño privado en suite, ventilación natural, cama con colchón de alta densidad y área de estudio independiente.",
+        "Habitación individual de diseño moderno con baño privado, librero colgante, escritorio funcional y buena calefacción para invierno.",
+        "Dormitorio individual privado con baño propio, clóset de pared a pared, mesa de estudio con lámpara led y vista al jardín interior.",
+        "Pieza individual con baño en suite, piso cerámico fácil de limpiar, perchero, escritorio con cajonera y cortinas blackout.",
+        "Habitación individual espaciosa con baño privado, cama de una plaza y media, escritorio de madera sólida y cómoda para ropa.",
+        "Pieza individual silenciosa con baño privado en suite, excelente aislamiento acústico, ideal para certámenes y estudio intensivo.",
+        "Dormitorio individual con baño privado, conexión eléctrica reforzada, escritorio amplio para monitor secundario y clóset espacioso."
+      ],
+      "SHARED_BATH": [
+        "Habitación individual acogedora con baño compartido, equipada con cama de una plaza, escritorio de estudio y clóset de dos cuerpos.",
+        "Pieza individual luminosa con acceso a baño compartido impecable, cama cómoda, velador y mesa de trabajo para computador.",
+        "Dormitorio individual con piso flotante, ventana orientada al sol de la mañana, escritorio de trabajo y armario para ropa.",
+        "Habitación individual interior muy silenciosa, baño compartido cercano, cama confortable y repisas modulares para libros.",
+        "Pieza individual funcional con baño compartido, escritorio compacto, silla de estudio acolchada y clóset con cajones.",
+        "Dormitorio individual con cama de plaza y media, baño compartido con aseo diario, escritorio esquinero y buena ventilación.",
+        "Habitación individual práctica y abrigada, clóset empotrado, velador con gaveta y espacio de trabajo cómodo frente a la ventana.",
+        "Pieza individual para estudiante, ventana con cortinas térmicas, escritorio con repisa superior y clóset de buena capacidad.",
+        "Dormitorio individual con piso de madera, baño compartido sanitizado periódicamente, mesa de estudio y cómoda para vestuario.",
+        "Habitación individual tranquila orientada al patio trasero, cama con respaldo, escritorio amplio y clóset para estudiante de región.",
+        "Pieza individual económica con baño compartido, luz natural durante la tarde, escritorio con silla ergonómica y armario independiente."
+      ]
+    },
+    "SHARED": {
+      "PRIVATE_BATH": [
+        "Habitación doble espaciosa con baño privado en suite, dos camas individuales separadas, dos escritorios independientes y lockers personales.",
+        "Pieza compartida con baño privado completo, dos camas de una plaza, clóset dividido en dos secciones y repisas de estudio separadas.",
+        "Dormitorio compartido amplio con baño en suite, escritorios dobles enfrentados, buena luz natural y armario con llave para cada estudiante.",
+        "Habitación compartida para dos estudiantes con baño privado, dos puestos de estudio confortables y ventanal amplio hacia el exterior.",
+        "Pieza doble con baño propio, camas individuales dispuestas para máxima privacidad, cajoneras independientes y clóset doble.",
+        "Dormitorio compartido con baño en suite, piso flotante, estanterías dobles para material académico y lockers de seguridad.",
+        "Habitación compartida luminosa con baño privado, dos escritorios con lámparas de lectura y armarios individuales empotrados.",
+        "Pieza compartida de buen metraje con baño privado, dos camas con colchones nuevos, veladores individuales y zona de estudio.",
+        "Dormitorio doble con baño en suite, cortinas térmicas, escritorios dobles equipados con enchufes múltiples y clóset de gran capacidad.",
+        "Habitación compartida con baño privado sanitizado, dos camas individuales y mobiliario completo para estudiar en pareja o con amigos.",
+        "Pieza compartida amplia y ventilada con baño en suite, muebles modulares de almacenaje y dos puestos de trabajo confortables."
+      ],
+      "SHARED_BATH": [
+        "Habitación compartida funcional con baño compartido, dos camas individuales, dos escritorios compactos y clóset de dos cuerpos.",
+        "Pieza doble económica para dos estudiantes, con camas confortables, cajoneras personales y acceso a baño compartido con agua caliente continua.",
+        "Dormitorio compartido con dos camas de una plaza, mesas de estudio independientes, ventana con reja de seguridad y clóset compartido.",
+        "Habitación compartida para dos compañeros, piso cerámico, repisas para cuadernos y carpetas, y lockers individuales con candado.",
+        "Pieza doble bien ventilada con baño compartido, dos puestos de trabajo para computador y armarios individuales para ropa.",
+        "Dormitorio compartido económico, ideal para compartir arriendo, con dos camas resistentes, escritorios gemelos y clóset dividido.",
+        "Habitación doble práctica con baño compartido en pasillo, excelente iluminación natural y mobiliario esencial para la vida universitaria.",
+        "Pieza compartida con dos camas individuales separadas por velador central, mesas de estudio y repisas colgantes para apuntes.",
+        "Dormitorio compartido silencioso orientado al interior, dos camas individuales, armarios personales y baño compartido cercano.",
+        "Habitación doble con calefactor, dos escritorios para estudiar cómodamente y acceso fluido a baños compartidos limpios.",
+        "Pieza compartida espaciosa con camas bajas individuales, cajoneras dobles y percheros, ideal para universitarios de primer año."
+      ]
+    },
+    "STUDIO": {
+      "PRIVATE_BATH": [
+        "Minidepartamento tipo estudio independiente con kitchenette privada, baño en suite completo, escritorio ejecutivo y cama de dos plazas.",
+        "Estudio privado amoblado con entrada independiente, baño completo, frigobar, cocina encimera eléctrica y cómoda zona de estudio.",
+        "Monoambiente universitario con baño en suite, cocina americana equipada, clóset amplio, escritorio para dos pantallas y balcón pequeño.",
+        "Estudio independiente climatizado, con kitchenette amoblada, microondas, baño privado de finas terminaciones y mesa de trabajo amplia.",
+        "Minidepartamento tipo estudio con baño privado, cama de plaza y media, refrigerador pequeño, cocina equipada y libreros flotantes.",
+        "Estudio privado para estudiante de posgrado o último año, baño en suite, comedor diario, escritorio ergonómico y ventanales termopanel.",
+        "Monoambiente luminoso e independiente, baño completo, clóset de tres cuerpos, kitchenette con despensa y conexión de alta velocidad.",
+        "Estudio universitario con acceso directo desde el exterior, baño en suite, cocina funcional, escritorio de madera y cortinas blackout.",
+        "Minidepartamento equipado con baño privado, barra para computador, cama matrimonial, frigobar y estanterías para libros.",
+        "Estudio monoambiente moderno, baño completo privado, piso de porcelanato, muebles de cocina a medida y puesto de trabajo espacioso.",
+        "Estudio independiente acogedor y silencioso, baño en suite, kitchenette con lavaplatos y anafe eléctrico, y escritorio para estudio intensivo."
+      ],
+      "SHARED_BATH": [
+        "Estudio funcional independiente con kitchenette privada y acceso a baño exterior compartido de baja concurrencia, con escritorio amplio.",
+        "Espacio tipo estudio con frigobar y mesón de cocina privado, dormitorio amoblado con cama cómoda y baño compartido en pasillo.",
+        "Monoambiente económico con cocina americana propia, escritorio para computador y baño compartido mantenido con aseo riguroso.",
+        "Estudio semi-independiente con área de descanso y kitchenette personal, ideal para mayor privacidad con baño compartido higiénico.",
+        "Habitación tipo estudio con despensa y microondas privado, zona de trabajo cómoda y baño compartido con agua caliente garantizada.",
+        "Estudio universitario con cocinilla privada y mesón de estudio, buena iluminación natural y acceso a baño compartido ordenado.",
+        "Monoambiente funcional amoblado con frigobar y muebles de cocina, escritorio de estudio y baño compartido inmediato a la salida.",
+        "Estudio de un ambiente con entrada semi-privada, barra de cocina personal y baño compartido en zona de servicios comunes.",
+        "Espacio estudio para estudiante independiente con muebles de cocina, cama de plaza y media, escritorio y baño compartido en pasillo.",
+        "Estudio económico con cocinilla y estantes para víveres, clóset grande, mesa de estudio y baño compartido con horario libre.",
+        "Monoambiente práctico con kitchenette equipada, ventana amplia, escritorio de trabajo y baño exterior compartido con otro residente."
+      ]
+    }
+  },
+  "reviews": {
+    "5": [
+      {
+        "aspect": "ambiente_estudio",
+        "comment": "El ambiente para estudiar es insuperable. Se respetan religiosamente las horas de silencio y el wifi vuela incluso en época de exámenes. Totalmente recomendada."
+      },
+      {
+        "aspect": "atencion_anfitrion",
+        "comment": "La hospitalidad de los dueños hace que te sientas como en casa desde el primer día. Siempre atentos a solucionar cualquier detalle y las áreas comunes se mantienen impecables."
+      },
+      {
+        "aspect": "conectividad_campus",
+        "comment": "Estar a solo pasos de la universidad me ahorró muchísimo tiempo y plata en micros. La pensión es súper cómoda, abrigada en invierno y muy segura."
+      },
+      {
+        "aspect": "limpieza_orden",
+        "comment": "Excelente mantención en baños y cocina. Todos los días se realiza aseo profundo en las áreas comunes y la convivencia entre compañeros es un 7."
+      },
+      {
+        "aspect": "equipamiento_habitacion",
+        "comment": "La pieza es exactamente lo que necesitaba: amplia, con un escritorio de verdad para estudiar horas y una cama comodísima. La calefacción funciona perfecto."
+      },
+      {
+        "aspect": "seguridad_tranquilidad",
+        "comment": "Barrio residencial muy tranquilo y seguro para volver tarde de la biblioteca. Las chapas y accesos dan mucha tranquilidad para dejar las cosas de valor."
+      },
+      {
+        "aspect": "hospitalidad_comunidad",
+        "comment": "Llegué sin conocer a nadie en la ciudad y la calidez del anfitrión y los compañeros de pensión hicieron que mi adaptación fuera rápida y feliz. 100% recomendada."
+      },
+      {
+        "aspect": "servicios_estables",
+        "comment": "Agua caliente con buena presión a toda hora, internet simétrico que nunca se cae y cocina totalmente equipada con refrigeradores espaciosos."
+      },
+      {
+        "aspect": "relacion_calidad_precio",
+        "comment": "Vale cada peso del arriendo. El estándar de las instalaciones, la cercanía a la facultad y el ambiente de respeto no se encuentran fácilmente."
+      },
+      {
+        "aspect": "descanso_silencio",
+        "comment": "Pude preparar mi tesis con absoluta concentración. Cero fiestas ni desorden por las noches, ideal para quienes nos tomamos la carrera en serio."
+      },
+      {
+        "aspect": "experiencia_global",
+        "comment": "Viví todo mi segundo año aquí y renovaría sin dudarlo. Un hogar lejos de casa con todo lo que un estudiante universitario necesita."
+      }
+    ],
+    "4": [
+      {
+        "aspect": "precio_calidad",
+        "comment": "Muy buena relación precio-calidad. La habitación cumplió de sobra con mis expectativas para el año universitario y el sector es muy tranquilo."
+      },
+      {
+        "aspect": "convivencia",
+        "comment": "Grata convivencia con los demás compañeros. A veces la cocina compartida se llena a la hora de almuerzo, pero hay respeto y buen orden general."
+      },
+      {
+        "aspect": "conectividad",
+        "comment": "Excelente ubicación respecto a la facultad. Se puede ir caminando sin problemas, aunque de noche es recomendable andar acompañado por precaución."
+      },
+      {
+        "aspect": "servicios_generales",
+        "comment": "El wifi responde bien en casi todo el inmueble, salvo pequeñas bajas de velocidad en la noche cuando todos nos conectamos. El resto de los servicios impecable."
+      },
+      {
+        "aspect": "anfitrion_gestion",
+        "comment": "El dueño es muy amable y comprensivo ante imprevistos de pago o solicitudes de mantención menor. Buena disposición constante."
+      },
+      {
+        "aspect": "confort_termico",
+        "comment": "La casa es abrigada en general, aunque en las semanas más frías del invierno conviene apoyarse con una estufa personal en la habitación."
+      },
+      {
+        "aspect": "habitacion_espacio",
+        "comment": "Habitación cómoda y con buen clóset. El escritorio es algo compacto si usas dos pantallas, pero suficiente para cuadernos y notebook."
+      },
+      {
+        "aspect": "tranquilidad_estudio",
+        "comment": "Ambiente tranquilo la mayor parte del tiempo. Solo en fines de semana se escucha algo de música en el living, pero dentro de horarios razonables."
+      },
+      {
+        "aspect": "equipamiento_cocina",
+        "comment": "Cocina con vajilla completa y hornos funcionando bien. Solo faltaría un poco más de espacio en las despensas personales para guardar alimentos."
+      },
+      {
+        "aspect": "lavanderia_servicios",
+        "comment": "Las lavadoras funcionan perfecto y hay buen espacio para tender la ropa. La convivencia es fluida y coordinada mediante turnos."
+      },
+      {
+        "aspect": "balance_academico",
+        "comment": "Buena opción para rendir bien en la universidad. Cómoda, accesible y con vecinos respetuosos."
+      }
+    ],
+    "3": [
+      {
+        "aspect": "espacios_comunes",
+        "comment": "Cumple con lo básico para cursar el semestre. La habitación es cómoda, aunque los baños y la cocina compartida se quedan algo justos para la cantidad de residentes."
+      },
+      {
+        "aspect": "ruido_calle",
+        "comment": "Buena ubicación cercana al campus, pero en horas punta se siente bastante el ruido exterior desde las habitaciones que dan hacia la calle principal."
+      },
+      {
+        "aspect": "wifi_intermitente",
+        "comment": "El internet funciona para navegación y correos, pero para clases virtuales o subir archivos pesados suele tener caídas intermitentes."
+      },
+      {
+        "aspect": "aislacion_termica",
+        "comment": "La pieza es helada en invierno. Tuvimos que coordinar con el anfitrión para sumar estufas porque el frío de las mañanas se notaba bastante."
+      },
+      {
+        "aspect": "normas_convivencia",
+        "comment": "Las reglas existen pero a veces no se fiscalizan con rigor. La mayoría de los compañeros es respetuosa, pero de vez en cuando hay desorden en la cocina."
+      },
+      {
+        "aspect": "agua_caliente",
+        "comment": "La presión del agua caliente disminuye notablemente si varias personas se bañan a la misma hora en la mañana. Hay que coordinar horarios."
+      },
+      {
+        "aspect": "mobiliario_antiguo",
+        "comment": "Muebles algo antiguos pero operativos. Cumple el propósito básico para estudiar y dormir, aunque no esperes lujos."
+      },
+      {
+        "aspect": "iluminacion_ventilacion",
+        "comment": "A mi pieza le faltaba un poco de ventilación natural en verano, aunque el tamaño era aceptable para el valor pagado."
+      },
+      {
+        "aspect": "administracion_tiempos",
+        "comment": "El anfitrión soluciona los problemas, pero a veces toma varios días en coordinar a los técnicos si falla algún artefacto."
+      },
+      {
+        "aspect": "ubicacion_vs_servicios",
+        "comment": "La gran ventaja es la cercanía a la U, pero el estándar de las áreas comunes requiere mayor frecuencia de limpieza profunda."
+      },
+      {
+        "aspect": "experiencia_regular",
+        "comment": "Ni muy buena ni muy mala. Para salir del paso durante el año académico está bien, pero para el próximo año buscaré algo con baño privado."
+      }
+    ],
+    "2": [
+      {
+        "aspect": "frio_mantencion",
+        "comment": "La casa es bastante helada en los meses de invierno y la calefacción no da abasto. Además tuvimos un par de cortes de agua caliente que tardaron en reparar."
+      },
+      {
+        "aspect": "normas_ruido",
+        "comment": "Falta un control más firme de las normas de convivencia por la noche. Varias veces costó concentrarse para estudiar por ruidos en las áreas comunes."
+      },
+      {
+        "aspect": "desorden_aseo",
+        "comment": "El aseo de los baños compartidos fue deficiente. Había que estar recordando permanentemente la limpieza de la cocina y el retiro de basura."
+      },
+      {
+        "aspect": "internet_deficiente",
+        "comment": "Pésima señal de wifi en las piezas del segundo piso. En período de certámenes tuve que gastar mis datos móviles para poder entregar trabajos."
+      },
+      {
+        "aspect": "comunicacion_anfitrion",
+        "comment": "Poca receptividad del arrendador frente a los reclamos de convivencia. Cuando se reportaba ruido o desorden, prefería no involucrarse."
+      },
+      {
+        "aspect": "espacios_reducidos",
+        "comment": "La habitación era más pequeña de lo que aparentaba y el escritorio casi no dejaba espacio para moverse con la maleta y libros."
+      },
+      {
+        "aspect": "filtraciones_humedad",
+        "comment": "En los meses de lluvia hubo problemas de condensación y olor a humedad en la habitación. Faltó aislación adecuada."
+      },
+      {
+        "aspect": "visitas_descontroladas",
+        "comment": "Se permitían visitas hasta altas horas de la noche sin aviso previo, lo que generaba incomodidad e inseguridad en los espacios comunes."
+      },
+      {
+        "aspect": "falla_gas_luz",
+        "comment": "Varios cortes de gas imprevistos justo en mañanas frías. Se demoraban demasiado en cambiar los balones vacíos."
+      },
+      {
+        "aspect": "precio_desproporcionado",
+        "comment": "Cobran como si fuera una pensión de estándar alto pero los servicios y comodidades dejan bastante que desear. No renové contrato."
+      },
+      {
+        "aspect": "inseguridad_vecindario",
+        "comment": "Aunque la casa tiene reja, el entorno después de las 20:00 hrs es solitario y poco iluminado para volver caminando de clases."
+      }
+    ],
+    "1": [
+      {
+        "aspect": "servicios_criticos",
+        "comment": "Mala experiencia durante el semestre. Problemas constantes con la presión del agua, wifi muy inestable para certámenes online y poca respuesta de la administración."
+      },
+      {
+        "aspect": "desacuerdos_convivencia",
+        "comment": "No se cumplieron los acuerdos de silencio ni de aseo pactados al ingresar. El ambiente no es apto para quien realmente necesita concentrarse en los estudios."
+      },
+      {
+        "aspect": "cortes_reiterados",
+        "comment": "Pasamos días enteros sin agua caliente en pleno junio. El dueño daba excusas continuas y nunca ofreció compensación ni solución definitiva."
+      },
+      {
+        "aspect": "ruido_insoportable",
+        "comment": "Imposible dormir ni estudiar. Fiestas recurrentes hasta la madrugada en la casa sin ningún tipo de límite ni criterio de respeto por los certámenes."
+      },
+      {
+        "aspect": "desidia_administracion",
+        "comment": "El anfitrión fue sumamente déspota cuando solicitamos reparaciones básicas de cerrajería y calefacción. Cero empatía con los estudiantes."
+      },
+      {
+        "aspect": "condiciones_insalubres",
+        "comment": "Los baños presentaban hongos persistentes y la cocina era un caos de platos sucios que nadie fiscalizaba. Tuve que irme antes de terminar el semestre."
+      },
+      {
+        "aspect": "incumplimiento_arriendo",
+        "comment": "Nos prometieron internet de alta velocidad y calefacción central incluida, y ninguna de las dos cosas funcionó durante mi estadía. Publicidad engañosa."
+      },
+      {
+        "aspect": "perdida_pertenencias",
+        "comment": "Cero seguridad interior. Entraba gente desconocida a la casa sin control y se perdieron cosas de la cocina y lavandería sin que nadie respondiera."
+      },
+      {
+        "aspect": "humedad_extrema",
+        "comment": "La pieza era inhabitable por goteras y humedad en las paredes. Mi ropa se llenó de moho y el arrendador no se hizo cargo de nada."
+      },
+      {
+        "aspect": "clima_hostil",
+        "comment": "Ambiente tenso y hostil entre arrendador y residentes. En vez de apoyar el año académico, vivir aquí fue un factor constante de estrés."
+      },
+      {
+        "aspect": "pesima_experiencia",
+        "comment": "La peor experiencia de arriendo universitario. No se la recomendaría a nadie, busquen con tiempo otras opciones en la zona."
+      }
+    ]
+  }
+}

@@ -25,9 +25,7 @@
     "lint": "biome lint .",
     "check": "biome check --write .",
     "review": "biome check .",
-    "generate:postman": "tsx scripts/generate-postman-collection.ts",
-    "db:enrich": "tsx scripts/seeds/enrich.ts",
-    "db:enrichment": "tsx scripts/seeds/enrich.ts"
+    "generate:postman": "tsx scripts/generate-postman-collection.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1132.0",
@@ -58,7 +56,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.11",
     "@faker-js/faker": "^10.6.0",
-    "@huggingface/transformers": "^4.3.1",
     "@nestjs/cli": "^12.0.0",
     "@nestjs/mau": "^0.2.6",
     "@nestjs/schematics": "^12.0.0",

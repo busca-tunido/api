@@ -7,7 +7,7 @@ import type {
 } from '@prisma/client';
 import type { TierKey } from './config.js';
 
-export interface DraftUser {
+export type DraftUser = {
   id: string;
   email: string;
   passwordHash: string;
@@ -18,9 +18,9 @@ export interface DraftUser {
   role: Role;
   gender: 'MALE' | 'FEMALE';
   universityId: string | null;
-}
+};
 
-export interface DraftRoom {
+export type DraftRoom = {
   id: string;
   roomNumber: string;
   title: string;
@@ -33,27 +33,27 @@ export interface DraftRoom {
   availableBeds: number;
   isAvailable: boolean;
   images: string[];
-}
+};
 
-export interface DraftNearbyUniversity {
+export type DraftNearbyUniversity = {
   universityId: string;
   name: string;
   shortName: string | null;
   distanceMeters: number;
   walkingMinutes: number;
   transitMinutes: number;
-}
+};
 
-export interface DraftPensionImage {
+export type DraftPensionImage = {
   id: string;
   url: string;
   thumbnailUrl: string;
   caption: string;
   isFeatured: boolean;
   sortOrder: number;
-}
+};
 
-export interface DraftPension {
+export type DraftPension = {
   id: string;
   slug: string;
   title: string;
@@ -88,9 +88,9 @@ export interface DraftPension {
   images: DraftPensionImage[];
   nearbyUniversities: DraftNearbyUniversity[];
   landlordId: string;
-}
+};
 
-export interface DraftReview {
+export type DraftReview = {
   id: string;
   pensionId: string;
   userId: string;
@@ -104,45 +104,31 @@ export interface DraftReview {
   isResidentVerified: boolean;
   authorGender: 'MALE' | 'FEMALE';
   authorFirstName: string;
-}
+};
 
-export interface PensionAiPromptContext {
-  id: string;
-  city: string;
-  neighborhood: string;
-  tier: TierKey;
-  nearestUniName: string;
-  walkingMinutes: number;
-  amenitiesList: string[];
-  roomsSummary: string;
-  rulesSummary: string;
-  landlordName: string;
-}
+export type ReviewSituationItem = {
+  aspect: string;
+  comment: string;
+};
 
-export interface ReviewAiPromptContext {
-  id: string;
-  city: string;
-  nearestUniName: string;
-  authorName: string;
-  authorGender: 'MALE' | 'FEMALE';
-  overallRating: number;
-  sentiment: 'enojado' | 'neutral' | 'contento';
-  highlightAspect: string;
-}
-
-export interface RoomAiPromptContext {
-  id: string;
-  roomType: string;
-  hasPrivateBathroom: boolean;
-  totalBeds: number;
-  city: string;
-  neighborhood: string;
-}
-
-export interface EnrichedSeedTextsCache {
-  version: number;
-  generatedAt: string;
-  descriptions: Record<string, string>;
-  reviews: Record<string, string>;
-  rooms?: Record<string, string>;
-}
+export type SituationsCatalog = {
+  pensions: {
+    titlePrefixes: Record<TierKey, string[]>;
+    descriptions: Record<TierKey, string[]>;
+  };
+  rooms: {
+    SINGLE: {
+      PRIVATE_BATH: string[];
+      SHARED_BATH: string[];
+    };
+    SHARED: {
+      PRIVATE_BATH: string[];
+      SHARED_BATH: string[];
+    };
+    STUDIO: {
+      PRIVATE_BATH: string[];
+      SHARED_BATH: string[];
+    };
+  };
+  reviews: Record<'1' | '2' | '3' | '4' | '5', ReviewSituationItem[]>;
+};

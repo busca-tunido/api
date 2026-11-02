@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 export const TIER_MAP = {
   alta: 'high',
   media: 'mid',
@@ -113,18 +111,6 @@ export const STORAGE_BASE_URL = (
   process.env.PUBLIC_NEON_STORAGE_BASE_URL ||
   'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads'
 ).replace(/\/+$/, '');
-
-export const AI_CONFIG = {
-  modelId: 'onnx-community/Qwen2.5-0.5B-Instruct',
-  dtype: 'q4' as const,
-  device: 'cpu' as const,
-  maxNewTokensDescription: 45,
-  maxNewTokensReview: 26,
-  maxNewTokensRoom: 24,
-  batchSize: 12,
-  cacheDir: path.resolve(process.cwd(), '.cache/huggingface'),
-  enrichedTextsFile: path.resolve(process.cwd(), '.cache/enriched-seed-texts.json'),
-};
 
 export const DEMO_USERS = {
   landlord: {

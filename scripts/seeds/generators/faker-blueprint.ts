@@ -1,4 +1,7 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { fakerES_MX as faker } from '@faker-js/faker';
 import type {
   GenderPreference,
@@ -28,8 +31,7 @@ import type {
   DraftReview,
   DraftRoom,
   DraftUser,
-  PensionAiPromptContext,
-  ReviewAiPromptContext,
+  SituationsCatalog,
 } from '../types.js';
 import {
   calculateHaversineMeters,
@@ -38,14 +40,14 @@ import {
 } from './haversine.js';
 import { generateSafePensionCoordinates } from './water-exclusion.js';
 
-export interface ValidatedCity {
+export type ValidatedCity = {
   city: string;
   latitude: number;
   longitude: number;
   isPrimary: boolean;
-}
+};
 
-export interface UniversityRecord {
+export type UniversityRecord = {
   id: string;
   name: string;
   shortName: string | null;
@@ -53,20 +55,67 @@ export interface UniversityRecord {
   city: string;
   latitude: number;
   longitude: number;
-}
+};
 
-export interface AmenityRecord {
+export type AmenityRecord = {
   id: string;
   slug: string;
   name: string;
   category: string;
-}
+};
 
-export interface BlueprintDataset {
+export type BlueprintDataset = {
   users: DraftUser[];
   pensions: DraftPension[];
   reviews: DraftReview[];
-}
+};
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const situationsPath = path.resolve(currentDir, '../data/seed-situations.json');
+const situations: SituationsCatalog = JSON.parse(fs.readFileSync(situationsPath, 'utf-8'));
+
+const generatePensionTitle = (tier: TierKey, neighborhood: string, index: number): string => {
+  const prefixes = situations.pensions.titlePrefixes[tier];
+  const prefix = prefixes[index % prefixes.length];
+  return `${prefix} ${neighborhood} #${index + 1}`;
+};
+
+const generatePensionDescription = (
+  tier: TierKey,
+  neighborhood: string,
+  city: string,
+  universityName: string,
+  walkingMinutes: number,
+  curfewRule: string,
+  contactName: string,
+  index: number,
+): string => {
+  const templates = situations.pensions.descriptions[tier];
+  const template = templates[index % templates.length];
+  return template
+    .replaceAll('{neighborhood}', neighborhood)
+    .replaceAll('{city}', city)
+    .replaceAll('{university}', universityName)
+    .replaceAll('{walkingMinutes}', String(walkingMinutes))
+    .replaceAll('{curfewRule}', curfewRule)
+    .replaceAll('{contactName}', contactName);
+};
+
+const generateRoomDescription = (
+  roomType: RoomType,
+  hasPrivateBathroom: boolean,
+  index: number,
+): string => {
+  const bathKey = hasPrivateBathroom ? 'PRIVATE_BATH' : 'SHARED_BATH';
+  const pool = situations.rooms[roomType][bathKey];
+  return pool[index % pool.length];
+};
+
+const generateReviewComment = (rating: number, index: number): string => {
+  const key = String(rating) as '1' | '2' | '3' | '4' | '5';
+  const pool = situations.reviews[key];
+  return pool[index % pool.length].comment;
+};
 
 const getHouseImageUrl = (tier: TierKey, index: number): string =>
   `${STORAGE_BASE_URL}/v1/shared/curated/houses/${TIER_MAP[tier]}/${index}.webp`;
@@ -109,31 +158,6 @@ const calculateRoomPrice = (
     price *= 1.15;
   }
   return Math.round(price / 5000) * 5000;
-};
-
-const generateGenericPensionDescription = (
-  city: string,
-  neighborhood: string,
-  tier: TierKey,
-): string => {
-  const intro =
-    tier === 'alta'
-      ? 'Residencia universitaria de alto estándar'
-      : tier === 'media'
-        ? 'Pensión estudiantil acogedora y funcional'
-        : 'Alojamiento universitario económico y práctico';
-  return `${intro} ubicada en ${neighborhood}, ${city}. Ambiente tranquilo diseñado para el estudio, con conectividad y servicios básicos garantizados.`;
-};
-
-const generateGenericReviewComment = (rating: number, authorGender: 'MALE' | 'FEMALE'): string => {
-  const satisfiedAdj = authorGender === 'FEMALE' ? 'conforme' : 'conforme';
-  if (rating >= 4) {
-    return `Muy buena pensión, quedé bastante ${satisfiedAdj} con la estadía durante el semestre. Recomendable.`;
-  }
-  if (rating === 3) {
-    return 'Cumple con lo justo para cursar el semestre, aunque hay detalles de convivencia y mantención por mejorar.';
-  }
-  return 'Mala experiencia durante mi estadía. Tuve constantes inconvenientes con los servicios básicos y la tranquilidad.';
 };
 
 const createDeterministicObjectId = (seed: string): string =>
@@ -267,7 +291,6 @@ export const generateBlueprintDataset = async (
     const street = faker.location.street();
     const neighborhoodList = CITY_NEIGHBORHOODS[city];
     const neighborhood = neighborhoodList ? faker.helpers.arrayElement(neighborhoodList) : city;
-    const genericTitle = `Pensión Universitaria ${neighborhood} #${i + 1}`;
     const slug = `pension-${faker.string.alphanumeric(8).toLowerCase()}-${i + 1}`;
 
     const localUniversities = universityRecords.filter(
@@ -334,7 +357,7 @@ export const generateBlueprintDataset = async (
         id: crypto.randomUUID(),
         roomNumber: `Hab ${r * 10 + r}`,
         title: `Pieza ${roomType === 'SINGLE' ? 'Individual' : roomType === 'SHARED' ? 'Compartida' : 'Estudio'} #${r}`,
-        description: `Habitación equipada con escritorio. ${hasPrivateBath ? 'Baño privado.' : 'Baño compartido.'}`,
+        description: generateRoomDescription(roomType, hasPrivateBath, i * 10 + r),
         type: roomType,
         monthlyPrice: roomPrice,
         deposit: roomPrice,
@@ -375,17 +398,36 @@ export const generateBlueprintDataset = async (
         ? Math.min(...availableRooms.map((r) => r.monthlyPrice))
         : basePrice;
 
+    const nearest = nearbyUniversities[0];
+    const uniName = nearest?.shortName || nearest?.name || 'la universidad local';
+    const walking = nearest?.walkingMinutes || 8;
+    const curfewTime = tier === 'alta' ? null : '23:30';
+    const curfewRule = curfewTime ? `toque de queda ${curfewTime} hrs` : 'sin restricción horaria';
+    const contactName = `${landlord.firstName} ${landlord.lastName}`;
+
+    const title = generatePensionTitle(tier, neighborhood, i);
+    const description = generatePensionDescription(
+      tier,
+      neighborhood,
+      city,
+      uniName,
+      walking,
+      curfewRule,
+      contactName,
+      i,
+    );
+
     const pension: DraftPension = {
       id: createDeterministicObjectId(`pension-${i}`),
       slug,
-      title: genericTitle,
-      description: generateGenericPensionDescription(city, neighborhood, tier),
+      title,
+      description,
       address: `${street} ${faker.number.int({ min: 100, max: 2500 })}`,
       city,
       neighborhood,
       latitude,
       longitude,
-      contactName: `${landlord.firstName} ${landlord.lastName}`,
+      contactName,
       contactPhone: landlord.phone,
       contactWhatsapp: landlord.phone,
       contactEmail: landlord.email,
@@ -396,7 +438,7 @@ export const generateBlueprintDataset = async (
       electricityIncluded: true,
       gasIncluded: true,
       internetIncluded: true,
-      curfewTime: tier === 'alta' ? null : '23:30',
+      curfewTime,
       guestsAllowed: tier === 'alta',
       smokingAllowed: false,
       petsAllowed: tier === 'alta',
@@ -446,7 +488,7 @@ export const generateBlueprintDataset = async (
         landlordRating: overallRating,
         quietnessRating: Math.max(1, overallRating - 1),
         wifiRating: overallRating,
-        comment: generateGenericReviewComment(overallRating, reviewer.gender),
+        comment: generateReviewComment(overallRating, reviews.length),
         stayDurationCategory: 'ONE_SEMESTER' as StayDurationCategory,
         isResidentVerified: Math.random() < 0.7,
         authorGender: reviewer.gender,
@@ -461,72 +503,5 @@ export const generateBlueprintDataset = async (
     users,
     pensions,
     reviews,
-  };
-};
-
-export const extractPensionAiPromptContext = (pension: DraftPension): PensionAiPromptContext => {
-  const nearest = pension.nearbyUniversities[0];
-  const uniName = nearest?.shortName || nearest?.name || 'la universidad local';
-  const walking = nearest?.walkingMinutes || 8;
-
-  const roomsSummary = `${pension.rooms.length} habitaciones (${pension.rooms.filter((r) => r.type === 'SINGLE').length} individuales, ${pension.rooms.filter((r) => r.hasPrivateBathroom).length} con baño privado)`;
-
-  const rules: string[] = [];
-  if (pension.curfewTime) rules.push(`toque de queda ${pension.curfewTime}`);
-  if (pension.quietHoursStart) rules.push(`horario de silencio desde ${pension.quietHoursStart}`);
-  if (!pension.guestsAllowed) rules.push('sin visitas nocturnas');
-
-  return {
-    id: pension.id,
-    city: pension.city,
-    neighborhood: pension.neighborhood,
-    tier: pension.tier,
-    nearestUniName: uniName,
-    walkingMinutes: walking,
-    amenitiesList: pension.amenities.slice(0, 5),
-    roomsSummary,
-    rulesSummary: rules.join(', ') || 'normas estándar de convivencia',
-    landlordName: pension.contactName,
-  };
-};
-
-export const extractReviewAiPromptContext = (
-  review: DraftReview,
-  pension: DraftPension,
-): ReviewAiPromptContext => {
-  const nearest = pension.nearbyUniversities[0];
-  const uniName = nearest?.shortName || nearest?.name || 'la universidad';
-
-  const sentiment =
-    review.overallRating <= 2 ? 'enojado' : review.overallRating === 3 ? 'neutral' : 'contento';
-
-  const highlightAspect =
-    review.overallRating >= 4
-      ? faker.helpers.arrayElement([
-          'excelente ubicación cerca del campus',
-          'buena calefacción e internet rápido',
-          'anfitrión muy comprensivo y amable',
-        ])
-      : review.overallRating === 3
-        ? faker.helpers.arrayElement([
-            'espacio básico pero ruidoso',
-            'buena ubicación pero wifi inestable',
-            'cocina compartida pequeña',
-          ])
-        : faker.helpers.arrayElement([
-            'cortes de agua caliente y frío en invierno',
-            'mucho ruido nocturno y cero tranquilidad para estudiar',
-            'dueño poco empático con los acuerdos',
-          ]);
-
-  return {
-    id: review.id,
-    city: pension.city,
-    nearestUniName: uniName,
-    authorName: review.authorFirstName,
-    authorGender: review.authorGender,
-    overallRating: review.overallRating,
-    sentiment,
-    highlightAspect,
   };
 };
