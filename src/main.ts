@@ -62,7 +62,9 @@ async function bootstrap(): Promise<void> {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(app, swaggerConfig, {
+    operationIdFactory: (_controllerKey: string, methodKey: string) => methodKey,
+  });
   SwaggerModule.setup('api/docs', app, document);
 
   if (env.NODE_ENV !== 'production') {
