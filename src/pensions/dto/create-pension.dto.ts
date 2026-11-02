@@ -9,34 +9,37 @@ import {
   IsOptional,
   IsString,
   Matches,
+  Max,
   MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
 
 export class CreatePensionDto {
-  @ApiProperty({ example: 'Residencia San Joaquín' })
+  @ApiProperty({ example: 'Residencia San Joaquín', minLength: 3, maxLength: 100 })
   @IsString()
-  @MaxLength(150)
+  @MinLength(3, { message: 'El título debe tener al menos 3 caracteres' })
+  @MaxLength(100, { message: 'El título no puede superar los 100 caracteres' })
   title!: string;
 
-  @ApiProperty({ example: 'Excelente pensión cerca de campus San Joaquín' })
+  @ApiProperty({ example: 'Excelente pensión cerca de campus San Joaquín', maxLength: 1500 })
   @IsString()
-  @MaxLength(4000)
+  @MaxLength(1500, { message: 'La descripción no puede superar los 1500 caracteres' })
   description!: string;
 
-  @ApiProperty({ example: 'Av. Vicuña Mackenna 4860' })
+  @ApiProperty({ example: 'Av. Vicuña Mackenna 4860', maxLength: 120 })
   @IsString()
-  @MaxLength(250)
+  @MaxLength(120, { message: 'La dirección no puede superar los 120 caracteres' })
   address!: string;
 
-  @ApiProperty({ example: 'Santiago' })
+  @ApiProperty({ example: 'Santiago', maxLength: 60 })
   @IsString()
-  @MaxLength(100)
+  @MaxLength(60, { message: 'La ciudad no puede superar los 60 caracteres' })
   city!: string;
 
-  @ApiProperty({ example: 'San Joaquín' })
+  @ApiProperty({ example: 'San Joaquín', maxLength: 60 })
   @IsString()
-  @MaxLength(100)
+  @MaxLength(60, { message: 'El barrio/comuna no puede superar los 60 caracteres' })
   neighborhood!: string;
 
   @ApiProperty({ example: -33.4996 })
@@ -49,17 +52,19 @@ export class CreatePensionDto {
   @IsNumber()
   longitude!: number;
 
-  @ApiProperty({ example: 250000 })
+  @ApiProperty({ example: 250000, minimum: 0, maximum: 2000000 })
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
+  @Min(0, { message: 'El precio base mensual no puede ser negativo' })
+  @Max(2000000, { message: 'El precio base mensual no puede superar $2.000.000 CLP' })
   baseMonthlyPrice!: number;
 
-  @ApiPropertyOptional({ example: 250000 })
+  @ApiPropertyOptional({ example: 250000, minimum: 0, maximum: 1500000 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
+  @Min(0, { message: 'El mes de garantía no puede ser negativo' })
+  @Max(1500000, { message: 'El mes de garantía no puede superar $1.500.000 CLP' })
   deposit?: number;
 
   @ApiPropertyOptional({ example: 'CLP', default: 'CLP' })

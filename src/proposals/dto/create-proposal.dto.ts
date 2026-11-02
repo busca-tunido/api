@@ -21,9 +21,9 @@ export class CreateProposalDto {
   @IsObject()
   proposedChanges!: Record<string, unknown>;
 
-  @ApiPropertyOptional({ example: 'Actualización tras consulta presencial.' })
+  @ApiPropertyOptional({ example: 'Actualización tras consulta presencial.', maxLength: 500 })
   @IsOptional()
   @IsString()
-  @MaxLength(1000)
+  @MaxLength(500, { message: 'Las notas de la sugerencia no pueden superar los 500 caracteres' })
   submissionNotes?: string;
 }

@@ -1,15 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateUniversityDto {
-  @ApiProperty({ example: 'Universidad de Chile' })
+  @ApiProperty({ example: 'Universidad de Chile', minLength: 3, maxLength: 100 })
   @IsString()
+  @MinLength(3)
+  @MaxLength(100)
   name!: string;
 
-  @ApiPropertyOptional({ example: 'UCH' })
+  @ApiPropertyOptional({ example: 'UCH', maxLength: 20 })
   @IsOptional()
   @IsString()
+  @MaxLength(20)
   shortName?: string;
 
   @ApiPropertyOptional({ example: ['uchile.cl', 'alumnos.uchile.cl'] })
@@ -18,12 +21,14 @@ export class CreateUniversityDto {
   @IsString({ each: true })
   emailDomains?: string[];
 
-  @ApiProperty({ example: 'Santiago' })
+  @ApiProperty({ example: 'Santiago', maxLength: 60 })
   @IsString()
+  @MaxLength(60)
   city!: string;
 
-  @ApiProperty({ example: "Av. Libertador Bernardo O'Higgins 1058" })
+  @ApiProperty({ example: "Av. Libertador Bernardo O'Higgins 1058", maxLength: 150 })
   @IsString()
+  @MaxLength(150)
   address!: string;
 
   @ApiProperty({ example: -33.4442 })
