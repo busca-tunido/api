@@ -437,7 +437,7 @@ export const generateBlueprintDataset = async (
       waterIncluded: true,
       electricityIncluded: true,
       gasIncluded: true,
-      internetIncluded: true,
+      internetIncluded: selectedAmenities.includes('wifi-alta-velocidad'),
       curfewTime,
       guestsAllowed: tier === 'alta',
       smokingAllowed: false,
