@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from '../src/app.module.js';
+import { AppModule } from '../dist/app.module.js';
 
 async function exportOpenApi(): Promise<void> {
   const app = await NestFactory.create(AppModule, new FastifyAdapter(), {
@@ -18,9 +18,7 @@ async function exportOpenApi(): Promise<void> {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig, {
-    operationIdFactory: (_controllerKey: string, methodKey: string) => methodKey,
-  });
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
 
   const outputPath = path.resolve(import.meta.dirname, '../../web/src/lib/openapi.json');
   await fs.writeFile(outputPath, JSON.stringify(document, null, 2), 'utf-8');

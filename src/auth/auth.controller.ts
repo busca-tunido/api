@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import {
   ApiEnvelopeResponse,
@@ -38,6 +38,7 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user account' })
+  @ApiBody({ type: RegisterDto })
   @ApiEnvelopeResponse(AuthResponseDto, {
     status: 201,
     description: 'User successfully created and token issued',
@@ -50,6 +51,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Log in with email and password' })
+  @ApiBody({ type: LoginDto })
   @ApiEnvelopeResponse(AuthResponseDto, {
     status: 200,
     description: 'Authentication successful',
