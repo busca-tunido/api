@@ -10,17 +10,23 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import {
+  ApiEnvelopeResponse,
+  ApiStandardErrors,
+} from '../common/decorators/api-envelope-response.decorator.js';
+import {
   CacheControl,
   CacheControlInterceptor,
 } from '../common/interceptors/cache-control.interceptor.js';
+import { DeleteResultResponseDto } from '../pensions/dto/pension-response.dto.js';
 import { CampusAreaResponseDto } from './dto/campus-area.dto.js';
 import { CreateUniversityDto } from './dto/create-university.dto.js';
+import { UniversityResponseDto } from './dto/university-response.dto.js';
 import { UpdateUniversityDto } from './dto/update-university.dto.js';
 import { UniversitiesService } from './universities.service.js';
 
@@ -34,7 +40,12 @@ export class UniversitiesController {
   @CacheControl(3600, 86400)
   @ApiOperation({ summary: 'List all universities with optional city filter' })
   @ApiQuery({ name: 'city', required: false, type: String })
-  @ApiResponse({ status: 200, description: 'List of universities' })
+  @ApiEnvelopeResponse(UniversityResponseDto, {
+    status: 200,
+    isArray: true,
+    description: 'List of universities',
+  })
+  @ApiStandardErrors([500])
   async findAll(@Query('city') city?: string): Promise<unknown[]> {
     return this.universitiesService.findAll(city);
   }
@@ -44,11 +55,12 @@ export class UniversitiesController {
   @CacheControl(3600, 86400)
   @ApiOperation({ summary: 'List all university campus areas with perimeter polygons' })
   @ApiQuery({ name: 'city', required: false, type: String })
-  @ApiResponse({
+  @ApiEnvelopeResponse(CampusAreaResponseDto, {
     status: 200,
+    isArray: true,
     description: 'List of campus areas with polygons',
-    type: [CampusAreaResponseDto],
   })
+  @ApiStandardErrors([500])
   async findCampusAreas(@Query('city') city?: string): Promise<CampusAreaResponseDto[]> {
     return this.universitiesService.findCampusAreas(city);
   }
@@ -57,8 +69,12 @@ export class UniversitiesController {
   @UseInterceptors(CacheControlInterceptor)
   @CacheControl(3600, 86400)
   @ApiOperation({ summary: 'Get university by ID' })
-  @ApiResponse({ status: 200, description: 'University details' })
-  @ApiResponse({ status: 404, description: 'University not found' })
+  @ApiParam({ name: 'id', type: String, description: 'ID de la universidad' })
+  @ApiEnvelopeResponse(UniversityResponseDto, {
+    status: 200,
+    description: 'University details',
+  })
+  @ApiStandardErrors([404, 500])
   async findOne(@Param('id') id: string): Promise<unknown> {
     return this.universitiesService.findById(id);
   }
@@ -68,8 +84,11 @@ export class UniversitiesController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new university (Admin only)' })
-  @ApiResponse({ status: 201, description: 'University created' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiEnvelopeResponse(UniversityResponseDto, {
+    status: 201,
+    description: 'University created',
+  })
+  @ApiStandardErrors([400, 401, 403, 500])
   async create(@Body() dto: CreateUniversityDto): Promise<unknown> {
     return this.universitiesService.create(dto);
   }
@@ -79,8 +98,12 @@ export class UniversitiesController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update university (Admin only)' })
-  @ApiResponse({ status: 200, description: 'University updated' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiParam({ name: 'id', type: String, description: 'ID de la universidad' })
+  @ApiEnvelopeResponse(UniversityResponseDto, {
+    status: 200,
+    description: 'University updated',
+  })
+  @ApiStandardErrors([400, 401, 403, 404, 500])
   async update(@Param('id') id: string, @Body() dto: UpdateUniversityDto): Promise<unknown> {
     return this.universitiesService.update(id, dto);
   }
@@ -90,8 +113,12 @@ export class UniversitiesController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Soft delete university (Admin only)' })
-  @ApiResponse({ status: 200, description: 'University deleted' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiParam({ name: 'id', type: String, description: 'ID de la universidad' })
+  @ApiEnvelopeResponse(DeleteResultResponseDto, {
+    status: 200,
+    description: 'University deleted',
+  })
+  @ApiStandardErrors([401, 403, 404, 500])
   async delete(@Param('id') id: string): Promise<{ id: string; deleted: boolean }> {
     return this.universitiesService.delete(id);
   }

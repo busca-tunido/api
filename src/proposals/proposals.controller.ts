@@ -1,12 +1,18 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProposalStatus, Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
+import {
+  ApiEnvelopeResponse,
+  ApiPaginatedEnvelopeResponse,
+  ApiStandardErrors,
+} from '../common/decorators/api-envelope-response.decorator.js';
 import { CreateProposalDto } from './dto/create-proposal.dto.js';
+import { ProposalResponseDto } from './dto/proposal-response.dto.js';
 import { ReviewProposalDto } from './dto/review-proposal.dto.js';
 import { ProposalsService } from './proposals.service.js';
 
@@ -19,9 +25,12 @@ export class ProposalsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Submit a change proposal for a pension listing' })
-  @ApiResponse({ status: 201, description: 'Proposal submitted successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Pension not found' })
+  @ApiParam({ name: 'id', type: String, description: 'ID de la pensión' })
+  @ApiEnvelopeResponse(ProposalResponseDto, {
+    status: 201,
+    description: 'Proposal submitted successfully',
+  })
+  @ApiStandardErrors([400, 401, 404, 500])
   async create(
     @Param('id') pensionId: string,
     @Body() dto: CreateProposalDto,
@@ -34,8 +43,13 @@ export class ProposalsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get proposal history for a specific pension' })
-  @ApiResponse({ status: 200, description: 'List of proposals' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiParam({ name: 'id', type: String, description: 'ID de la pensión' })
+  @ApiEnvelopeResponse(ProposalResponseDto, {
+    status: 200,
+    isArray: true,
+    description: 'List of proposals',
+  })
+  @ApiStandardErrors([401, 500])
   async findByPension(@Param('id') pensionId: string): Promise<unknown[]> {
     return this.proposalsService.findByPension(pensionId);
   }
@@ -48,8 +62,11 @@ export class ProposalsController {
   @ApiQuery({ name: 'status', enum: ProposalStatus, required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'Paginated proposals for moderation' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiPaginatedEnvelopeResponse(ProposalResponseDto, {
+    status: 200,
+    description: 'Paginated proposals for moderation',
+  })
+  @ApiStandardErrors([401, 403, 500])
   async findModerationProposals(
     @Query('status') status?: ProposalStatus,
     @Query('page') page?: string,
@@ -65,8 +82,12 @@ export class ProposalsController {
   @Roles(Role.MODERATOR, Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Inspect proposal diff and context (Moderator or Admin only)' })
-  @ApiResponse({ status: 200, description: 'Proposal and diff against active pension' })
-  @ApiResponse({ status: 404, description: 'Proposal not found' })
+  @ApiParam({ name: 'id', type: String, description: 'ID de la propuesta' })
+  @ApiEnvelopeResponse(ProposalResponseDto, {
+    status: 200,
+    description: 'Proposal and diff against active pension',
+  })
+  @ApiStandardErrors([401, 403, 404, 500])
   async findProposalWithDiff(@Param('id') id: string): Promise<unknown> {
     return this.proposalsService.findProposalWithDiff(id);
   }
@@ -78,10 +99,12 @@ export class ProposalsController {
   @ApiOperation({
     summary: 'Approve, reject, or modify and merge proposal (Moderator, Admin, or Landlord)',
   })
-  @ApiResponse({ status: 200, description: 'Proposal reviewed and merged' })
-  @ApiResponse({ status: 400, description: 'Invalid review action or notes missing' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Proposal not found' })
+  @ApiParam({ name: 'id', type: String, description: 'ID de la propuesta' })
+  @ApiEnvelopeResponse(ProposalResponseDto, {
+    status: 200,
+    description: 'Proposal reviewed and merged',
+  })
+  @ApiStandardErrors([400, 401, 403, 404, 500])
   async review(
     @Param('id') id: string,
     @Body() dto: ReviewProposalDto,
