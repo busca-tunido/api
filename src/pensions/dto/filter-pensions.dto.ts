@@ -11,32 +11,37 @@ import {
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
 export class FilterPensionsDto {
-  @ApiPropertyOptional({ example: 'Santiago' })
+  @ApiPropertyOptional({ example: 'Santiago', maxLength: 60 })
   @IsOptional()
   @IsString()
+  @MaxLength(60)
   city?: string;
 
-  @ApiPropertyOptional({ example: 'San Joaquín' })
+  @ApiPropertyOptional({ example: 'San Joaquín', maxLength: 60 })
   @IsOptional()
   @IsString()
+  @MaxLength(60)
   neighborhood?: string;
 
-  @ApiPropertyOptional({ example: 150000 })
+  @ApiPropertyOptional({ example: 150000, minimum: 0, maximum: 2000000 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
+  @Max(2000000)
   minPrice?: number;
 
-  @ApiPropertyOptional({ example: 400000 })
+  @ApiPropertyOptional({ example: 400000, minimum: 0, maximum: 2000000 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
+  @Max(2000000)
   maxPrice?: number;
 
   @ApiPropertyOptional({ enum: GenderPreference })
@@ -88,9 +93,10 @@ export class FilterPensionsDto {
   @Min(1)
   minBeds?: number;
 
-  @ApiPropertyOptional({ example: 'República' })
+  @ApiPropertyOptional({ example: 'República', maxLength: 100 })
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   search?: string;
 
   @ApiPropertyOptional({ example: 1, default: 1 })

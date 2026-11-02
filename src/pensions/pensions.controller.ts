@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
@@ -17,8 +17,19 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
+import {
+  ApiEnvelopeResponse,
+  ApiPaginatedEnvelopeResponse,
+  ApiStandardErrors,
+} from '../common/decorators/api-envelope-response.decorator.js';
 import { CreatePensionDto } from './dto/create-pension.dto.js';
 import { FilterPensionsDto } from './dto/filter-pensions.dto.js';
+import {
+  CitySummaryResponseDto,
+  DeleteResultResponseDto,
+  PensionItemResponseDto,
+  PriceHistogramResponseDto,
+} from './dto/pension-response.dto.js';
 import { UpdatePensionDto } from './dto/update-pension.dto.js';
 import {
   type CitySummaryItem,
@@ -34,14 +45,22 @@ export class PensionsController {
 
   @Get()
   @ApiOperation({ summary: 'List pensions with filtering and pagination' })
-  @ApiResponse({ status: 200, description: 'Paginated list of pensions' })
+  @ApiPaginatedEnvelopeResponse(PensionItemResponseDto, {
+    status: 200,
+    description: 'Paginated list of pensions',
+  })
+  @ApiStandardErrors([400, 500])
   async findAll(@Query() filter: FilterPensionsDto): Promise<PaginatedPensions<unknown>> {
     return this.pensionsService.findAll(filter);
   }
 
   @Get('price-histogram')
   @ApiOperation({ summary: 'Get price distribution histogram for pensions' })
-  @ApiResponse({ status: 200, description: 'Price distribution histogram with 28 bins' })
+  @ApiEnvelopeResponse(PriceHistogramResponseDto, {
+    status: 200,
+    description: 'Price distribution histogram with 28 bins',
+  })
+  @ApiStandardErrors([400, 500])
   async getPriceHistogram(@Query() query: FilterPensionsDto): Promise<PriceHistogram> {
     return this.pensionsService.getPriceHistogram(query);
   }
@@ -51,16 +70,24 @@ export class PensionsController {
   @Roles(Role.LANDLORD, Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List pensions owned by authenticated landlord' })
-  @ApiResponse({ status: 200, description: 'List of pensions owned by landlord' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiEnvelopeResponse(PensionItemResponseDto, {
+    status: 200,
+    isArray: true,
+    description: 'List of pensions owned by landlord',
+  })
+  @ApiStandardErrors([401, 403, 500])
   async getMine(@CurrentUser('id') userId: string): Promise<unknown> {
     return this.pensionsService.findMine(userId);
   }
 
   @Get('cities')
   @ApiOperation({ summary: 'List all cities with absolute pension counts and coordinates' })
-  @ApiResponse({ status: 200, description: 'List of cities with absolute pension counts' })
+  @ApiEnvelopeResponse(CitySummaryResponseDto, {
+    status: 200,
+    isArray: true,
+    description: 'List of cities with absolute pension counts',
+  })
+  @ApiStandardErrors([500])
   async getCities(): Promise<CitySummaryItem[]> {
     return this.pensionsService.getCitiesSummary();
   }
@@ -68,8 +95,12 @@ export class PensionsController {
   @Get(':idOrSlug')
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Get pension detail by ID or Slug' })
-  @ApiResponse({ status: 200, description: 'Pension detailed information' })
-  @ApiResponse({ status: 404, description: 'Pension not found' })
+  @ApiParam({ name: 'idOrSlug', type: String, description: 'Pension ID or friendly URL slug' })
+  @ApiEnvelopeResponse(PensionItemResponseDto, {
+    status: 200,
+    description: 'Pension detailed information',
+  })
+  @ApiStandardErrors([404, 500])
   async findOne(
     @Param('idOrSlug') idOrSlug: string,
     @CurrentUser() user?: SanitizedUser,
@@ -82,9 +113,11 @@ export class PensionsController {
   @Roles(Role.LANDLORD, Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new pension (Landlord or Admin)' })
-  @ApiResponse({ status: 201, description: 'Pension created successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiEnvelopeResponse(PensionItemResponseDto, {
+    status: 201,
+    description: 'Pension created successfully',
+  })
+  @ApiStandardErrors([400, 401, 403, 500])
   async create(
     @Body() dto: CreatePensionDto,
     @CurrentUser() user: SanitizedUser,
@@ -96,10 +129,12 @@ export class PensionsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update pension details (Owner or Admin)' })
-  @ApiResponse({ status: 200, description: 'Pension updated successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - You do not own this pension' })
-  @ApiResponse({ status: 404, description: 'Pension not found' })
+  @ApiParam({ name: 'id', type: String, description: 'Pension ID' })
+  @ApiEnvelopeResponse(PensionItemResponseDto, {
+    status: 200,
+    description: 'Pension updated successfully',
+  })
+  @ApiStandardErrors([400, 401, 403, 404, 500])
   async update(
     @Param('id') id: string,
     @Body() dto: UpdatePensionDto,
@@ -112,10 +147,12 @@ export class PensionsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Soft delete pension (Owner or Admin)' })
-  @ApiResponse({ status: 200, description: 'Pension deleted successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - You do not own this pension' })
-  @ApiResponse({ status: 404, description: 'Pension not found' })
+  @ApiParam({ name: 'id', type: String, description: 'Pension ID' })
+  @ApiEnvelopeResponse(DeleteResultResponseDto, {
+    status: 200,
+    description: 'Pension deleted successfully',
+  })
+  @ApiStandardErrors([401, 403, 404, 500])
   async delete(
     @Param('id') id: string,
     @CurrentUser() user: SanitizedUser,

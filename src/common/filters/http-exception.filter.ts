@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { ApiErrorCode } from '../types/error-codes.js';
 
 export type ErrorEnvelope = {
   success: false;
@@ -14,8 +15,74 @@ export type ErrorEnvelope = {
   timestamp: string;
   path: string;
   message: string;
+  errorCode: ApiErrorCode;
   errors: unknown;
 };
+
+function resolveErrorCode(status: number, message: string, explicitCode?: unknown): ApiErrorCode {
+  if (typeof explicitCode === 'string' && explicitCode in ApiErrorCode) {
+    return explicitCode as ApiErrorCode;
+  }
+
+  const lowerMessage = message.toLowerCase();
+
+  if (status === HttpStatus.BAD_REQUEST) {
+    if (lowerMessage.includes('validation') || lowerMessage.includes('válid')) {
+      return ApiErrorCode.VALIDATION_FAILED;
+    }
+    return ApiErrorCode.VALIDATION_FAILED;
+  }
+
+  if (status === HttpStatus.UNAUTHORIZED) {
+    if (
+      lowerMessage.includes('credencial') ||
+      lowerMessage.includes('password') ||
+      lowerMessage.includes('contraseña')
+    ) {
+      return ApiErrorCode.INVALID_CREDENTIALS;
+    }
+    return ApiErrorCode.UNAUTHORIZED;
+  }
+
+  if (status === HttpStatus.FORBIDDEN) {
+    return ApiErrorCode.FORBIDDEN;
+  }
+
+  if (status === HttpStatus.NOT_FOUND) {
+    if (lowerMessage.includes('pensi')) {
+      return ApiErrorCode.PENSION_NOT_FOUND;
+    }
+    if (lowerMessage.includes('room') || lowerMessage.includes('habitaci')) {
+      return ApiErrorCode.ROOM_NOT_FOUND;
+    }
+    if (lowerMessage.includes('review') || lowerMessage.includes('reseña')) {
+      return ApiErrorCode.REVIEW_NOT_FOUND;
+    }
+    if (lowerMessage.includes('favorit')) {
+      return ApiErrorCode.FAVORITE_NOT_FOUND;
+    }
+    return ApiErrorCode.NOT_FOUND;
+  }
+
+  if (status === HttpStatus.CONFLICT) {
+    if (lowerMessage.includes('email') || lowerMessage.includes('correo')) {
+      return ApiErrorCode.EMAIL_ALREADY_EXISTS;
+    }
+    if (lowerMessage.includes('review') || lowerMessage.includes('reseña')) {
+      return ApiErrorCode.ALREADY_REVIEWED;
+    }
+    if (lowerMessage.includes('favorit')) {
+      return ApiErrorCode.ALREADY_FAVORITED;
+    }
+    return ApiErrorCode.CONFLICT;
+  }
+
+  if (status === HttpStatus.TOO_MANY_REQUESTS) {
+    return ApiErrorCode.RATE_LIMIT_EXCEEDED;
+  }
+
+  return ApiErrorCode.INTERNAL_SERVER_ERROR;
+}
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -29,6 +96,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
     let errors: unknown = null;
+    let explicitCode: unknown;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -49,6 +117,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
         if (body.errors !== undefined) {
           errors = body.errors;
+        }
+
+        if (body.errorCode !== undefined) {
+          explicitCode = body.errorCode;
         }
       }
     } else if (exception instanceof Error) {
@@ -87,6 +159,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request?.url || '',
       message,
+      errorCode: resolveErrorCode(status, message, explicitCode),
       errors,
     };
 

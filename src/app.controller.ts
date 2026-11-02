@@ -1,13 +1,21 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service.js';
+import { ApiEnvelopeResponse } from './common/decorators/api-envelope-response.decorator.js';
 import { PrismaService } from './prisma/prisma.service.js';
 
-export interface HealthCheckResponse {
-  status: 'ok' | 'error';
-  database: 'connected' | 'disconnected';
+export class HealthCheckResponseDto {
+  @ApiProperty({ type: String, example: 'ok' })
+  status!: 'ok' | 'error';
+
+  @ApiProperty({ type: String, example: 'connected' })
+  database!: 'connected' | 'disconnected';
+
+  @ApiPropertyOptional({ type: String, example: 'OK' })
   details?: string;
 }
+
+export type HealthCheckResponse = HealthCheckResponseDto;
 
 @ApiTags('App')
 @Controller()
@@ -24,8 +32,8 @@ export class AppController {
 
   @Get('health')
   @ApiOperation({ summary: 'Check API and database health' })
-  @ApiResponse({ status: 200, description: 'Health check result' })
-  async getHealth(): Promise<HealthCheckResponse> {
+  @ApiEnvelopeResponse(HealthCheckResponseDto, { status: 200, description: 'Health check result' })
+  async getHealth(): Promise<HealthCheckResponseDto> {
     try {
       await this.prisma.$runCommandRaw({ ping: 1 });
       return { status: 'ok', database: 'connected' };

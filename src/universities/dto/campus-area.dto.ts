@@ -3,53 +3,79 @@ import { Type } from 'class-transformer';
 import { IsArray, IsNumber, IsString, ValidateNested } from 'class-validator';
 
 export class GeoCoordinateDto {
-  @ApiProperty({ example: -33.496388 })
+  @ApiProperty({ type: Number, example: -33.496388 })
   @IsNumber()
   latitude!: number;
 
-  @ApiProperty({ example: -70.616067 })
+  @ApiProperty({ type: Number, example: -70.616067 })
   @IsNumber()
   longitude!: number;
 }
 
 export class CampusAreaDto {
-  @ApiProperty({ example: 'cuid-12345' })
+  @ApiProperty({ type: String, example: 'cuid-12345' })
   @IsString()
   id!: string;
 
-  @ApiProperty({ example: 'Campus San Joaquín' })
+  @ApiProperty({ type: String, example: 'Campus San Joaquín' })
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 'San Joaquín' })
+  @ApiProperty({ type: String, example: 'San Joaquín' })
   @IsString()
   acronym!: string;
 
-  @ApiProperty({ example: -33.49706 })
+  @ApiProperty({ type: Number, example: -33.49706 })
   @IsNumber()
   centerLat!: number;
 
-  @ApiProperty({ example: -70.61459 })
+  @ApiProperty({ type: Number, example: -70.61459 })
   @IsNumber()
   centerLng!: number;
 
-  @ApiProperty({ type: [GeoCoordinateDto] })
+  @ApiProperty({ type: () => [GeoCoordinateDto] })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => GeoCoordinateDto)
   polygon!: GeoCoordinateDto[];
 }
 
-export class CampusAreaResponseDto extends CampusAreaDto {
-  @ApiProperty({ example: '6acbfe8bac0ea03feffc1e7a' })
+export class CampusAreaResponseDto {
+  @ApiProperty({ type: String, example: 'cuid-12345' })
+  @IsString()
+  id!: string;
+
+  @ApiProperty({ type: String, example: 'Campus San Joaquín' })
+  @IsString()
+  name!: string;
+
+  @ApiProperty({ type: String, example: 'San Joaquín' })
+  @IsString()
+  acronym!: string;
+
+  @ApiProperty({ type: Number, example: -33.49706 })
+  @IsNumber()
+  centerLat!: number;
+
+  @ApiProperty({ type: Number, example: -70.61459 })
+  @IsNumber()
+  centerLng!: number;
+
+  @ApiProperty({ type: () => [GeoCoordinateDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => GeoCoordinateDto)
+  polygon!: GeoCoordinateDto[];
+
+  @ApiProperty({ type: String, example: '6acbfe8bac0ea03feffc1e7a' })
   @IsString()
   universityId!: string;
 
-  @ApiProperty({ example: 'Pontificia Universidad Católica de Chile' })
+  @ApiProperty({ type: String, example: 'Pontificia Universidad Católica de Chile' })
   @IsString()
   universityName!: string;
 
-  @ApiProperty({ example: 'Santiago' })
+  @ApiProperty({ type: String, example: 'Santiago' })
   @IsString()
   city!: string;
 }

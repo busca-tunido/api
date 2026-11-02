@@ -1,5 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiEnvelopeResponse,
+  ApiStandardErrors,
+} from '../common/decorators/api-envelope-response.decorator.js';
+import { CitySummaryResponseDto } from './dto/pension-response.dto.js';
 import { type CitySummaryItem, PensionsService } from './pensions.service.js';
 
 @ApiTags('Cities')
@@ -9,7 +14,12 @@ export class CitiesController {
 
   @Get()
   @ApiOperation({ summary: 'List all cities with absolute pension counts and coordinates' })
-  @ApiResponse({ status: 200, description: 'List of cities with absolute pension counts' })
+  @ApiEnvelopeResponse(CitySummaryResponseDto, {
+    status: 200,
+    isArray: true,
+    description: 'List of cities with absolute pension counts',
+  })
+  @ApiStandardErrors([500])
   async findAll(): Promise<CitySummaryItem[]> {
     return this.pensionsService.getCitiesSummary();
   }

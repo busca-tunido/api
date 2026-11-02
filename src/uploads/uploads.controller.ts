@@ -7,16 +7,14 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import {
+  ApiEnvelopeResponse,
+  ApiStandardErrors,
+} from '../common/decorators/api-envelope-response.decorator.js';
+import { UploadImageResponseDto } from './dto/upload-image-response.dto.js';
 import { type ProcessedImageResult, UploadsService } from './uploads.service.js';
 
 type FastifyMultipartRequest = FastifyRequest & {
@@ -46,24 +44,11 @@ export class UploadsController {
       required: ['file'],
     },
   })
-  @ApiResponse({
+  @ApiEnvelopeResponse(UploadImageResponseDto, {
     status: 201,
     description: 'Image processed and converted to WebP successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        url: { type: 'string', example: '/uploads/abcd-1234.webp' },
-        thumbnailUrl: { type: 'string', example: '/uploads/abcd-1234-thumb.webp' },
-        width: { type: 'number', example: 1200 },
-        height: { type: 'number', example: 800 },
-        format: { type: 'string', example: 'webp' },
-        size: { type: 'number', example: 124500 },
-      },
-    },
   })
-  @ApiResponse({ status: 400, description: 'Invalid image or unsupported format' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 413, description: 'File size exceeds limit' })
+  @ApiStandardErrors([400, 401, 500])
   async uploadImage(@Req() req: FastifyRequest): Promise<ProcessedImageResult> {
     const multipartReq = req as FastifyMultipartRequest;
     let file: MultipartFile | undefined;
