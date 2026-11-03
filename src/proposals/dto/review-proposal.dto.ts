@@ -1,14 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export type ReviewAction = 'APPROVE' | 'REJECT' | 'MODIFY_AND_APPROVE';
+export enum ReviewAction {
+  APPROVE = 'APPROVE',
+  REJECT = 'REJECT',
+  MODIFY_AND_APPROVE = 'MODIFY_AND_APPROVE',
+}
 
 export class ReviewProposalDto {
   @ApiProperty({
-    enum: ['APPROVE', 'REJECT', 'MODIFY_AND_APPROVE'],
-    example: 'APPROVE',
+    enum: ReviewAction,
+    enumName: 'ReviewAction',
+    example: ReviewAction.APPROVE,
   })
-  @IsIn(['APPROVE', 'REJECT', 'MODIFY_AND_APPROVE'])
+  @IsIn([ReviewAction.APPROVE, ReviewAction.REJECT, ReviewAction.MODIFY_AND_APPROVE])
   action!: ReviewAction;
 
   @ApiPropertyOptional({ example: 'Cambios validados telefónicamente.' })

@@ -113,7 +113,11 @@ export class CreatePensionDto {
   @IsBoolean()
   petsAllowed?: boolean;
 
-  @ApiPropertyOptional({ enum: GenderPreference, default: GenderPreference.ANY })
+  @ApiPropertyOptional({
+    enum: GenderPreference,
+    enumName: 'GenderPreference',
+    default: GenderPreference.ANY,
+  })
   @IsOptional()
   @IsEnum(GenderPreference)
   genderPreference?: GenderPreference;

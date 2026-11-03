@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { StayDurationCategory } from '@prisma/client';
+import { PaginationMetaDto } from '../../common/dto/pagination.dto.js';
 
 export class ReviewUserUniversityDto {
   @ApiPropertyOptional({ type: String, nullable: true, example: 'Universidad de Chile' })
@@ -220,4 +221,27 @@ export class VoteHelpfulResultResponseDto {
 
   @ApiProperty({ type: Boolean, example: true })
   voted!: boolean;
+}
+
+export class PaginatedReviewsResponseDto {
+  @ApiProperty({ type: () => [ReviewResponseDto] })
+  items!: ReviewResponseDto[];
+
+  @ApiProperty({ type: () => PaginationMetaDto })
+  pagination!: PaginationMetaDto;
+
+  @ApiProperty({ type: Number, example: 12 })
+  total!: number;
+
+  @ApiProperty({ type: Number, example: 1 })
+  page!: number;
+
+  @ApiProperty({ type: Number, example: 10 })
+  limit!: number;
+
+  @ApiProperty({ type: Number, example: 2 })
+  totalPages!: number;
+
+  @ApiPropertyOptional({ type: Boolean, example: true })
+  hasMore?: boolean;
 }

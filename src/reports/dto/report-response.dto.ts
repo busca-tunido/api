@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ReportStatus } from '@prisma/client';
+import { ReportReason, ReportStatus } from '@prisma/client';
 
 export class ReportPensionSummaryDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef01' })
@@ -36,8 +36,12 @@ export class ReportResponseDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef02' })
   userId!: string;
 
-  @ApiProperty({ type: String, example: 'INCORRECT_INFORMATION' })
-  reason!: string;
+  @ApiProperty({
+    enum: ReportReason,
+    enumName: 'ReportReason',
+    example: ReportReason.INACCURATE_PRICE,
+  })
+  reason!: ReportReason;
 
   @ApiProperty({ type: String, example: 'La dirección informada no corresponde a la realidad.' })
   description!: string;

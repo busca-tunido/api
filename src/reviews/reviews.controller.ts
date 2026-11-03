@@ -15,7 +15,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import {
   ApiEnvelopeResponse,
-  ApiPaginatedEnvelopeResponse,
   ApiStandardErrors,
 } from '../common/decorators/api-envelope-response.decorator.js';
 import { DeleteResultResponseDto } from '../pensions/dto/pension-response.dto.js';
@@ -23,6 +22,7 @@ import { CreateReviewDto } from './dto/create-review.dto.js';
 import { FilterReviewsDto } from './dto/filter-reviews.dto.js';
 import {
   HelpfulVotesResponseDto,
+  PaginatedReviewsResponseDto,
   ReviewResponseDto,
   StudentStayResponseDto,
   VoteHelpfulResultResponseDto,
@@ -40,7 +40,7 @@ export class ReviewsController {
     summary: 'Get paginated reviews for a pension with optional rating filter and sorting',
   })
   @ApiParam({ name: 'pensionId', type: String, description: 'ID de la pensión' })
-  @ApiPaginatedEnvelopeResponse(ReviewResponseDto, {
+  @ApiEnvelopeResponse(PaginatedReviewsResponseDto, {
     status: 200,
     description: 'Paginated reviews response',
   })

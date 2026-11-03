@@ -8,11 +8,10 @@ import { RolesGuard } from '../auth/guards/roles.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import {
   ApiEnvelopeResponse,
-  ApiPaginatedEnvelopeResponse,
   ApiStandardErrors,
 } from '../common/decorators/api-envelope-response.decorator.js';
 import { CreateProposalDto } from './dto/create-proposal.dto.js';
-import { ProposalResponseDto } from './dto/proposal-response.dto.js';
+import { PaginatedProposalsResponseDto, ProposalResponseDto } from './dto/proposal-response.dto.js';
 import { ReviewProposalDto } from './dto/review-proposal.dto.js';
 import { ProposalsService } from './proposals.service.js';
 
@@ -59,10 +58,10 @@ export class ProposalsController {
   @Roles(Role.MODERATOR, Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List proposals for moderation review (Moderator or Admin only)' })
-  @ApiQuery({ name: 'status', enum: ProposalStatus, required: false })
+  @ApiQuery({ name: 'status', enum: ProposalStatus, enumName: 'ProposalStatus', required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiPaginatedEnvelopeResponse(ProposalResponseDto, {
+  @ApiEnvelopeResponse(PaginatedProposalsResponseDto, {
     status: 200,
     description: 'Paginated proposals for moderation',
   })

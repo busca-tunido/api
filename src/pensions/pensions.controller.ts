@@ -19,7 +19,6 @@ import { RolesGuard } from '../auth/guards/roles.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import {
   ApiEnvelopeResponse,
-  ApiPaginatedEnvelopeResponse,
   ApiStandardErrors,
 } from '../common/decorators/api-envelope-response.decorator.js';
 import { CreatePensionDto } from './dto/create-pension.dto.js';
@@ -27,6 +26,7 @@ import { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import {
   CitySummaryResponseDto,
   DeleteResultResponseDto,
+  PaginatedPensionsResponseDto,
   PensionItemResponseDto,
   PriceHistogramResponseDto,
 } from './dto/pension-response.dto.js';
@@ -45,7 +45,7 @@ export class PensionsController {
 
   @Get()
   @ApiOperation({ summary: 'List pensions with filtering and pagination' })
-  @ApiPaginatedEnvelopeResponse(PensionItemResponseDto, {
+  @ApiEnvelopeResponse(PaginatedPensionsResponseDto, {
     status: 200,
     description: 'Paginated list of pensions',
   })

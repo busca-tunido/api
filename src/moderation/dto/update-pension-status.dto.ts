@@ -3,7 +3,11 @@ import { VerificationStatus } from '@prisma/client';
 import { IsBoolean, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class UpdatePensionStatusDto {
-  @ApiPropertyOptional({ enum: VerificationStatus, example: VerificationStatus.COMMUNITY_VERIFIED })
+  @ApiPropertyOptional({
+    enum: VerificationStatus,
+    enumName: 'VerificationStatus',
+    example: VerificationStatus.COMMUNITY_VERIFIED,
+  })
   @IsOptional()
   @IsEnum(VerificationStatus)
   verificationStatus?: VerificationStatus;

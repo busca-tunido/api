@@ -64,7 +64,7 @@ export class RegisterDto {
   })
   phone?: string;
 
-  @ApiPropertyOptional({ enum: [Role.STUDENT, Role.LANDLORD], default: Role.STUDENT })
+  @ApiPropertyOptional({ enum: Role, enumName: 'Role', default: Role.STUDENT })
   @IsOptional()
   @IsIn([Role.STUDENT, Role.LANDLORD], {
     message: 'Role must be either STUDENT or LANDLORD',

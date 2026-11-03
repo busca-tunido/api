@@ -7,7 +7,11 @@ export class CreateReportDto {
   @IsString()
   pensionId!: string;
 
-  @ApiProperty({ enum: ReportReason, example: ReportReason.INACCURATE_PRICE })
+  @ApiProperty({
+    enum: ReportReason,
+    enumName: 'ReportReason',
+    example: ReportReason.INACCURATE_PRICE,
+  })
   @IsEnum(ReportReason)
   reason!: ReportReason;
 

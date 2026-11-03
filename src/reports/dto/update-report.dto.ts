@@ -3,7 +3,11 @@ import { ReportStatus } from '@prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdateReportDto {
-  @ApiPropertyOptional({ enum: ReportStatus, example: ReportStatus.RESOLVED })
+  @ApiPropertyOptional({
+    enum: ReportStatus,
+    enumName: 'ReportStatus',
+    example: ReportStatus.RESOLVED,
+  })
   @IsOptional()
   @IsEnum(ReportStatus)
   status?: ReportStatus;

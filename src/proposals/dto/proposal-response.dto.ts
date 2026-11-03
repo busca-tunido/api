@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ProposalStatus } from '@prisma/client';
+import { ProposalStatus, ProposalType } from '@prisma/client';
+import { PaginationMetaDto } from '../../common/dto/pagination.dto.js';
 
 export class ProposalUserDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef01' })
@@ -25,8 +26,12 @@ export class ProposalResponseDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef02' })
   submittedById!: string;
 
-  @ApiProperty({ type: String, example: 'PRICE_UPDATE' })
-  type!: string;
+  @ApiProperty({
+    enum: ProposalType,
+    enumName: 'ProposalType',
+    example: ProposalType.BASIC_INFO,
+  })
+  type!: ProposalType;
 
   @ApiProperty({
     enum: ProposalStatus,
@@ -59,4 +64,27 @@ export class ProposalResponseDto {
 
   @ApiProperty({ type: Date, example: '2026-03-01T00:00:00.000Z' })
   updatedAt!: Date;
+}
+
+export class PaginatedProposalsResponseDto {
+  @ApiProperty({ type: () => [ProposalResponseDto] })
+  items!: ProposalResponseDto[];
+
+  @ApiProperty({ type: () => PaginationMetaDto })
+  pagination!: PaginationMetaDto;
+
+  @ApiProperty({ type: Number, example: 5 })
+  total!: number;
+
+  @ApiProperty({ type: Number, example: 1 })
+  page!: number;
+
+  @ApiProperty({ type: Number, example: 20 })
+  limit!: number;
+
+  @ApiProperty({ type: Number, example: 1 })
+  totalPages!: number;
+
+  @ApiPropertyOptional({ type: Boolean, example: false })
+  hasMore?: boolean;
 }

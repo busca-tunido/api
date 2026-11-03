@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GenderPreference, RoomType, VerificationStatus } from '@prisma/client';
+import { PaginationMetaDto } from '../../common/dto/pagination.dto.js';
 import { BathType } from '../../rooms/dto/room-response.dto.js';
 
 export class PensionImageResponseDto {
@@ -311,4 +312,30 @@ export class DeleteResultResponseDto {
 
   @ApiProperty({ type: Boolean, example: true })
   deleted!: boolean;
+}
+
+export class PaginatedPensionsResponseDto {
+  @ApiProperty({ type: () => [PensionItemResponseDto] })
+  items!: PensionItemResponseDto[];
+
+  @ApiProperty({ type: () => PaginationMetaDto })
+  pagination!: PaginationMetaDto;
+
+  @ApiProperty({ type: Number, example: 45 })
+  total!: number;
+
+  @ApiProperty({ type: Number, example: 1 })
+  page!: number;
+
+  @ApiProperty({ type: Number, example: 20 })
+  limit!: number;
+
+  @ApiProperty({ type: Number, example: 3 })
+  totalPages!: number;
+
+  @ApiPropertyOptional({ type: Boolean, example: true })
+  hasMore?: boolean;
+
+  @ApiPropertyOptional({ type: () => [NearbyCityCountDto] })
+  nearbyCityCounts?: NearbyCityCountDto[];
 }

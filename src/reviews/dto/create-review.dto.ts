@@ -71,7 +71,10 @@ export class CreateReviewDto {
   @IsString({ each: true })
   images?: string[];
 
-  @ApiPropertyOptional({ enum: StayDurationCategory })
+  @ApiPropertyOptional({
+    enum: StayDurationCategory,
+    enumName: 'StayDurationCategory',
+  })
   @IsOptional()
   @IsEnum(StayDurationCategory)
   stayDurationCategory?: StayDurationCategory;

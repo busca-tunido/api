@@ -3,7 +3,11 @@ import { ProposalType } from '@prisma/client';
 import { IsEnum, IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateProposalDto {
-  @ApiProperty({ enum: ProposalType, default: ProposalType.BASIC_INFO })
+  @ApiProperty({
+    enum: ProposalType,
+    enumName: 'ProposalType',
+    default: ProposalType.BASIC_INFO,
+  })
   @IsEnum(ProposalType)
   type!: ProposalType;
 

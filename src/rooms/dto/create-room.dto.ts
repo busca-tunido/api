@@ -35,7 +35,11 @@ export class CreateRoomDto {
   @MaxLength(800, { message: 'La descripción no puede superar los 800 caracteres' })
   description?: string;
 
-  @ApiPropertyOptional({ enum: RoomType, default: RoomType.SINGLE })
+  @ApiPropertyOptional({
+    enum: RoomType,
+    enumName: 'RoomType',
+    default: RoomType.SINGLE,
+  })
   @IsOptional()
   @IsEnum(RoomType)
   type?: RoomType;

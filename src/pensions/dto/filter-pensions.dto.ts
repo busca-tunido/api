@@ -15,6 +15,14 @@ import {
   Min,
 } from 'class-validator';
 
+export enum PensionSortBy {
+  RELEVANCE = 'relevance',
+  DISTANCE = 'distance',
+  RATING = 'rating',
+  PRICE_ASC = 'price_asc',
+  PRICE_DESC = 'price_desc',
+}
+
 export class FilterPensionsDto {
   @ApiPropertyOptional({ example: 'Santiago', maxLength: 60 })
   @IsOptional()
@@ -44,7 +52,7 @@ export class FilterPensionsDto {
   @Max(2000000)
   maxPrice?: number;
 
-  @ApiPropertyOptional({ enum: GenderPreference })
+  @ApiPropertyOptional({ enum: GenderPreference, enumName: 'GenderPreference' })
   @IsOptional()
   @IsEnum(GenderPreference)
   genderPreference?: GenderPreference;
@@ -69,7 +77,7 @@ export class FilterPensionsDto {
   @IsString({ each: true })
   amenities?: string[];
 
-  @ApiPropertyOptional({ enum: RoomType })
+  @ApiPropertyOptional({ enum: RoomType, enumName: 'RoomType' })
   @IsOptional()
   @IsEnum(RoomType)
   roomType?: RoomType;
@@ -163,10 +171,11 @@ export class FilterPensionsDto {
   maxLng?: number;
 
   @ApiPropertyOptional({
-    example: 'relevance',
-    enum: ['relevance', 'distance', 'rating', 'price_asc', 'price_desc'],
+    example: PensionSortBy.RELEVANCE,
+    enum: PensionSortBy,
+    enumName: 'PensionSortBy',
   })
   @IsOptional()
   @IsIn(['relevance', 'distance', 'rating', 'price_asc', 'price_desc'])
-  sortBy?: 'relevance' | 'distance' | 'rating' | 'price_asc' | 'price_desc';
+  sortBy?: PensionSortBy | 'relevance' | 'distance' | 'rating' | 'price_asc' | 'price_desc';
 }

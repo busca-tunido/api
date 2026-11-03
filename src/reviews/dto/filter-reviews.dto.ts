@@ -2,6 +2,13 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
 
+export enum ReviewSortBy {
+  NEWEST = 'newest',
+  OLDEST = 'oldest',
+  RATING_DESC = 'rating_desc',
+  RATING_ASC = 'rating_asc',
+}
+
 export class FilterReviewsDto {
   @ApiPropertyOptional({ example: 1, default: 1, description: 'Page number' })
   @IsOptional()
@@ -32,12 +39,13 @@ export class FilterReviewsDto {
   rating?: number;
 
   @ApiPropertyOptional({
-    example: 'newest',
-    enum: ['newest', 'oldest', 'rating_desc', 'rating_asc'],
-    default: 'newest',
+    example: ReviewSortBy.NEWEST,
+    enum: ReviewSortBy,
+    enumName: 'ReviewSortBy',
+    default: ReviewSortBy.NEWEST,
     description: 'Sort order for reviews',
   })
   @IsOptional()
   @IsIn(['newest', 'oldest', 'rating_desc', 'rating_asc'])
-  sortBy?: 'newest' | 'oldest' | 'rating_desc' | 'rating_asc' = 'newest';
+  sortBy?: ReviewSortBy | 'newest' | 'oldest' | 'rating_desc' | 'rating_asc' = ReviewSortBy.NEWEST;
 }
