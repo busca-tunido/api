@@ -85,14 +85,34 @@ export class AuthService {
         role: true,
         isEmailVerified: true,
         universityId: true,
+        university: {
+          select: {
+            name: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
     });
 
-    const accessToken = this.generateToken(user);
+    const sanitizedUser: SanitizedUser = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      avatarUrl: user.avatarUrl,
+      role: user.role,
+      isEmailVerified: user.isEmailVerified,
+      universityId: user.universityId,
+      universityName: user.university?.name ?? null,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    const accessToken = this.generateToken(sanitizedUser);
     return {
-      user,
+      user: sanitizedUser,
       accessToken,
     };
   }
@@ -101,6 +121,13 @@ export class AuthService {
     const normalizedEmail = dto.email.toLowerCase().trim();
     const user = await this.prisma.user.findUnique({
       where: { email: normalizedEmail },
+      include: {
+        university: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -122,6 +149,7 @@ export class AuthService {
       role: user.role,
       isEmailVerified: user.isEmailVerified,
       universityId: user.universityId,
+      universityName: user.university?.name ?? null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -146,6 +174,11 @@ export class AuthService {
         role: true,
         isEmailVerified: true,
         universityId: true,
+        university: {
+          select: {
+            name: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
@@ -155,7 +188,20 @@ export class AuthService {
       throw new NotFoundException('User profile not found');
     }
 
-    return user;
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      avatarUrl: user.avatarUrl,
+      role: user.role,
+      isEmailVerified: user.isEmailVerified,
+      universityId: user.universityId,
+      universityName: user.university?.name ?? null,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   async checkEmail(email: string): Promise<CheckEmailResponse> {

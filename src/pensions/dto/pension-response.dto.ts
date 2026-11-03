@@ -58,11 +58,17 @@ export class PensionRoomSummaryDto {
   @ApiProperty({ type: String, example: 'Habitación Individual' })
   title!: string;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'Habitación Individual' })
+  name?: string | null;
+
   @ApiProperty({ type: String, example: 'SINGLE' })
   type!: string;
 
   @ApiProperty({ type: Number, example: 250000 })
   monthlyPrice!: number;
+
+  @ApiPropertyOptional({ type: Number, example: 250000 })
+  priceMonthlyClp?: number;
 
   @ApiPropertyOptional({ type: Number, nullable: true, example: 100000 })
   deposit?: number | null;
@@ -163,8 +169,14 @@ export class PensionItemResponseDto {
   })
   verificationStatus!: VerificationStatus;
 
+  @ApiProperty({ type: Boolean, example: true })
+  isActive!: boolean;
+
   @ApiProperty({ type: Number, example: 4.8 })
   ratingAverage!: number;
+
+  @ApiPropertyOptional({ type: Number, example: 4.8 })
+  averageRating?: number;
 
   @ApiProperty({ type: Number, example: 12 })
   ratingCount!: number;

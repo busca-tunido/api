@@ -16,6 +16,7 @@ export type SanitizedUser = {
   role: Role;
   isEmailVerified: boolean;
   universityId: string | null;
+  universityName?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };

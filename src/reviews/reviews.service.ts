@@ -127,6 +127,7 @@ export class ReviewsService {
         locationRating: review.quietnessRating,
         quietnessRating: review.quietnessRating,
         helpfulCount: helpfulVotes.length,
+        stayDuration: review.stayDurationCategory ?? null,
       };
     });
 

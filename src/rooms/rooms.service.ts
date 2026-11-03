@@ -45,6 +45,8 @@ export class RoomsService {
       .map((room) => ({
         ...room,
         pensionId: pension.id,
+        name: room.title,
+        priceMonthlyClp: room.monthlyPrice,
       }));
   }
 
@@ -79,6 +81,8 @@ export class RoomsService {
     return {
       ...room,
       pensionId: pension.id,
+      name: room.title,
+      priceMonthlyClp: room.monthlyPrice,
       pension: {
         id: pension.id,
         title: pension.title,

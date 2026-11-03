@@ -100,6 +100,8 @@ export class UniversitiesService {
 
     return universities.map((u) => ({
       ...u,
+      acronym: u.shortName ?? null,
+      imageUrl: null,
       _count: {
         students: u._count?.students ?? 0,
         nearbyPensions: countMap.get(u.id) ?? 0,
@@ -211,6 +213,8 @@ export class UniversitiesService {
 
     return {
       ...university,
+      acronym: university.shortName ?? null,
+      imageUrl: null,
       nearbyPensions: nearbyPensions.map((pension) => ({
         ...pension,
         pension,

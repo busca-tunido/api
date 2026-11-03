@@ -1,6 +1,31 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { StayDurationCategory } from '@prisma/client';
 
+export class ReviewUserUniversityDto {
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'Universidad de Chile' })
+  name?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'UCh' })
+  shortName?: string | null;
+}
+
+export class ReviewUserDto {
+  @ApiProperty({ type: String, example: '6659f8c123456789abcdef01' })
+  id!: string;
+
+  @ApiProperty({ type: String, example: 'Carlos' })
+  firstName!: string;
+
+  @ApiProperty({ type: String, example: 'Gómez' })
+  lastName!: string;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'https://example.com/avatar.jpg' })
+  avatarUrl?: string | null;
+
+  @ApiPropertyOptional({ type: () => ReviewUserUniversityDto, nullable: true })
+  university?: ReviewUserUniversityDto | null;
+}
+
 export class ReviewAuthorDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef01' })
   id!: string;
@@ -109,6 +134,12 @@ export class ReviewResponseDto {
 
   @ApiPropertyOptional({ type: () => ReviewAuthorDto, nullable: true })
   author?: ReviewAuthorDto | null;
+
+  @ApiPropertyOptional({ type: () => ReviewUserDto, nullable: true })
+  user?: ReviewUserDto | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'ONE_SEMESTER' })
+  stayDuration?: string | null;
 
   @ApiProperty({ type: Date, example: '2026-03-01T00:00:00.000Z' })
   createdAt!: Date;

@@ -228,7 +228,12 @@ export class PensionsService {
 
     const rooms = (pension.rooms || [])
       .filter((r) => !r.deletedAt)
-      .sort((a, b) => a.monthlyPrice - b.monthlyPrice);
+      .sort((a, b) => a.monthlyPrice - b.monthlyPrice)
+      .map((r) => ({
+        ...r,
+        name: r.title,
+        priceMonthlyClp: r.monthlyPrice,
+      }));
 
     const nearbyUniversities = (pension.nearbyUniversities || []).map((u) => ({
       ...u,
@@ -244,6 +249,8 @@ export class PensionsService {
 
     return {
       ...pension,
+      isActive: Boolean(pension.isActive ?? true),
+      averageRating: pension.ratingAverage ?? 0,
       images,
       amenities,
       rooms,

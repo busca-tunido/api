@@ -14,6 +14,9 @@ export class RoomResponseDto {
   @ApiProperty({ type: String, example: 'Habitación Individual Luminosa' })
   title!: string;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'Habitación Individual Luminosa' })
+  name?: string | null;
+
   @ApiPropertyOptional({
     type: String,
     nullable: true,
@@ -26,6 +29,9 @@ export class RoomResponseDto {
 
   @ApiProperty({ type: Number, example: 250000 })
   monthlyPrice!: number;
+
+  @ApiPropertyOptional({ type: Number, example: 250000 })
+  priceMonthlyClp?: number;
 
   @ApiPropertyOptional({ type: Number, nullable: true, example: 100000 })
   deposit?: number | null;

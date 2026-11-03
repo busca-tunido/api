@@ -29,6 +29,9 @@ export class SanitizedUserResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true, example: '6659f8c123456789abcdef02' })
   universityId!: string | null;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'Universidad de Chile' })
+  universityName?: string | null;
+
   @ApiProperty({ type: Date, example: '2026-03-01T00:00:00.000Z' })
   createdAt!: Date;
 

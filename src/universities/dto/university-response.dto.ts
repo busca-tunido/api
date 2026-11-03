@@ -10,6 +10,9 @@ export class UniversityResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true, example: 'UCh' })
   shortName!: string | null;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'UCh' })
+  acronym?: string | null;
+
   @ApiProperty({ type: String, example: 'Santiago' })
   city!: string;
 
@@ -22,11 +25,14 @@ export class UniversityResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true, example: 'https://uchile.cl' })
   website?: string | null;
 
-  @ApiPropertyOptional({ type: Number, nullable: true, example: -33.4443 })
-  latitude?: number | null;
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'https://example.com/uchile.webp' })
+  imageUrl?: string | null;
 
-  @ApiPropertyOptional({ type: Number, nullable: true, example: -70.6558 })
-  longitude?: number | null;
+  @ApiProperty({ type: Number, example: -33.4443 })
+  latitude!: number;
+
+  @ApiProperty({ type: Number, example: -70.6558 })
+  longitude!: number;
 
   @ApiProperty({ type: Date, example: '2026-03-01T00:00:00.000Z' })
   createdAt!: Date;
