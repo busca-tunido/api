@@ -48,6 +48,9 @@ export class RoomResponseDto {
   @ApiProperty({ type: Boolean, example: true })
   isAvailable!: boolean;
 
+  @ApiPropertyOptional({ type: Boolean, example: true, default: true })
+  isActive?: boolean;
+
   @ApiPropertyOptional({ type: String, nullable: true, example: '2026-03-01' })
   availableFrom?: string | null;
 

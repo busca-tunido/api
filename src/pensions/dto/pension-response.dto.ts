@@ -78,6 +78,9 @@ export class PensionRoomSummaryDto {
 
   @ApiProperty({ type: Boolean, example: true })
   isAvailable!: boolean;
+
+  @ApiPropertyOptional({ type: Boolean, example: true })
+  isActive?: boolean;
 }
 
 export class PensionCountDto {

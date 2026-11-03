@@ -80,6 +80,11 @@ export class CreateRoomDto {
   @IsBoolean()
   isAvailable?: boolean;
 
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
   @ApiPropertyOptional({ example: ['https://example.com/room1.jpg'], maxItems: 5 })
   @IsOptional()
   @IsArray()

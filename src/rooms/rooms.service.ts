@@ -18,6 +18,7 @@ interface EmbeddedRoomData {
   totalBeds: number;
   availableBeds: number;
   isAvailable: boolean;
+  isActive: boolean;
   images: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -120,6 +121,7 @@ export class RoomsService {
       totalBeds: dto.totalBeds ?? 1,
       availableBeds: dto.availableBeds ?? 1,
       isAvailable: dto.isAvailable ?? true,
+      isActive: dto.isActive ?? true,
       images: dto.images ?? [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -128,7 +130,7 @@ export class RoomsService {
 
     const allRooms = [...(pension.rooms || []), newRoom];
     const availablePrices = allRooms
-      .filter((r) => !r.deletedAt && r.isAvailable)
+      .filter((r) => !r.deletedAt && r.isAvailable && r.isActive !== false)
       .map((r) => r.monthlyPrice);
     const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
 
@@ -184,7 +186,7 @@ export class RoomsService {
     updatedRooms[roomIndex] = updatedRoom;
 
     const availablePrices = updatedRooms
-      .filter((r) => !r.deletedAt && r.isAvailable)
+      .filter((r) => !r.deletedAt && r.isAvailable && r.isActive !== false)
       .map((r) => r.monthlyPrice);
     const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
 
@@ -233,7 +235,7 @@ export class RoomsService {
     );
 
     const availablePrices = updatedRooms
-      .filter((r) => !r.deletedAt && r.isAvailable)
+      .filter((r) => !r.deletedAt && r.isAvailable && r.isActive !== false)
       .map((r) => r.monthlyPrice);
     const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
 

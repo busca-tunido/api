@@ -106,6 +106,7 @@ type EmbeddedRoom {
   totalBeds          Int       @default(1)
   availableBeds      Int       @default(1)
   isAvailable        Boolean   @default(true)
+  isActive           Boolean   @default(true)
   images             String[]
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @default(now())

@@ -131,6 +131,7 @@ interface EmbeddedRoomRaw {
   totalBeds: number;
   availableBeds: number;
   isAvailable: boolean;
+  isActive?: boolean;
   images: string[];
   createdAt?: Date;
   updatedAt?: Date;
@@ -233,6 +234,7 @@ export class PensionsService {
         ...r,
         name: r.title,
         priceMonthlyClp: r.monthlyPrice,
+        isActive: r.isActive ?? true,
       }));
 
     const nearbyUniversities = (pension.nearbyUniversities || []).map((u) => ({
