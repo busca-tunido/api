@@ -32,6 +32,7 @@ export type DraftRoom = {
   totalBeds: number;
   availableBeds: number;
   isAvailable: boolean;
+  isActive?: boolean;
   images: string[];
 };
 

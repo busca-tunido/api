@@ -122,6 +122,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
         isEmailVerified: true,
         avatarUrl: user.avatarUrl,
         universityId: user.universityId,
+        favoritePensionIds: [],
         deletedAt: null,
       },
     });
@@ -167,6 +168,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
         quietHoursStart: pension.quietHoursStart,
         quietHoursEnd: pension.quietHoursEnd,
         verificationStatus: pension.verificationStatus,
+        isActive: true,
         landlordId: realLandlordId,
         amenities: pension.amenities,
         deletedAt: null,
@@ -182,6 +184,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
           totalBeds: r.totalBeds,
           availableBeds: r.availableBeds,
           isAvailable: r.isAvailable,
+          isActive: r.isActive ?? true,
           images: r.images,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -212,11 +215,20 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
 
   console.log(`--- Persistiendo ${dataset.reviews.length} reseñas en MongoDB ---`);
   const pensionRatingsMap = new Map<string, number[]>();
+  const studentUserIds = dataset.users
+    .filter((u) => u.role === 'STUDENT')
+    .map((u) => userIdMap.get(u.id))
+    .filter((id): id is string => Boolean(id));
 
-  for (const review of dataset.reviews) {
+  for (let idx = 0; idx < dataset.reviews.length; idx++) {
+    const review = dataset.reviews[idx];
     const realPensionId = pensionIdMap.get(review.pensionId);
     const realUserId = userIdMap.get(review.userId);
     if (!realPensionId || !realUserId) continue;
+
+    const eligibleVoters = studentUserIds.filter((uid) => uid !== realUserId);
+    const sampleVotesCount = idx % 5;
+    const helpfulUserIds = eligibleVoters.slice(0, sampleVotesCount);
 
     await prisma.review.create({
       data: {
@@ -230,6 +242,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
         comment: review.comment,
         stayDurationCategory: review.stayDurationCategory,
         isResidentVerified: review.isResidentVerified,
+        helpfulUserIds,
         stayStartDate: new Date('2025-03-01'),
         stayEndDate: new Date('2025-07-15'),
         exactStayDays: 136,
@@ -294,6 +307,24 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
         submissionNotes: 'Sugerencia de servicios adicionales disponibles en el inmueble.',
       },
     });
+
+    console.log('--- Sembrando pensiones favoritas para estudiantes ---');
+    for (const user of dataset.users) {
+      if (user.role === 'STUDENT') {
+        const realUserId = userIdMap.get(user.id);
+        if (realUserId) {
+          const isDemo = user.email.includes('camila');
+          const favCount = isDemo ? 3 : (user.id.charCodeAt(0) % 3) + 1;
+          const assignedPensions = pensionIdArray.slice(0, favCount);
+          await prisma.user.update({
+            where: { id: realUserId },
+            data: {
+              favoritePensionIds: assignedPensions,
+            },
+          });
+        }
+      }
+    }
   }
 
   console.log('=== Inserción de base de datos finalizada con éxito ===');

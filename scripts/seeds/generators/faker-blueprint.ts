@@ -365,6 +365,7 @@ export const generateBlueprintDataset = async (
         totalBeds: roomType === 'SHARED' ? 2 : 1,
         availableBeds: 1,
         isAvailable: true,
+        isActive: true,
         images: roomPhotoUrls,
       });
     }
