@@ -265,7 +265,10 @@ export class PensionsService {
     return {
       ...pension,
       isActive: Boolean(pension.isActive ?? true),
-      averageRating: pension.ratingAverage ?? 0,
+      ratingAverage: Number(pension.ratingAverage ?? 0),
+      averageRating: Number(pension.ratingAverage ?? 0),
+      ratingCount: Number(pension.ratingCount ?? reviewsCount),
+      reviewsCount,
       images,
       amenities,
       amenitySlugs,
