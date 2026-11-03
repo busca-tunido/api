@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateRoomDto } from './dto/create-room.dto.js';
+import { BathType } from './dto/room-response.dto.js';
 import type { UpdateRoomDto } from './dto/update-room.dto.js';
 
 interface EmbeddedRoomData {
@@ -48,6 +49,7 @@ export class RoomsService {
         pensionId: pension.id,
         name: room.title,
         priceMonthlyClp: room.monthlyPrice,
+        bathType: room.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
       }));
   }
 
@@ -84,6 +86,7 @@ export class RoomsService {
       pensionId: pension.id,
       name: room.title,
       priceMonthlyClp: room.monthlyPrice,
+      bathType: room.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
       pension: {
         id: pension.id,
         title: pension.title,
@@ -108,6 +111,11 @@ export class RoomsService {
       throw new ForbiddenException('You can only create rooms for your own pensions');
     }
 
+    const hasPrivateBathroom =
+      dto.bathType !== undefined
+        ? dto.bathType === BathType.PRIVATE
+        : (dto.hasPrivateBathroom ?? false);
+
     const roomId = crypto.randomUUID();
     const newRoom: EmbeddedRoomData = {
       id: roomId,
@@ -117,7 +125,7 @@ export class RoomsService {
       type: dto.type ?? 'SINGLE',
       monthlyPrice: dto.monthlyPrice,
       deposit: dto.deposit ?? null,
-      hasPrivateBathroom: dto.hasPrivateBathroom ?? false,
+      hasPrivateBathroom,
       totalBeds: dto.totalBeds ?? 1,
       availableBeds: dto.availableBeds ?? 1,
       isAvailable: dto.isAvailable ?? true,
@@ -147,6 +155,9 @@ export class RoomsService {
     return {
       ...newRoom,
       pensionId: pension.id,
+      name: newRoom.title,
+      priceMonthlyClp: newRoom.monthlyPrice,
+      bathType: newRoom.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
     };
   }
 
@@ -175,9 +186,15 @@ export class RoomsService {
     }
 
     const existing = pension.rooms[roomIndex];
+    const hasPrivateBathroom =
+      dto.bathType !== undefined
+        ? dto.bathType === BathType.PRIVATE
+        : (dto.hasPrivateBathroom ?? existing.hasPrivateBathroom);
+
     const updatedRoom: EmbeddedRoomData = {
       ...existing,
       ...dto,
+      hasPrivateBathroom,
       images: dto.images ?? existing.images,
       updatedAt: new Date(),
     };
@@ -203,6 +220,9 @@ export class RoomsService {
     return {
       ...updatedRoom,
       pensionId: pension.id,
+      name: updatedRoom.title,
+      priceMonthlyClp: updatedRoom.monthlyPrice,
+      bathType: updatedRoom.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
     };
   }
 

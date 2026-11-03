@@ -1,6 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RoomType } from '@prisma/client';
 
+export enum BathType {
+  PRIVATE = 'PRIVATE',
+  SHARED = 'SHARED',
+}
+
 export class RoomResponseDto {
   @ApiProperty({ type: String, example: 'room-123' })
   id!: string;
@@ -38,6 +43,9 @@ export class RoomResponseDto {
 
   @ApiProperty({ type: Boolean, example: false })
   hasPrivateBathroom!: boolean;
+
+  @ApiPropertyOptional({ enum: BathType, enumName: 'BathType', example: BathType.PRIVATE })
+  bathType?: BathType;
 
   @ApiProperty({ type: Number, example: 1 })
   totalBeds!: number;

@@ -1,5 +1,6 @@
 import { applyDecorators, type Type } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { NearbyCityCountDto } from '../../pensions/dto/pension-response.dto.js';
 import { PaginationMetaDto } from '../dto/pagination.dto.js';
 import { ErrorEnvelopeDto } from '../types/error-codes.js';
 
@@ -65,7 +66,7 @@ export const ApiPaginatedEnvelopeResponse = <TItemModel extends Type<unknown>>(
   const description = options.description ?? 'Listado paginado exitoso';
 
   return applyDecorators(
-    ApiExtraModels(itemModel, PaginationMetaDto),
+    ApiExtraModels(itemModel, PaginationMetaDto, NearbyCityCountDto),
     ApiResponse({
       status,
       description,
@@ -90,6 +91,10 @@ export const ApiPaginatedEnvelopeResponse = <TItemModel extends Type<unknown>>(
               limit: { type: 'number', example: 20 },
               totalPages: { type: 'number', example: 3 },
               hasMore: { type: 'boolean', example: true },
+              nearbyCityCounts: {
+                type: 'array',
+                items: { $ref: getSchemaPath(NearbyCityCountDto) },
+              },
             },
             required: ['items', 'pagination', 'total', 'page', 'limit', 'totalPages'],
           },

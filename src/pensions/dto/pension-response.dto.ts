@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GenderPreference, VerificationStatus } from '@prisma/client';
+import { BathType } from '../../rooms/dto/room-response.dto.js';
 
 export class PensionImageResponseDto {
   @ApiProperty({ type: String, example: 'img-123' })
@@ -75,6 +76,9 @@ export class PensionRoomSummaryDto {
 
   @ApiProperty({ type: Boolean, example: false })
   hasPrivateBathroom!: boolean;
+
+  @ApiPropertyOptional({ enum: BathType, enumName: 'BathType', example: BathType.PRIVATE })
+  bathType?: BathType;
 
   @ApiProperty({ type: Boolean, example: true })
   isAvailable!: boolean;
@@ -275,6 +279,13 @@ export class CitySummaryResponseDto {
 
   @ApiProperty({ type: Number, example: -70.669265 })
   longitude!: number;
+
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    example: 'https://example.com/santiago.webp',
+  })
+  imageUrl?: string | null;
 }
 
 export class DeleteResultResponseDto {

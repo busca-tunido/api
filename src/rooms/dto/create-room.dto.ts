@@ -14,6 +14,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { BathType } from './room-response.dto.js';
 
 export class CreateRoomDto {
   @ApiPropertyOptional({ example: 'Hab 101', maxLength: 20 })
@@ -58,6 +59,11 @@ export class CreateRoomDto {
   @IsOptional()
   @IsBoolean()
   hasPrivateBathroom?: boolean;
+
+  @ApiPropertyOptional({ enum: BathType, enumName: 'BathType', example: BathType.PRIVATE })
+  @IsOptional()
+  @IsEnum(BathType)
+  bathType?: BathType;
 
   @ApiPropertyOptional({ example: 1, default: 1, minimum: 1, maximum: 10 })
   @IsOptional()

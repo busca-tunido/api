@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CampusAreaResponseDto } from './dto/campus-area.dto.js';
 import type { CreateUniversityDto } from './dto/create-university.dto.js';
+import type { UniversityResponseDto } from './dto/university-response.dto.js';
 import type { UpdateUniversityDto } from './dto/update-university.dto.js';
 import { UniversitiesCacheService } from './universities-cache.service.js';
 
@@ -49,7 +50,7 @@ export class UniversitiesService {
     });
   }
 
-  async findAll(city?: string): Promise<unknown[]> {
+  async findAll(city?: string): Promise<UniversityResponseDto[]> {
     const where: Prisma.UniversityWhereInput = {
       deletedAt: null,
     };
@@ -72,6 +73,8 @@ export class UniversitiesService {
           latitude: true,
           longitude: true,
           campuses: true,
+          createdAt: true,
+          updatedAt: true,
           _count: {
             select: {
               students: true,
@@ -99,9 +102,21 @@ export class UniversitiesService {
     }
 
     return universities.map((u) => ({
-      ...u,
+      id: u.id,
+      name: u.name,
+      shortName: u.shortName ?? null,
       acronym: u.shortName ?? null,
+      city: u.city ?? '',
+      address: u.address ?? '',
+      emailDomains: u.emailDomains || [],
+      emailDomain: u.emailDomains?.[0] ?? null,
+      latitude: u.latitude ?? 0,
+      longitude: u.longitude ?? 0,
+      campuses: (u.campuses || []) as CampusAreaResponseDto[],
       imageUrl: null,
+      logoUrl: null,
+      createdAt: u.createdAt || new Date(),
+      updatedAt: u.updatedAt || new Date(),
       _count: {
         students: u._count?.students ?? 0,
         nearbyPensions: countMap.get(u.id) ?? 0,

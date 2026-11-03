@@ -46,7 +46,7 @@ export class UniversitiesController {
     description: 'List of universities',
   })
   @ApiStandardErrors([500])
-  async findAll(@Query('city') city?: string): Promise<unknown[]> {
+  async findAll(@Query('city') city?: string): Promise<UniversityResponseDto[]> {
     return this.universitiesService.findAll(city);
   }
 

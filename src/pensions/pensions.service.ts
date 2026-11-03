@@ -48,6 +48,7 @@ export type CitySummaryItem = {
   pensionsCount: number;
   latitude: number;
   longitude: number;
+  imageUrl?: string | null;
 };
 
 export const calculateHaversineDistanceKm = (
@@ -235,6 +236,7 @@ export class PensionsService {
         name: r.title,
         priceMonthlyClp: r.monthlyPrice,
         isActive: r.isActive ?? true,
+        bathType: r.hasPrivateBathroom ? 'PRIVATE' : 'SHARED',
       }));
 
     const nearbyUniversities = (pension.nearbyUniversities || []).map((u) => ({
@@ -1009,7 +1011,10 @@ export class PensionsService {
       }
     }
 
-    const cityDataMap = new Map<string, { name: string; latitude: number; longitude: number }>();
+    const cityDataMap = new Map<
+      string,
+      { name: string; latitude: number; longitude: number; imageUrl?: string | null }
+    >();
 
     for (const uni of universities) {
       if (uni.city) {
@@ -1049,13 +1054,17 @@ export class PensionsService {
     const result: CitySummaryItem[] = [];
     for (const [key, data] of cityDataMap.entries()) {
       const pensionsCount = countMap.get(key) ?? 0;
-      result.push({
+      const item: CitySummaryItem = {
         id: slugify(data.name),
         name: data.name,
         pensionsCount,
         latitude: data.latitude,
         longitude: data.longitude,
-      });
+      };
+      if (data.imageUrl) {
+        item.imageUrl = data.imageUrl;
+      }
+      result.push(item);
     }
 
     return result.sort((a, b) => b.pensionsCount - a.pensionsCount || a.name.localeCompare(b.name));
