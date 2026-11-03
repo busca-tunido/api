@@ -95,6 +95,17 @@ export class PensionCountDto {
   reviews!: number;
 }
 
+export class PensionNearestUniversitySummaryDto {
+  @ApiProperty({ type: String, example: 'Universidad de Chile' })
+  name!: string;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'UCHILE' })
+  shortName?: string | null;
+
+  @ApiProperty({ type: Number, example: 450, description: 'Distance in meters' })
+  distanceMeters!: number;
+}
+
 export class PensionItemResponseDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef01' })
   id!: string;
@@ -217,6 +228,12 @@ export class PensionItemResponseDto {
 
   @ApiProperty({ type: () => [PensionNearbyUniversityResponseDto] })
   nearbyUniversities!: PensionNearbyUniversityResponseDto[];
+
+  @ApiPropertyOptional({ type: () => PensionNearestUniversitySummaryDto })
+  nearestUniversity?: PensionNearestUniversitySummaryDto;
+
+  @ApiPropertyOptional({ type: [String], example: ['wifi-alta-velocidad', 'comida-incluida'] })
+  amenitySlugs?: string[];
 
   @ApiProperty({ type: () => [PensionRoomSummaryDto] })
   rooms!: PensionRoomSummaryDto[];

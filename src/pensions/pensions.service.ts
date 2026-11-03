@@ -248,6 +248,17 @@ export class PensionsService {
       },
     }));
 
+    const firstNearby = nearbyUniversities[0];
+    const nearestUniversity = firstNearby
+      ? {
+          name: firstNearby.university.name,
+          shortName: firstNearby.university.shortName ?? null,
+          distanceMeters: firstNearby.distanceMeters,
+        }
+      : undefined;
+
+    const amenitySlugs = amenities.map((a) => a.slug).filter(Boolean);
+
     const totalRoomsCount = (pension.rooms || []).filter((r) => !r.deletedAt).length;
     const reviewsCount = pension._count?.reviews ?? pension.ratingCount ?? 0;
 
@@ -257,6 +268,8 @@ export class PensionsService {
       averageRating: pension.ratingAverage ?? 0,
       images,
       amenities,
+      amenitySlugs,
+      nearestUniversity,
       rooms,
       nearbyUniversities,
       _count: {
