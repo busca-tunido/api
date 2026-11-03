@@ -1,3 +1,4 @@
+import { enrichCampusAreas } from '../enrich-campus-areas.js';
 import { loadStaticCatalogs, persistDatasetToMongo } from './db/mongo-loader.js';
 import { generateBlueprintDataset } from './generators/faker-blueprint.js';
 
@@ -11,6 +12,9 @@ const run = async (): Promise<void> => {
 
   console.log('--- Persistiendo dataset completo en MongoDB Atlas ---');
   await persistDatasetToMongo(dataset);
+
+  console.log('--- Enriqueciendo campus universitarios con geometrías y siglas ---');
+  await enrichCampusAreas();
 
   console.log('=== Proceso de seeds completado exitosamente ===');
 };

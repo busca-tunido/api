@@ -1622,127 +1622,142 @@ async function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function main(): Promise<void> {
+export async function enrichCampusAreas(prismaClient?: PrismaClient): Promise<void> {
   console.log('=== Iniciando Enriquecimiento Riguroso de Facultades y Campus en Chile ===');
-  const prisma = new PrismaClient();
+  const shouldDisconnect = !prismaClient;
+  const prisma = prismaClient ?? new PrismaClient();
 
-  const universities = await prisma.university.findMany({
-    where: { deletedAt: null },
-    select: { id: true, name: true, shortName: true, latitude: true, longitude: true, city: true },
-  });
-
-  console.log(`Analizando ${universities.length} universidades registradas...`);
-
-  let enrichedCount = 0;
-  let totalFacultiesCount = 0;
-
-  for (const uni of universities) {
-    const knownConfig = KNOWN_UNIVERSITY_CAMPUSES.find((cfg) =>
-      cfg.universityMatcher(uni.name, uni.shortName),
-    );
-
-    const campusesData: Array<{
-      name: string;
-      acronym: string;
-      centerLat: number;
-      centerLng: number;
-      polygon: GeoCoordinate[];
-    }> = [];
-
-    if (knownConfig && knownConfig.campuses.length > 0) {
-      console.log(
-        `\n[${uni.name}] -> Mapeando ${knownConfig.campuses.length} facultades/campus específicos:`,
-      );
-
-      for (const campusDef of knownConfig.campuses) {
-        console.log(`  - Consultando: ${campusDef.name} (${campusDef.acronym})...`);
-        const osmResult = await fetchOSMPolygon(campusDef.osmQuery);
-        await delay(300);
-
-        if (osmResult && osmResult.polygon.length >= 4) {
-          console.log(
-            `    ✓ Perímetro real obtenido de OSM (${osmResult.polygon.length} vértices)`,
-          );
-          campusesData.push({
-            name: campusDef.name,
-            acronym: campusDef.acronym,
-            centerLat: osmResult.centerLat,
-            centerLng: osmResult.centerLng,
-            polygon: osmResult.polygon,
-          });
-        } else {
-          console.log(
-            `    ✓ Geometría precisa generada en [${campusDef.fallbackLat}, ${campusDef.fallbackLng}]`,
-          );
-          const targetSize =
-            campusDef.sizeMeters ??
-            Math.min(130, Math.max(75, Math.round((campusDef.radiusMeters || 200) * 0.42)));
-          const fallbackPoly = generateFallbackPolygon(
-            campusDef.fallbackLat,
-            campusDef.fallbackLng,
-            targetSize,
-          );
-          campusesData.push({
-            name: campusDef.name,
-            acronym: campusDef.acronym,
-            centerLat: campusDef.fallbackLat,
-            centerLng: campusDef.fallbackLng,
-            polygon: fallbackPoly,
-          });
-        }
-      }
-    } else {
-      const cityKey = (uni.city || 'Santiago').toLowerCase().trim();
-      const cityDefault = CITY_COORDINATES[cityKey] ?? CITY_COORDINATES.santiago;
-      const baseLat =
-        uni.latitude !== -33.45694 && uni.latitude !== 0 ? uni.latitude : cityDefault.lat;
-      const baseLng =
-        uni.longitude !== -70.64827 && uni.longitude !== 0 ? uni.longitude : cityDefault.lng;
-
-      const acronym =
-        uni.shortName ||
-        (uni.name.length <= 15
-          ? uni.name
-          : uni.name
-              .split(' ')
-              .filter((w) => w.length > 2)
-              .map((w) => w[0].toUpperCase())
-              .slice(0, 4)
-              .join(''));
-
-      const fallbackPoly = generateFallbackPolygon(baseLat, baseLng, 95);
-      campusesData.push({
-        name: `${uni.name} - Sede Principal`,
-        acronym: acronym.slice(0, 12),
-        centerLat: baseLat,
-        centerLng: baseLng,
-        polygon: fallbackPoly,
-      });
-    }
-
-    const primaryLat = campusesData[0]?.centerLat ?? uni.latitude;
-    const primaryLng = campusesData[0]?.centerLng ?? uni.longitude;
-
-    await prisma.university.update({
-      where: { id: uni.id },
-      data: {
-        latitude: primaryLat,
-        longitude: primaryLng,
-        campuses: campusesData,
+  try {
+    const universities = await prisma.university.findMany({
+      where: { deletedAt: null },
+      select: {
+        id: true,
+        name: true,
+        shortName: true,
+        latitude: true,
+        longitude: true,
+        city: true,
       },
     });
 
-    enrichedCount++;
-    totalFacultiesCount += campusesData.length;
-  }
+    console.log(`Analizando ${universities.length} universidades registradas...`);
 
-  console.log(
-    `\n=== Enriquecimiento finalizado con éxito: ${enrichedCount} universidades con ${totalFacultiesCount} facultades/campus detallados a lo largo de Chile ===`,
-  );
-  await prisma.$disconnect();
+    let enrichedCount = 0;
+    let totalFacultiesCount = 0;
+
+    for (const uni of universities) {
+      const knownConfig = KNOWN_UNIVERSITY_CAMPUSES.find((cfg) =>
+        cfg.universityMatcher(uni.name, uni.shortName),
+      );
+
+      const campusesData: Array<{
+        name: string;
+        acronym: string;
+        centerLat: number;
+        centerLng: number;
+        polygon: GeoCoordinate[];
+      }> = [];
+
+      if (knownConfig && knownConfig.campuses.length > 0) {
+        console.log(
+          `\n[${uni.name}] -> Mapeando ${knownConfig.campuses.length} facultades/campus específicos:`,
+        );
+
+        for (const campusDef of knownConfig.campuses) {
+          console.log(`  - Consultando: ${campusDef.name} (${campusDef.acronym})...`);
+          const osmResult = await fetchOSMPolygon(campusDef.osmQuery);
+          await delay(300);
+
+          if (osmResult && osmResult.polygon.length >= 4) {
+            console.log(
+              `    ✓ Perímetro real obtenido de OSM (${osmResult.polygon.length} vértices)`,
+            );
+            campusesData.push({
+              name: campusDef.name,
+              acronym: campusDef.acronym,
+              centerLat: osmResult.centerLat,
+              centerLng: osmResult.centerLng,
+              polygon: osmResult.polygon,
+            });
+          } else {
+            console.log(
+              `    ✓ Geometría precisa generada en [${campusDef.fallbackLat}, ${campusDef.fallbackLng}]`,
+            );
+            const targetSize =
+              campusDef.sizeMeters ??
+              Math.min(130, Math.max(75, Math.round((campusDef.radiusMeters || 200) * 0.42)));
+            const fallbackPoly = generateFallbackPolygon(
+              campusDef.fallbackLat,
+              campusDef.fallbackLng,
+              targetSize,
+            );
+            campusesData.push({
+              name: campusDef.name,
+              acronym: campusDef.acronym,
+              centerLat: campusDef.fallbackLat,
+              centerLng: campusDef.fallbackLng,
+              polygon: fallbackPoly,
+            });
+          }
+        }
+      } else {
+        const cityKey = (uni.city || 'Santiago').toLowerCase().trim();
+        const cityDefault = CITY_COORDINATES[cityKey] ?? CITY_COORDINATES.santiago;
+        const baseLat =
+          uni.latitude !== -33.45694 && uni.latitude !== 0 ? uni.latitude : cityDefault.lat;
+        const baseLng =
+          uni.longitude !== -70.64827 && uni.longitude !== 0 ? uni.longitude : cityDefault.lng;
+
+        const acronym =
+          uni.shortName ||
+          (uni.name.length <= 15
+            ? uni.name
+            : uni.name
+                .split(' ')
+                .filter((w) => w.length > 2)
+                .map((w) => w[0].toUpperCase())
+                .slice(0, 4)
+                .join(''));
+
+        const fallbackPoly = generateFallbackPolygon(baseLat, baseLng, 95);
+        campusesData.push({
+          name: `${uni.name} - Sede Principal`,
+          acronym: acronym.slice(0, 12),
+          centerLat: baseLat,
+          centerLng: baseLng,
+          polygon: fallbackPoly,
+        });
+      }
+
+      const primaryLat = campusesData[0]?.centerLat ?? uni.latitude;
+      const primaryLng = campusesData[0]?.centerLng ?? uni.longitude;
+
+      await prisma.university.update({
+        where: { id: uni.id },
+        data: {
+          latitude: primaryLat,
+          longitude: primaryLng,
+          campuses: campusesData,
+        },
+      });
+
+      enrichedCount++;
+      totalFacultiesCount += campusesData.length;
+    }
+
+    console.log(
+      `\n=== Enriquecimiento finalizado con éxito: ${enrichedCount} universidades con ${totalFacultiesCount} facultades/campus detallados a lo largo de Chile ===`,
+    );
+  } finally {
+    if (shouldDisconnect) {
+      await prisma.$disconnect();
+    }
+  }
 }
 
-main().catch((err) => {
-  console.error('Error fatal durante el enriquecimiento:', err);
-  process.exit(1);
-});
+if (process.argv[1]?.includes('enrich-campus-areas')) {
+  enrichCampusAreas().catch((err) => {
+    console.error('Error fatal durante el enriquecimiento:', err);
+    process.exit(1);
+  });
+}
