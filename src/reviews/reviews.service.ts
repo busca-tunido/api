@@ -274,14 +274,51 @@ export class ReviewsService {
         ...dto,
         pensionId: pension.id,
         userId: user.id,
-        isVerifiedResident: user.isEmailVerified,
+        isResidentVerified: user.isEmailVerified,
         helpfulUserIds: [],
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            university: {
+              select: {
+                shortName: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
     await this.recalculatePensionRating(pension.id);
 
-    return review;
+    return {
+      ...review,
+      rating: review.overallRating,
+      overallRating: review.overallRating,
+      isVerifiedStay: review.isResidentVerified,
+      isResidentVerified: review.isResidentVerified,
+      ownerRating: review.landlordRating,
+      landlordRating: review.landlordRating,
+      locationRating: review.quietnessRating,
+      quietnessRating: review.quietnessRating,
+      helpfulCount: review.helpfulUserIds?.length || 0,
+      isAnonymous: false,
+      author: review.user
+        ? {
+            id: review.user.id,
+            firstName: review.user.firstName,
+            lastName: review.user.lastName,
+            avatarUrl: review.user.avatarUrl,
+            universityName: review.user.university?.name ?? null,
+          }
+        : null,
+    };
   }
 
   async update(id: string, dto: UpdateReviewDto, user: SanitizedUser): Promise<unknown> {
@@ -300,11 +337,48 @@ export class ReviewsService {
     const updated = await this.prisma.review.update({
       where: { id },
       data: dto,
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            university: {
+              select: {
+                shortName: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     await this.recalculatePensionRating(review.pensionId);
 
-    return updated;
+    return {
+      ...updated,
+      rating: updated.overallRating,
+      overallRating: updated.overallRating,
+      isVerifiedStay: updated.isResidentVerified,
+      isResidentVerified: updated.isResidentVerified,
+      ownerRating: updated.landlordRating,
+      landlordRating: updated.landlordRating,
+      locationRating: updated.quietnessRating,
+      quietnessRating: updated.quietnessRating,
+      helpfulCount: updated.helpfulUserIds?.length || 0,
+      isAnonymous: false,
+      author: updated.user
+        ? {
+            id: updated.user.id,
+            firstName: updated.user.firstName,
+            lastName: updated.user.lastName,
+            avatarUrl: updated.user.avatarUrl,
+            universityName: updated.user.university?.name ?? null,
+          }
+        : null,
+    };
   }
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
