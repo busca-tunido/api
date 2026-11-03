@@ -149,4 +149,28 @@ export class CreatePensionDto {
   @IsOptional()
   @IsNumber()
   distanceMeters?: number;
+
+  @ApiPropertyOptional({ example: 'Sra. Carmen Gloria', maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100, { message: 'El nombre de contacto no puede superar los 100 caracteres' })
+  contactName?: string;
+
+  @ApiPropertyOptional({ example: '+56 9 1234 5678', maxLength: 30 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30, { message: 'El teléfono de contacto no puede superar los 30 caracteres' })
+  contactPhone?: string;
+
+  @ApiPropertyOptional({ example: '+56 9 1234 5678', maxLength: 30 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30, { message: 'El WhatsApp de contacto no puede superar los 30 caracteres' })
+  contactWhatsapp?: string;
+
+  @ApiPropertyOptional({ example: 'contacto@residencia.cl', maxLength: 120 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120, { message: 'El correo de contacto no puede superar los 120 caracteres' })
+  contactEmail?: string;
 }

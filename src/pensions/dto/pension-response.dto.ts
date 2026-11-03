@@ -122,6 +122,18 @@ export class PensionItemResponseDto {
   @ApiPropertyOptional({ type: Number, nullable: true, example: 100000 })
   deposit?: number | null;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'Sra. Carmen Gloria' })
+  contactName?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: '+56 9 1234 5678' })
+  contactPhone?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: '+56 9 1234 5678' })
+  contactWhatsapp?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'contacto@residencia.cl' })
+  contactEmail?: string | null;
+
   @ApiProperty({ type: String, example: 'CLP' })
   currency!: string;
 

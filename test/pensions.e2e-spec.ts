@@ -140,6 +140,23 @@ describe('Pensions E2E', () => {
     });
 
     expect(patchOkRes.statusCode).toBe(200);
+
+    const patchContactRes = await app.inject({
+      method: 'PATCH',
+      url: `/pensions/${createdPension.id}`,
+      headers: {
+        authorization: `Bearer ${landlordToken}`,
+      },
+      payload: {
+        contactName: 'Sra. Carmen Gloria',
+        contactPhone: '+56 9 1234 5678',
+      },
+    });
+
+    expect(patchContactRes.statusCode).toBe(200);
+    const updatedPension = JSON.parse(patchContactRes.payload).data;
+    expect(updatedPension.contactName).toBe('Sra. Carmen Gloria');
+    expect(updatedPension.contactPhone).toBe('+56 9 1234 5678');
   });
 
   it('should filter pensions by coordinates and radiusKm', async () => {
