@@ -69,6 +69,12 @@ The backend connects directly to MongoDB Atlas M0 clusters (`DATABASE_URL`) with
    - Hardcoded values, dummy/mock data, synthetic fallbacks (e.g., fallback images, fake room titles, hardcoded prices, synthetic date arithmetic), and hardcoded heuristic dictionaries (e.g., hardcoded university regexes, hardcoded amenity slugs) are strictly prohibited unless explicitly requested by the user.
    - If initial, sample, or testing data is required for features or verification, it must be created in the corresponding seed file (`prisma/seed.ts`, `prisma/seed-utils.ts`) or managed via Prisma database migrations.
    - Endpoints and services must always query and return real database records, compute geospatial distances with real coordinates, or return clean null/empty states.
+1. **100% OpenAPI Completeness & Schema Contract Rule**:
+   - The backend API and OpenAPI specifications must maintain 100% completeness and 1:1 synchronization at all times.
+   - Every controller endpoint, HTTP method, route parameter, query argument, request body, and response payload must have exhaustive OpenAPI documentation via `@ApiOperation`, `@ApiParam`, `@ApiQuery`, `@ApiBody`, and `@ApiEnvelopeResponse` (or formal Response DTOs).
+   - Anonymous inline schemas, untyped responses (`any` or `unknown`), and undocumented status codes are strictly prohibited.
+   - All enums used in DTOs must specify `enumName` to ensure canonical named schema generation under `components['schemas']`.
+   - Any modification or addition of controller endpoints, parameters, or DTO properties must be immediately followed by running `just openapi` to regenerate the contract and preserve 100% schema parity with the frontend.
 
 ---
 
