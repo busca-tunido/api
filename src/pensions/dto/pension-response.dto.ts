@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { GenderPreference, VerificationStatus } from '@prisma/client';
+import { GenderPreference, RoomType, VerificationStatus } from '@prisma/client';
 import { BathType } from '../../rooms/dto/room-response.dto.js';
 
 export class PensionImageResponseDto {
@@ -62,8 +62,8 @@ export class PensionRoomSummaryDto {
   @ApiPropertyOptional({ type: String, nullable: true, example: 'Habitación Individual' })
   name?: string | null;
 
-  @ApiProperty({ type: String, example: 'SINGLE' })
-  type!: string;
+  @ApiProperty({ enum: RoomType, enumName: 'RoomType', example: RoomType.SINGLE })
+  type!: RoomType;
 
   @ApiProperty({ type: Number, example: 250000 })
   monthlyPrice!: number;
@@ -306,6 +306,9 @@ export class CitySummaryResponseDto {
 }
 
 export class DeleteResultResponseDto {
+  @ApiPropertyOptional({ type: String, example: '6659f8c123456789abcdef01' })
+  id?: string;
+
   @ApiProperty({ type: Boolean, example: true })
   deleted!: boolean;
 }

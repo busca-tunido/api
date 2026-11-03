@@ -1,5 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiProduces,
+  ApiProperty,
+  ApiPropertyOptional,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AppService } from './app.service.js';
 import { ApiEnvelopeResponse } from './common/decorators/api-envelope-response.decorator.js';
 import { PrismaService } from './prisma/prisma.service.js';
@@ -26,6 +33,16 @@ export class AppController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'API welcome root endpoint' })
+  @ApiProduces('text/plain')
+  @ApiResponse({
+    status: 200,
+    description: 'Welcome message',
+    schema: {
+      type: 'string',
+      example: 'Hello World!',
+    },
+  })
   getHello(): string {
     return this.appService.getHello();
   }
