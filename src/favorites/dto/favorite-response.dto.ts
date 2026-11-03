@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { VerificationStatus } from '@prisma/client';
 import { PensionImageResponseDto } from '../../pensions/dto/pension-response.dto.js';
 
 export class FavoritePensionSummaryDto {
@@ -28,6 +29,13 @@ export class FavoritePensionSummaryDto {
 
   @ApiProperty({ type: () => [PensionImageResponseDto] })
   images!: PensionImageResponseDto[];
+
+  @ApiPropertyOptional({
+    enum: VerificationStatus,
+    enumName: 'VerificationStatus',
+    example: VerificationStatus.OFFICIALLY_VERIFIED,
+  })
+  verificationStatus?: VerificationStatus;
 }
 
 export class FavoriteItemResponseDto {

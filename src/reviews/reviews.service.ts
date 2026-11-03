@@ -52,6 +52,7 @@ interface EmbeddedRoomRaw {
 
 interface PensionStayRaw {
   id: string;
+  slug?: string;
   title: string;
   city: string;
   baseMonthlyPrice: number;
@@ -117,6 +118,14 @@ export class ReviewsService {
       const helpfulVotes = review.helpfulUserIds || [];
       return {
         ...review,
+        rating: review.overallRating,
+        overallRating: review.overallRating,
+        isVerifiedStay: review.isResidentVerified,
+        isResidentVerified: review.isResidentVerified,
+        ownerRating: review.landlordRating,
+        landlordRating: review.landlordRating,
+        locationRating: review.quietnessRating,
+        quietnessRating: review.quietnessRating,
         helpfulCount: helpfulVotes.length,
       };
     });
@@ -187,24 +196,37 @@ export class ReviewsService {
         pensionId: review.pensionId,
         pensionTitle: pension.title,
         pensionCity: pension.city,
+        pensionSlug: pension.slug,
+        city: pension.city,
         roomTitle,
         stayDurationCategory,
         ratingGiven: review.overallRating,
+        rating: review.overallRating,
         hasReview: true,
         monthlyPaidClp,
         imageUrl: featuredImage,
+        featuredImage,
+        comment: review.comment,
+        createdAt: review.createdAt,
         review: {
           id: review.id,
           pensionId: review.pensionId,
+          userId: review.userId,
+          rating: review.overallRating,
           overallRating: review.overallRating,
           cleanlinessRating: review.cleanlinessRating ?? undefined,
           landlordRating: review.landlordRating ?? undefined,
+          ownerRating: review.landlordRating ?? undefined,
           quietnessRating: review.quietnessRating ?? undefined,
+          locationRating: review.quietnessRating ?? undefined,
           wifiRating: review.wifiRating ?? undefined,
           comment: review.comment,
           stayDurationCategory,
           isResidentVerified: review.isResidentVerified,
-          images: review.images.map((url, idx) => ({ id: `rev-img-${idx}`, url })),
+          isVerifiedStay: review.isResidentVerified,
+          isAnonymous: false,
+          helpfulCount: review.helpfulUserIds?.length || 0,
+          images: review.images,
           createdAt: review.createdAt.toISOString(),
           user: review.user
             ? {

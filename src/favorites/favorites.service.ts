@@ -55,6 +55,7 @@ export class FavoritesService {
           baseMonthlyPrice: pension.baseMonthlyPrice,
           ratingAverage: pension.ratingAverage,
           ratingCount: pension.ratingCount,
+          verificationStatus: pension.verificationStatus,
           images,
         },
       };
