@@ -177,4 +177,14 @@ export class CreatePensionDto {
   @IsString()
   @MaxLength(120, { message: 'El correo de contacto no puede superar los 120 caracteres' })
   contactEmail?: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['https://storage.buscatunido.cl/pensions/photo-1.webp'],
+    description: 'URLs de fotos de la pensión',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 }

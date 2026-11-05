@@ -776,7 +776,7 @@ export class PensionsService {
     const uniqueSuffix = Math.random().toString(36).substring(2, 7);
     const slug = `${rawSlug}-${uniqueSuffix}`;
 
-    const { amenitySlugs, nearbyUniversityId, distanceMeters, ...pensionData } = dto;
+    const { amenitySlugs, nearbyUniversityId, distanceMeters, images, ...pensionData } = dto;
 
     let computedDistanceMeters = distanceMeters;
     let computedWalkingMinutes: number | null =
@@ -850,6 +850,16 @@ export class PensionsService {
           }
         : undefined;
 
+    const imagesData = (images || []).map((url, idx) => ({
+      id: crypto.randomUUID(),
+      url,
+      thumbnailUrl: url,
+      caption: null,
+      isFeatured: idx === 0,
+      sortOrder: idx,
+      createdAt: new Date(),
+    }));
+
     const created = await this.prisma.pension.create({
       data: {
         ...pensionData,
@@ -860,7 +870,7 @@ export class PensionsService {
         amenities: amenitySlugs ?? [],
         nearbyUniversities: nearbyUniversitiesData,
         rooms: [],
-        images: [],
+        images: imagesData,
       },
     });
 
@@ -880,7 +890,7 @@ export class PensionsService {
       throw new ForbiddenException('You can only update your own pensions');
     }
 
-    const { amenitySlugs, nearbyUniversityId, distanceMeters, ...pensionData } = dto;
+    const { amenitySlugs, nearbyUniversityId, distanceMeters, images, ...pensionData } = dto;
     const updateData: Prisma.PensionUpdateInput = {
       ...pensionData,
     };
@@ -894,6 +904,18 @@ export class PensionsService {
 
     if (amenitySlugs !== undefined) {
       updateData.amenities = amenitySlugs;
+    }
+
+    if (images !== undefined) {
+      updateData.images = images.map((url, idx) => ({
+        id: crypto.randomUUID(),
+        url,
+        thumbnailUrl: url,
+        caption: null,
+        isFeatured: idx === 0,
+        sortOrder: idx,
+        createdAt: new Date(),
+      }));
     }
 
     if (nearbyUniversityId !== undefined) {
