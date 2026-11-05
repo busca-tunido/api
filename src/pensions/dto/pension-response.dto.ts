@@ -28,6 +28,23 @@ export class PensionAmenityResponseDto {
   name!: string;
 }
 
+export class PensionAmenityCatalogItemDto {
+  @ApiProperty({ type: String, example: 'wifi-alta-velocidad' })
+  slug!: string;
+
+  @ApiProperty({ type: String, example: 'Wi-Fi fibra óptica alta velocidad' })
+  name!: string;
+
+  @ApiProperty({
+    enum: ['BASIC_UTILITY', 'ROOM_FEATURE', 'COMMON_AREA', 'STUDY_WORK', 'SAFETY_SECURITY'],
+    example: 'BASIC_UTILITY',
+  })
+  category!: 'BASIC_UTILITY' | 'ROOM_FEATURE' | 'COMMON_AREA' | 'STUDY_WORK' | 'SAFETY_SECURITY';
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'wifi' })
+  iconKey?: string | null;
+}
+
 export class NearbyUniversityItemDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef02' })
   id!: string;

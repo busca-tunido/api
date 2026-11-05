@@ -27,6 +27,7 @@ import {
   CitySummaryResponseDto,
   DeleteResultResponseDto,
   PaginatedPensionsResponseDto,
+  PensionAmenityCatalogItemDto,
   PensionItemResponseDto,
   PriceHistogramResponseDto,
 } from './dto/pension-response.dto.js';
@@ -90,6 +91,18 @@ export class PensionsController {
   @ApiStandardErrors([500])
   async getCities(): Promise<CitySummaryItem[]> {
     return this.pensionsService.getCitiesSummary();
+  }
+
+  @Get('amenities')
+  @ApiOperation({ summary: 'List all available pension amenities catalog' })
+  @ApiEnvelopeResponse(PensionAmenityCatalogItemDto, {
+    status: 200,
+    isArray: true,
+    description: 'List of all pension amenities grouped by category',
+  })
+  @ApiStandardErrors([500])
+  async getAmenities(): Promise<PensionAmenityCatalogItemDto[]> {
+    return this.pensionsService.getAmenitiesCatalog();
   }
 
   @Get(':idOrSlug')
