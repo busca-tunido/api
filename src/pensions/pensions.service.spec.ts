@@ -20,6 +20,9 @@ type MockPrismaService = {
     findUnique: ReturnType<typeof vi.fn>;
     findMany: ReturnType<typeof vi.fn>;
   };
+  amenity: {
+    findMany: ReturnType<typeof vi.fn>;
+  };
 };
 
 describe('PensionsService', () => {
@@ -82,6 +85,9 @@ describe('PensionsService', () => {
       },
       university: {
         findUnique: vi.fn(),
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+      amenity: {
         findMany: vi.fn().mockResolvedValue([]),
       },
     };
@@ -418,6 +424,92 @@ describe('PensionsService', () => {
         latitude: -33.04,
         longitude: -71.62,
       });
+    });
+  });
+
+  describe('getAmenitiesCatalog', () => {
+    it('should return catalog from database if amenities exist', async () => {
+      mockPrisma.amenity.findMany.mockResolvedValue([
+        {
+          slug: 'wifi-alta-velocidad',
+          name: 'Wi-Fi fibra óptica',
+          category: 'BASIC_UTILITY',
+          iconKey: 'wifi',
+        },
+      ]);
+
+      const result = await service.getAmenitiesCatalog();
+      expect(result).toHaveLength(1);
+      expect(result[0].slug).toBe('wifi-alta-velocidad');
+    });
+
+    it('should return default static catalog if database returns empty', async () => {
+      mockPrisma.amenity.findMany.mockResolvedValue([]);
+
+      const result = await service.getAmenitiesCatalog();
+      expect(result.length).toBeGreaterThanOrEqual(15);
+      expect(result.some((a) => a.slug === 'wifi-alta-velocidad')).toBe(true);
+    });
+  });
+
+  describe('wifi normalization', () => {
+    it('should normalize internetIncluded to true when wifi amenity is present on create', async () => {
+      mockPrisma.pension.create.mockImplementation(({ data }) =>
+        Promise.resolve({
+          id: 'new-pension',
+          ...data,
+        }),
+      );
+
+      await service.create(
+        {
+          title: 'Pensión Con Wifi',
+          address: 'Calle 1',
+          city: 'Santiago',
+          amenitySlugs: ['wifi-alta-velocidad'],
+          internetIncluded: false,
+        } as unknown as Parameters<typeof service.create>[0],
+        mockLandlord,
+      );
+
+      expect(mockPrisma.pension.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            internetIncluded: true,
+            amenities: ['wifi-alta-velocidad'],
+          }),
+        }),
+      );
+    });
+
+    it('should normalize wifi amenity when internetIncluded is true on update', async () => {
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'p-1',
+        landlordId: mockLandlord.id,
+        amenities: ['cocina-equipada'],
+        internetIncluded: false,
+      });
+      mockPrisma.pension.update.mockResolvedValue({
+        id: 'p-1',
+        landlordId: mockLandlord.id,
+        amenities: ['cocina-equipada', 'wifi-alta-velocidad'],
+        internetIncluded: true,
+      });
+
+      await service.update(
+        'p-1',
+        { internetIncluded: true } as unknown as Parameters<typeof service.update>[1],
+        mockLandlord,
+      );
+
+      expect(mockPrisma.pension.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            internetIncluded: true,
+            amenities: ['cocina-equipada', 'wifi-alta-velocidad'],
+          }),
+        }),
+      );
     });
   });
 });

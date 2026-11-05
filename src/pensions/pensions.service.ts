@@ -4,8 +4,10 @@ import { ProposalStatus, Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UniversitiesCacheService } from '../universities/universities-cache.service.js';
+import { AMENITY_CATALOG_ITEMS } from './constants/amenities-catalog.js';
 import type { CreatePensionDto } from './dto/create-pension.dto.js';
 import type { FilterPensionsDto } from './dto/filter-pensions.dto.js';
+import type { PensionAmenityCatalogItemDto } from './dto/pension-response.dto.js';
 import type { UpdatePensionDto } from './dto/update-pension.dto.js';
 
 export type PaginatedPensions<T> = {
@@ -771,12 +773,43 @@ export class PensionsService {
     return this.formatPensionItem(pension as unknown as PensionDocRaw, 100);
   }
 
+  async getAmenitiesCatalog(): Promise<PensionAmenityCatalogItemDto[]> {
+    try {
+      const dbAmenities = await this.prisma.amenity.findMany({
+        where: { deletedAt: null },
+        orderBy: [{ category: 'asc' }, { name: 'asc' }],
+      });
+
+      if (dbAmenities && dbAmenities.length > 0) {
+        return dbAmenities.map((a) => ({
+          slug: a.slug,
+          name: a.name,
+          category: a.category,
+          iconKey: a.iconKey ?? null,
+        }));
+      }
+    } catch {
+      // Fallback to static catalog if table unseeded
+    }
+
+    return [...AMENITY_CATALOG_ITEMS];
+  }
+
   async create(dto: CreatePensionDto, landlord: SanitizedUser): Promise<unknown> {
     const rawSlug = slugify(dto.title);
     const uniqueSuffix = Math.random().toString(36).substring(2, 7);
     const slug = `${rawSlug}-${uniqueSuffix}`;
 
     const { amenitySlugs, nearbyUniversityId, distanceMeters, images, ...pensionData } = dto;
+
+    let finalInternetIncluded = pensionData.internetIncluded ?? true;
+    const finalAmenities = amenitySlugs ? [...amenitySlugs] : [];
+
+    if (finalAmenities.includes('wifi-alta-velocidad')) {
+      finalInternetIncluded = true;
+    } else if (finalInternetIncluded) {
+      finalAmenities.push('wifi-alta-velocidad');
+    }
 
     let computedDistanceMeters = distanceMeters;
     let computedWalkingMinutes: number | null =
@@ -863,11 +896,12 @@ export class PensionsService {
     const created = await this.prisma.pension.create({
       data: {
         ...pensionData,
+        internetIncluded: finalInternetIncluded,
         slug,
         landlordId: landlord.id,
         submittedById: landlord.id,
         location,
-        amenities: amenitySlugs ?? [],
+        amenities: finalAmenities,
         nearbyUniversities: nearbyUniversitiesData,
         rooms: [],
         images: imagesData,
@@ -902,8 +936,32 @@ export class PensionsService {
       };
     }
 
-    if (amenitySlugs !== undefined) {
-      updateData.amenities = amenitySlugs;
+    let updatedAmenities = amenitySlugs !== undefined ? [...amenitySlugs] : undefined;
+    let updatedInternetIncluded = pensionData.internetIncluded;
+
+    if (updatedInternetIncluded === true) {
+      const base = updatedAmenities ?? [...(pension.amenities || [])];
+      if (!base.includes('wifi-alta-velocidad')) {
+        updatedAmenities = [...base, 'wifi-alta-velocidad'];
+      }
+    } else if (updatedInternetIncluded === false) {
+      const base = updatedAmenities ?? [...(pension.amenities || [])];
+      if (base.includes('wifi-alta-velocidad')) {
+        updatedAmenities = base.filter((slug) => slug !== 'wifi-alta-velocidad');
+      }
+    } else if (updatedAmenities !== undefined) {
+      if (updatedAmenities.includes('wifi-alta-velocidad')) {
+        updatedInternetIncluded = true;
+      } else {
+        updatedInternetIncluded = false;
+      }
+    }
+
+    if (updatedAmenities !== undefined) {
+      updateData.amenities = updatedAmenities;
+    }
+    if (updatedInternetIncluded !== undefined) {
+      updateData.internetIncluded = updatedInternetIncluded;
     }
 
     if (images !== undefined) {
