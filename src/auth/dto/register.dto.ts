@@ -5,7 +5,6 @@ import {
   IsIn,
   IsOptional,
   IsString,
-  IsUUID,
   Matches,
   MaxLength,
   MinLength,
@@ -71,8 +70,8 @@ export class RegisterDto {
   })
   role?: typeof Role.STUDENT | typeof Role.LANDLORD;
 
-  @ApiPropertyOptional({ example: '00000000-0000-0000-0000-000000000000' })
+  @ApiPropertyOptional({ example: '6824177b8b2e1f2b380a912c' })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   universityId?: string;
 }
