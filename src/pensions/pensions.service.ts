@@ -484,16 +484,12 @@ export class PensionsService {
             (acc, r) => acc + (r.availableBeds || 0),
             0,
           );
-          const hasUtilities = (pension.amenities || []).some((item: unknown) => {
-            const slug =
-              typeof item === 'string' ? item : ((item as { slug?: string })?.slug ?? '');
-            return (
-              slug.includes('wifi') ||
-              slug.includes('luz') ||
-              slug.includes('agua') ||
-              slug.includes('gas')
-            );
-          });
+          const hasUtilities = Boolean(
+            pension.waterIncluded ||
+              pension.electricityIncluded ||
+              pension.gasIncluded ||
+              pension.internetIncluded,
+          );
 
           const relevanceScore = calculateRelevanceScore(
             distanceKm,
@@ -803,7 +799,9 @@ export class PensionsService {
     const { amenitySlugs, nearbyUniversityId, distanceMeters, images, ...pensionData } = dto;
 
     let finalInternetIncluded = pensionData.internetIncluded ?? true;
-    const finalAmenities = amenitySlugs ? [...amenitySlugs] : [];
+    const finalAmenities = (amenitySlugs ? [...amenitySlugs] : []).filter(
+      (slug) => slug !== 'luz-incluida' && slug !== 'gas-incluido',
+    );
 
     if (finalAmenities.includes('wifi-alta-velocidad')) {
       finalInternetIncluded = true;
@@ -936,7 +934,10 @@ export class PensionsService {
       };
     }
 
-    let updatedAmenities = amenitySlugs !== undefined ? [...amenitySlugs] : undefined;
+    let updatedAmenities =
+      amenitySlugs !== undefined
+        ? amenitySlugs.filter((s) => s !== 'luz-incluida' && s !== 'gas-incluido')
+        : undefined;
     let updatedInternetIncluded = pensionData.internetIncluded;
 
     if (updatedInternetIncluded === true) {

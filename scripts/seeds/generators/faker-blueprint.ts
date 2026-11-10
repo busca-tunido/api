@@ -301,17 +301,17 @@ export const generateBlueprintDataset = async (
     let selectedAmenities: string[] = [];
     if (tier === 'baja') {
       const basicSlugs = amenityRecords
-        .filter((a) => a.category === 'BASIC_UTILITY')
+        .filter((a) => a.category === 'ROOM_FEATURE')
         .map((a) => a.slug);
-      selectedAmenities = faker.helpers.arrayElements(basicSlugs, { min: 3, max: 5 });
+      selectedAmenities = faker.helpers.arrayElements(basicSlugs, { min: 2, max: 4 });
     } else if (tier === 'media') {
       const mediaPool = amenityRecords
-        .filter((a) => ['BASIC_UTILITY', 'ROOM_FEATURE', 'COMMON_AREA'].includes(a.category))
+        .filter((a) => ['ROOM_FEATURE', 'COMMON_AREA'].includes(a.category))
         .map((a) => a.slug);
-      selectedAmenities = faker.helpers.arrayElements(mediaPool, { min: 6, max: 9 });
+      selectedAmenities = faker.helpers.arrayElements(mediaPool, { min: 4, max: 7 });
     } else {
       const altaPool = amenityRecords.map((a) => a.slug);
-      selectedAmenities = faker.helpers.arrayElements(altaPool, { min: 10, max: 15 });
+      selectedAmenities = faker.helpers.arrayElements(altaPool, { min: 7, max: 12 });
     }
 
     const tierHouseMax = CURATED_COUNTS.houses[TIER_MAP[tier]];
@@ -438,7 +438,7 @@ export const generateBlueprintDataset = async (
       waterIncluded: true,
       electricityIncluded: true,
       gasIncluded: true,
-      internetIncluded: selectedAmenities.includes('wifi-alta-velocidad'),
+      internetIncluded: true,
       curfewTime,
       guestsAllowed: tier === 'alta',
       smokingAllowed: false,

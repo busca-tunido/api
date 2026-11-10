@@ -14,33 +14,15 @@ export interface AmenityCatalogItem {
 
 export const AMENITY_CATALOG_ITEMS: readonly AmenityCatalogItem[] = [
   {
-    slug: 'wifi-alta-velocidad',
-    name: 'Wi-Fi fibra óptica alta velocidad',
-    category: 'BASIC_UTILITY',
-    iconKey: 'wifi',
-  },
-  {
     slug: 'agua-caliente',
     name: 'Agua caliente 24/7',
-    category: 'BASIC_UTILITY',
+    category: 'ROOM_FEATURE',
     iconKey: 'droplet',
-  },
-  {
-    slug: 'luz-incluida',
-    name: 'Electricidad incluida en renta',
-    category: 'BASIC_UTILITY',
-    iconKey: 'zap',
-  },
-  {
-    slug: 'gas-incluido',
-    name: 'Gas incluido',
-    category: 'BASIC_UTILITY',
-    iconKey: 'flame',
   },
   {
     slug: 'calefaccion',
     name: 'Calefacción central o estufa',
-    category: 'BASIC_UTILITY',
+    category: 'ROOM_FEATURE',
     iconKey: 'thermometer',
   },
   {

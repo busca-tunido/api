@@ -448,7 +448,9 @@ describe('PensionsService', () => {
 
       const result = await service.getAmenitiesCatalog();
       expect(result.length).toBeGreaterThanOrEqual(15);
-      expect(result.some((a) => a.slug === 'wifi-alta-velocidad')).toBe(true);
+      expect(result.some((a) => a.slug === 'bano-privado')).toBe(true);
+      expect(result.some((a) => a.slug === 'luz-incluida')).toBe(false);
+      expect(result.some((a) => a.slug === 'gas-incluido')).toBe(false);
     });
   });
 
