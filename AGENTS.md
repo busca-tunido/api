@@ -78,20 +78,52 @@ The backend connects directly to MongoDB Atlas M0 clusters (`DATABASE_URL`) with
 
 ---
 
-## 3. Task-Driven Lifecycle (`tasks/[task-name].md` Workflow)
+## 3. Execution Workflow
 
-Every backend feature, fix, or refactor must strictly adhere to the following workflow:
+```bash
+# PHASE 1: CONTRACT PREPARATION (Conditional: Schema / Migrations)
+# When: ONLY if modifying 'prisma/schema.prisma' or adding DB models.
+# Why: Generates Prisma Client types so IDE and TypeScript recognize models before writing logic.
+pnpm exec prisma generate
 
-### Code Quality & Biome Scripts Workflow:
+# PHASE 2: IMPLEMENT (Pure Logic & DTOs)
+# When: Write controllers, services, repositories and DTOs with validation decorators.
+# Rule: Do NOT call compilers, linters or test runners during implementation.
 
-- `pnpm run check`: Unified command combining formatting, import organization, and safe lint autofixes (`biome check --write .`). Agents must run this after modifying code.
-- `pnpm run review`: Read-only verification check (`biome check .`) that returns an error exit code if any unresolved formatting or lint errors exist. Mandatory for validation.
-- `pnpm exec tsc --noEmit -p tsconfig.build.json`: Decoupled incremental static type verification (~5s). Utilizes persistent `.tsbuildinfo` without wiping `dist/` or regenerating Prisma client unnecessarily.
-- `pnpm run build`: Full production bundle (`prisma generate && nest build`). Reserved for deployment and final release builds.
+# PHASE 3: SANITIZE & FORMAT (Biome Autofix ~2s - Fail-Fast #1)
+# When: Immediately after implementation.
+# Why: Normalizes code in-place (organizes imports, strips dead imports, formats).
+#      Catches syntax errors in 2s. Leaves the file in its FINAL immutable state on disk.
+pnpm run check
+
+# PHASE 4: TYPECHECK (Incremental Static Verification ~5s - Fail-Fast #2)
+# When: Once files on disk are clean and formatted.
+# Why: Runs ONCE on the definitive formatted code. Eliminates any need to re-verify types.
+pnpm exec tsc --noEmit -p tsconfig.build.json
+
+# PHASE 5: TEST (Vitest Unit Suite ~10s - Fail-Fast #3)
+# When: Only after syntax and static types are 100% green.
+# Why: Avoids launching the heavy test harness on code that doesn't even compile.
+pnpm vitest run
+
+# PHASE 6: CONTRACT SYNC & EXPORT (OpenAPI Gateway)
+# When: If routes, query params, DTOs or endpoints were created/modified.
+# Why: Runs after logic and tests are proven. Exports openapi.json and generates types for Web.
+just openapi
+
+# PHASE 7: COMMIT (Targeted Conventional Staging)
+# When: All previous gates passed cleanly.
+git add <target-files>
+git commit -m "feat(module): descriptive single-line message"
+```
 
 > [!IMPORTANT]
 > **Always Use Global `pnpm run <script>` (Do Not Target Individual Files)**:
 > Due to Biome's extreme execution speed (processing the entire project in tens of milliseconds), agents must always execute the predefined global scripts (`pnpm run check`, `pnpm run review`, `pnpm run format`, `pnpm run lint`) targeting the whole repository (`.`) rather than targeting individual files. Running against specific files provides no measurable performance advantage and risks leaving formatting or lint inconsistencies across the project.
+
+---
+
+## 4. Task-Driven Lifecycle (`tasks/[task-name].md` Workflow)
 
 ### Execution Cycle:
 
@@ -209,7 +241,7 @@ tasks/
 
 ---
 
-## 4. NestJS & Prisma Architectural Guidelines
+## 5. NestJS & Prisma Architectural Guidelines
 
 ### Core Framework Conventions:
 
