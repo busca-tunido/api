@@ -421,8 +421,46 @@ describe('PensionsService', () => {
         id: 'valparaiso',
         name: 'Valparaíso',
         pensionsCount: 25,
-        latitude: -33.04,
-        longitude: -71.62,
+        latitude: -33.0462524,
+        longitude: -71.6198042,
+      });
+    });
+
+    it('keeps Valparaiso centered on Plaza Victoria regardless of listing order or university coordinates', async () => {
+      const pensions = [
+        { city: 'Valparaíso', latitude: -33.120971, longitude: -71.561131 },
+        { city: 'Valparaíso', latitude: -33.04, longitude: -71.63 },
+      ];
+      mockPrisma.pension.groupBy.mockResolvedValue([{ city: 'Valparaíso', _count: { id: 2 } }]);
+      mockPrisma.university.findMany.mockResolvedValue([
+        { city: 'Valparaíso', latitude: -33.12, longitude: -71.56 },
+      ]);
+      mockPrisma.pension.findMany
+        .mockResolvedValueOnce(pensions)
+        .mockResolvedValueOnce([...pensions].reverse());
+      const first = await service.getCitiesSummary();
+      const second = await service.getCitiesSummary();
+      expect(first).toEqual(second);
+      expect(first[0]).toMatchObject({
+        latitude: -33.0462524,
+        longitude: -71.6198042,
+        pensionsCount: 2,
+      });
+      expect(pensions[0].latitude).toBe(-33.120971);
+    });
+
+    it('resolves the canonical center for unaccented city names without requiring listings', async () => {
+      mockPrisma.pension.groupBy.mockResolvedValue([]);
+      mockPrisma.pension.findMany.mockResolvedValue([]);
+      mockPrisma.university.findMany.mockResolvedValue([
+        { city: ' VALPARAISO ', latitude: -33.12, longitude: -71.56 },
+      ]);
+      const result = await service.getCitiesSummary();
+      expect(result[0]).toMatchObject({
+        id: 'valparaiso',
+        latitude: -33.0462524,
+        longitude: -71.6198042,
+        pensionsCount: 0,
       });
     });
   });
