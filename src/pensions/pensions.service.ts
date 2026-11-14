@@ -5,6 +5,7 @@ import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UniversitiesCacheService } from '../universities/universities-cache.service.js';
 import { AMENITY_CATALOG_ITEMS } from './constants/amenities-catalog.js';
+import { findCityCenter } from './constants/city-centers.js';
 import type { CreatePensionDto } from './dto/create-pension.dto.js';
 import type { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import type { PensionAmenityCatalogItemDto } from './dto/pension-response.dto.js';
@@ -1151,12 +1152,13 @@ export class PensionsService {
     const result: CitySummaryItem[] = [];
     for (const [key, data] of cityDataMap.entries()) {
       const pensionsCount = countMap.get(key) ?? 0;
+      const center = findCityCenter(data.name);
       const item: CitySummaryItem = {
         id: slugify(data.name),
         name: data.name,
         pensionsCount,
-        latitude: data.latitude,
-        longitude: data.longitude,
+        latitude: center?.latitude ?? data.latitude,
+        longitude: center?.longitude ?? data.longitude,
       };
       if (data.imageUrl) {
         item.imageUrl = data.imageUrl;

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { CITY_CENTERS } from '../src/pensions/constants/city-centers.js';
 
 try {
   process.loadEnvFile?.();
@@ -25,7 +26,7 @@ type UniversityCampusMap = {
 };
 
 const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
-  valparaíso: { lat: -33.0458, lng: -71.6197 },
+  valparaíso: { lat: CITY_CENTERS.valparaiso.latitude, lng: CITY_CENTERS.valparaiso.longitude },
   'viña del mar': { lat: -33.0245, lng: -71.5518 },
   santiago: { lat: -33.4489, lng: -70.6693 },
   concepción: { lat: -36.827, lng: -73.0498 },
