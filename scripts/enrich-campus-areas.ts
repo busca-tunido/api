@@ -5,7 +5,7 @@ try {
   process.loadEnvFile?.();
 } catch {}
 
-type GeoCoordinate = {
+export type GeoCoordinate = {
   latitude: number;
   longitude: number;
 };
@@ -1550,9 +1550,68 @@ function generateFallbackPolygon(
   ];
 }
 
-async function fetchOSMPolygon(
-  query: string,
-): Promise<{ polygon: GeoCoordinate[]; centerLat: number; centerLng: number } | null> {
+export type PolygonCentroidResult = {
+  polygon: GeoCoordinate[];
+  centerLat: number;
+  centerLng: number;
+};
+
+export function buildPolygonFromRing(
+  coords: readonly [number, number][],
+): PolygonCentroidResult | null {
+  if (coords.length < 3) return null;
+
+  const lastIdx = coords.length - 1;
+  const isClosed =
+    coords.length > 1 && coords[0][0] === coords[lastIdx][0] && coords[0][1] === coords[lastIdx][1];
+  const openCoords = isClosed ? coords.slice(0, lastIdx) : coords;
+
+  if (openCoords.length < 3) return null;
+
+  const step = Math.max(1, Math.floor(openCoords.length / 28));
+  const polygon: GeoCoordinate[] = [];
+  let sumLat = 0;
+  let sumLng = 0;
+
+  for (let i = 0; i < openCoords.length; i += step) {
+    const lat = Number(openCoords[i][1].toFixed(6));
+    const lng = Number(openCoords[i][0].toFixed(6));
+    if (polygon.length > 0 && lat === polygon[0].latitude && lng === polygon[0].longitude) {
+      continue;
+    }
+    polygon.push({ latitude: lat, longitude: lng });
+    sumLat += lat;
+    sumLng += lng;
+  }
+
+  const uniqueCount = polygon.length;
+  if (uniqueCount < 3) return null;
+
+  const centerLat = Number((sumLat / uniqueCount).toFixed(6));
+  const centerLng = Number((sumLng / uniqueCount).toFixed(6));
+
+  polygon.push({ ...polygon[0] });
+
+  const minLat = Math.min(...polygon.map((p) => p.latitude));
+  const maxLat = Math.max(...polygon.map((p) => p.latitude));
+  const minLng = Math.min(...polygon.map((p) => p.longitude));
+  const maxLng = Math.max(...polygon.map((p) => p.longitude));
+
+  if (centerLat < minLat || centerLat > maxLat || centerLng < minLng || centerLng > maxLng) {
+    return null;
+  }
+
+  const latSpanMeters = (maxLat - minLat) * 111320;
+  const lngSpanMeters = (maxLng - minLng) * (111320 * Math.cos((centerLat * Math.PI) / 180));
+
+  if (latSpanMeters > 550 || lngSpanMeters > 550 || latSpanMeters < 25 || lngSpanMeters < 25) {
+    return null;
+  }
+
+  return { polygon, centerLat, centerLng };
+}
+
+async function fetchOSMPolygon(query: string): Promise<PolygonCentroidResult | null> {
   const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&polygon_geojson=1&q=${encodeURIComponent(query)}&limit=1&countrycodes=cl`;
   try {
     const controller = new AbortController();
@@ -1575,45 +1634,7 @@ async function fetchOSMPolygon(
       coords = geojson.coordinates[0][0];
     }
 
-    if (coords.length < 3) return null;
-
-    const step = Math.max(1, Math.floor(coords.length / 28));
-    const polygon: GeoCoordinate[] = [];
-    let sumLat = 0;
-    let sumLng = 0;
-
-    for (let i = 0; i < coords.length; i += step) {
-      const lat = Number(coords[i][1].toFixed(6));
-      const lng = Number(coords[i][0].toFixed(6));
-      polygon.push({ latitude: lat, longitude: lng });
-      sumLat += lat;
-      sumLng += lng;
-    }
-
-    if (
-      polygon.length > 0 &&
-      (polygon[0].latitude !== polygon[polygon.length - 1].latitude ||
-        polygon[0].longitude !== polygon[polygon.length - 1].longitude)
-    ) {
-      polygon.push(polygon[0]);
-    }
-
-    const centerLat = Number((sumLat / (polygon.length - 1 || 1)).toFixed(6));
-    const centerLng = Number((sumLng / (polygon.length - 1 || 1)).toFixed(6));
-
-    const minLat = Math.min(...polygon.map((p) => p.latitude));
-    const maxLat = Math.max(...polygon.map((p) => p.latitude));
-    const minLng = Math.min(...polygon.map((p) => p.longitude));
-    const maxLng = Math.max(...polygon.map((p) => p.longitude));
-
-    const latSpanMeters = (maxLat - minLat) * 111320;
-    const lngSpanMeters = (maxLng - minLng) * (111320 * Math.cos((centerLat * Math.PI) / 180));
-
-    if (latSpanMeters > 550 || lngSpanMeters > 550 || latSpanMeters < 25 || lngSpanMeters < 25) {
-      return null;
-    }
-
-    return { polygon, centerLat, centerLng };
+    return buildPolygonFromRing(coords);
   } catch {
     return null;
   }
@@ -1756,7 +1777,31 @@ export async function enrichCampusAreas(prismaClient?: PrismaClient): Promise<vo
   }
 }
 
-if (process.argv[1]?.includes('enrich-campus-areas')) {
+export function computePolygonCentroid(
+  polygon: readonly GeoCoordinate[],
+): { centerLat: number; centerLng: number } | null {
+  if (polygon.length < 3) return null;
+  const lastIdx = polygon.length - 1;
+  const isClosed =
+    polygon[0].latitude === polygon[lastIdx].latitude &&
+    polygon[0].longitude === polygon[lastIdx].longitude;
+  const uniqueVertices = isClosed ? polygon.slice(0, lastIdx) : polygon;
+  if (uniqueVertices.length < 3) return null;
+
+  let sumLat = 0;
+  let sumLng = 0;
+  for (const pt of uniqueVertices) {
+    sumLat += pt.latitude;
+    sumLng += pt.longitude;
+  }
+
+  return {
+    centerLat: Number((sumLat / uniqueVertices.length).toFixed(6)),
+    centerLng: Number((sumLng / uniqueVertices.length).toFixed(6)),
+  };
+}
+
+if (!process.env.VITEST && process.argv[1]?.endsWith('enrich-campus-areas.ts')) {
   enrichCampusAreas().catch((err) => {
     console.error('Error fatal durante el enriquecimiento:', err);
     process.exit(1);
