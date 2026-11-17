@@ -1,0 +1,6704 @@
+{
+  "Universidad Técnica Federico Santa María": [
+    {
+      "name": "USM Casa Central (Valparaíso)",
+      "acronym": "USM Central",
+      "centerLat": -33.0365,
+      "centerLng": -71.5935,
+      "polygon": [
+        {
+          "latitude": -33.035939,
+          "longitude": -71.592596
+        },
+        {
+          "latitude": -33.037061,
+          "longitude": -71.592596
+        },
+        {
+          "latitude": -33.037061,
+          "longitude": -71.594404
+        },
+        {
+          "latitude": -33.035939,
+          "longitude": -71.594404
+        },
+        {
+          "latitude": -33.035939,
+          "longitude": -71.592596
+        }
+      ]
+    },
+    {
+      "name": "USM Sede Viña del Mar",
+      "acronym": "USM Viña",
+      "centerLat": -33.036072,
+      "centerLng": -71.488695,
+      "polygon": [
+        {
+          "latitude": -33.036392,
+          "longitude": -71.489111
+        },
+        {
+          "latitude": -33.03643,
+          "longitude": -71.489101
+        },
+        {
+          "latitude": -33.036477,
+          "longitude": -71.489056
+        },
+        {
+          "latitude": -33.036524,
+          "longitude": -71.488984
+        },
+        {
+          "latitude": -33.036556,
+          "longitude": -71.488906
+        },
+        {
+          "latitude": -33.036577,
+          "longitude": -71.488822
+        },
+        {
+          "latitude": -33.036579,
+          "longitude": -71.488724
+        },
+        {
+          "latitude": -33.036559,
+          "longitude": -71.488633
+        },
+        {
+          "latitude": -33.036523,
+          "longitude": -71.488574
+        },
+        {
+          "latitude": -33.036124,
+          "longitude": -71.488402
+        },
+        {
+          "latitude": -33.035778,
+          "longitude": -71.488255
+        },
+        {
+          "latitude": -33.035746,
+          "longitude": -71.488268
+        },
+        {
+          "latitude": -33.035702,
+          "longitude": -71.488304
+        },
+        {
+          "latitude": -33.035661,
+          "longitude": -71.488356
+        },
+        {
+          "latitude": -33.035626,
+          "longitude": -71.488423
+        },
+        {
+          "latitude": -33.035598,
+          "longitude": -71.488505
+        },
+        {
+          "latitude": -33.035581,
+          "longitude": -71.488594
+        },
+        {
+          "latitude": -33.035581,
+          "longitude": -71.48868
+        },
+        {
+          "latitude": -33.035601,
+          "longitude": -71.488748
+        },
+        {
+          "latitude": -33.035627,
+          "longitude": -71.488791
+        },
+        {
+          "latitude": -33.035974,
+          "longitude": -71.488938
+        },
+        {
+          "latitude": -33.036367,
+          "longitude": -71.489107
+        },
+        {
+          "latitude": -33.036392,
+          "longitude": -71.489111
+        }
+      ]
+    },
+    {
+      "name": "USM Campus San Joaquín (Santiago)",
+      "acronym": "USM-SJ",
+      "centerLat": -33.490742,
+      "centerLng": -70.619373,
+      "polygon": [
+        {
+          "latitude": -33.48999,
+          "longitude": -70.620556
+        },
+        {
+          "latitude": -33.49037,
+          "longitude": -70.620473
+        },
+        {
+          "latitude": -33.490527,
+          "longitude": -70.620494
+        },
+        {
+          "latitude": -33.490567,
+          "longitude": -70.620117
+        },
+        {
+          "latitude": -33.491742,
+          "longitude": -70.619865
+        },
+        {
+          "latitude": -33.491772,
+          "longitude": -70.618857
+        },
+        {
+          "latitude": -33.491717,
+          "longitude": -70.61838
+        },
+        {
+          "latitude": -33.491669,
+          "longitude": -70.61809
+        },
+        {
+          "latitude": -33.491591,
+          "longitude": -70.617908
+        },
+        {
+          "latitude": -33.490557,
+          "longitude": -70.618118
+        },
+        {
+          "latitude": -33.489439,
+          "longitude": -70.618382
+        },
+        {
+          "latitude": -33.489766,
+          "longitude": -70.620323
+        },
+        {
+          "latitude": -33.489936,
+          "longitude": -70.620286
+        },
+        {
+          "latitude": -33.48999,
+          "longitude": -70.620556
+        }
+      ]
+    },
+    {
+      "name": "USM Campus Vitacura (Santiago)",
+      "acronym": "USM Vitacura",
+      "centerLat": -33.377482,
+      "centerLng": -70.577542,
+      "polygon": [
+        {
+          "latitude": -33.376805,
+          "longitude": -70.578873
+        },
+        {
+          "latitude": -33.377061,
+          "longitude": -70.578866
+        },
+        {
+          "latitude": -33.377732,
+          "longitude": -70.578835
+        },
+        {
+          "latitude": -33.377732,
+          "longitude": -70.578729
+        },
+        {
+          "latitude": -33.377732,
+          "longitude": -70.578613
+        },
+        {
+          "latitude": -33.377738,
+          "longitude": -70.578299
+        },
+        {
+          "latitude": -33.377726,
+          "longitude": -70.578193
+        },
+        {
+          "latitude": -33.377645,
+          "longitude": -70.57773
+        },
+        {
+          "latitude": -33.377831,
+          "longitude": -70.577428
+        },
+        {
+          "latitude": -33.378723,
+          "longitude": -70.577219
+        },
+        {
+          "latitude": -33.37871,
+          "longitude": -70.577158
+        },
+        {
+          "latitude": -33.378678,
+          "longitude": -70.576994
+        },
+        {
+          "latitude": -33.378545,
+          "longitude": -70.576405
+        },
+        {
+          "latitude": -33.378453,
+          "longitude": -70.57636
+        },
+        {
+          "latitude": -33.378136,
+          "longitude": -70.576419
+        },
+        {
+          "latitude": -33.377512,
+          "longitude": -70.576562
+        },
+        {
+          "latitude": -33.377061,
+          "longitude": -70.576667
+        },
+        {
+          "latitude": -33.37674,
+          "longitude": -70.576742
+        },
+        {
+          "latitude": -33.376665,
+          "longitude": -70.576759
+        },
+        {
+          "latitude": -33.376619,
+          "longitude": -70.576767
+        },
+        {
+          "latitude": -33.376695,
+          "longitude": -70.577172
+        },
+        {
+          "latitude": -33.376791,
+          "longitude": -70.577699
+        },
+        {
+          "latitude": -33.376798,
+          "longitude": -70.577754
+        },
+        {
+          "latitude": -33.3768,
+          "longitude": -70.577791
+        },
+        {
+          "latitude": -33.3768,
+          "longitude": -70.57782
+        },
+        {
+          "latitude": -33.376804,
+          "longitude": -70.578251
+        },
+        {
+          "latitude": -33.376805,
+          "longitude": -70.578873
+        }
+      ]
+    }
+  ],
+  "Universidad Academia de Humanismo Cristiano": [
+    {
+      "name": "Campus Condell UAHC (Providencia)",
+      "acronym": "UAHC Condell",
+      "centerLat": -33.438329,
+      "centerLng": -70.628247,
+      "polygon": [
+        {
+          "latitude": -33.437821,
+          "longitude": -70.628658
+        },
+        {
+          "latitude": -33.438475,
+          "longitude": -70.628502
+        },
+        {
+          "latitude": -33.438455,
+          "longitude": -70.628379
+        },
+        {
+          "latitude": -33.43881,
+          "longitude": -70.628294
+        },
+        {
+          "latitude": -33.438711,
+          "longitude": -70.627703
+        },
+        {
+          "latitude": -33.437702,
+          "longitude": -70.627945
+        },
+        {
+          "latitude": -33.437821,
+          "longitude": -70.628658
+        }
+      ]
+    },
+    {
+      "name": "Campus Brasil UAHC (Santiago Centro)",
+      "acronym": "UAHC Brasil",
+      "centerLat": -33.4415,
+      "centerLng": -70.6655,
+      "polygon": [
+        {
+          "latitude": -33.441087,
+          "longitude": -70.664831
+        },
+        {
+          "latitude": -33.441913,
+          "longitude": -70.664831
+        },
+        {
+          "latitude": -33.441913,
+          "longitude": -70.666169
+        },
+        {
+          "latitude": -33.441087,
+          "longitude": -70.666169
+        },
+        {
+          "latitude": -33.441087,
+          "longitude": -70.664831
+        }
+      ]
+    }
+  ],
+  "Escuela de Arquitectura y Diseño": [
+    {
+      "name": "Escuela de Arquitectura y Diseño - Sede Principal",
+      "acronym": "EAD",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Pontificia Universidad Catolica de Chile": [
+    {
+      "name": "Campus San Joaquín UC",
+      "acronym": "San Joaquín",
+      "centerLat": -33.4971,
+      "centerLng": -70.6146,
+      "polygon": [
+        {
+          "latitude": -33.496516,
+          "longitude": -70.613655
+        },
+        {
+          "latitude": -33.497684,
+          "longitude": -70.613655
+        },
+        {
+          "latitude": -33.497684,
+          "longitude": -70.615545
+        },
+        {
+          "latitude": -33.496516,
+          "longitude": -70.615545
+        },
+        {
+          "latitude": -33.496516,
+          "longitude": -70.613655
+        }
+      ]
+    },
+    {
+      "name": "Casa Central UC",
+      "acronym": "Casa Central UC",
+      "centerLat": -33.4412,
+      "centerLng": -70.6408,
+      "polygon": [
+        {
+          "latitude": -33.440787,
+          "longitude": -70.640131
+        },
+        {
+          "latitude": -33.441613,
+          "longitude": -70.640131
+        },
+        {
+          "latitude": -33.441613,
+          "longitude": -70.641469
+        },
+        {
+          "latitude": -33.440787,
+          "longitude": -70.641469
+        },
+        {
+          "latitude": -33.440787,
+          "longitude": -70.640131
+        }
+      ]
+    },
+    {
+      "name": "Campus Oriente UC",
+      "acronym": "Campus Oriente",
+      "centerLat": -33.4448,
+      "centerLng": -70.5968,
+      "polygon": [
+        {
+          "latitude": -33.444328,
+          "longitude": -70.596037
+        },
+        {
+          "latitude": -33.445272,
+          "longitude": -70.596037
+        },
+        {
+          "latitude": -33.445272,
+          "longitude": -70.597563
+        },
+        {
+          "latitude": -33.444328,
+          "longitude": -70.597563
+        },
+        {
+          "latitude": -33.444328,
+          "longitude": -70.596037
+        }
+      ]
+    },
+    {
+      "name": "Campus Lo Contador UC (Arquitectura y Diseño)",
+      "acronym": "Lo Contador",
+      "centerLat": -33.4182,
+      "centerLng": -70.6195,
+      "polygon": [
+        {
+          "latitude": -33.417823,
+          "longitude": -70.61889
+        },
+        {
+          "latitude": -33.418577,
+          "longitude": -70.61889
+        },
+        {
+          "latitude": -33.418577,
+          "longitude": -70.62011
+        },
+        {
+          "latitude": -33.417823,
+          "longitude": -70.62011
+        },
+        {
+          "latitude": -33.417823,
+          "longitude": -70.61889
+        }
+      ]
+    }
+  ],
+  "Universidad Austral de Chile": [
+    {
+      "name": "Campus Isla Teja UACh",
+      "acronym": "Isla Teja",
+      "centerLat": -39.8085,
+      "centerLng": -73.2505,
+      "polygon": [
+        {
+          "latitude": -39.807916,
+          "longitude": -73.249474
+        },
+        {
+          "latitude": -39.809084,
+          "longitude": -73.249474
+        },
+        {
+          "latitude": -39.809084,
+          "longitude": -73.251526
+        },
+        {
+          "latitude": -39.807916,
+          "longitude": -73.251526
+        },
+        {
+          "latitude": -39.807916,
+          "longitude": -73.249474
+        }
+      ]
+    },
+    {
+      "name": "Campus Miraflores UACh (Facultad de Ingeniería)",
+      "acronym": "Miraflores",
+      "centerLat": -39.829,
+      "centerLng": -73.242,
+      "polygon": [
+        {
+          "latitude": -39.828416,
+          "longitude": -73.240974
+        },
+        {
+          "latitude": -39.829584,
+          "longitude": -73.240974
+        },
+        {
+          "latitude": -39.829584,
+          "longitude": -73.243026
+        },
+        {
+          "latitude": -39.828416,
+          "longitude": -73.243026
+        },
+        {
+          "latitude": -39.828416,
+          "longitude": -73.240974
+        }
+      ]
+    },
+    {
+      "name": "Sede Puerto Montt UACh (Pelluco)",
+      "acronym": "Pelluco UACh",
+      "centerLat": -41.4875,
+      "centerLng": -72.8985,
+      "polygon": [
+        {
+          "latitude": -41.486916,
+          "longitude": -72.897448
+        },
+        {
+          "latitude": -41.488084,
+          "longitude": -72.897448
+        },
+        {
+          "latitude": -41.488084,
+          "longitude": -72.899552
+        },
+        {
+          "latitude": -41.486916,
+          "longitude": -72.899552
+        },
+        {
+          "latitude": -41.486916,
+          "longitude": -72.897448
+        }
+      ]
+    }
+  ],
+  "Universidad de Aconcagua": [
+    {
+      "name": "Sede San Felipe UAC",
+      "acronym": "UAC San Felipe",
+      "centerLat": -32.751485,
+      "centerLng": -70.70736,
+      "polygon": [
+        {
+          "latitude": -32.752348,
+          "longitude": -70.708371
+        },
+        {
+          "latitude": -32.752553,
+          "longitude": -70.707455
+        },
+        {
+          "latitude": -32.752575,
+          "longitude": -70.707356
+        },
+        {
+          "latitude": -32.75064,
+          "longitude": -70.70677
+        },
+        {
+          "latitude": -32.750619,
+          "longitude": -70.706874
+        },
+        {
+          "latitude": -32.750639,
+          "longitude": -70.70688
+        },
+        {
+          "latitude": -32.751002,
+          "longitude": -70.706982
+        },
+        {
+          "latitude": -32.751597,
+          "longitude": -70.70715
+        },
+        {
+          "latitude": -32.751489,
+          "longitude": -70.707674
+        },
+        {
+          "latitude": -32.751391,
+          "longitude": -70.708089
+        },
+        {
+          "latitude": -32.752348,
+          "longitude": -70.708371
+        }
+      ]
+    },
+    {
+      "name": "Sede Quillota UAC",
+      "acronym": "UAC Quillota",
+      "centerLat": -32.8795,
+      "centerLng": -71.2465,
+      "polygon": [
+        {
+          "latitude": -32.879064,
+          "longitude": -71.2458
+        },
+        {
+          "latitude": -32.879936,
+          "longitude": -71.2458
+        },
+        {
+          "latitude": -32.879936,
+          "longitude": -71.2472
+        },
+        {
+          "latitude": -32.879064,
+          "longitude": -71.2472
+        },
+        {
+          "latitude": -32.879064,
+          "longitude": -71.2458
+        }
+      ]
+    },
+    {
+      "name": "Sede Rancagua UAC",
+      "acronym": "UAC Rancagua",
+      "centerLat": -34.1685,
+      "centerLng": -70.7415,
+      "polygon": [
+        {
+          "latitude": -34.168046,
+          "longitude": -70.74076
+        },
+        {
+          "latitude": -34.168954,
+          "longitude": -70.74076
+        },
+        {
+          "latitude": -34.168954,
+          "longitude": -70.74224
+        },
+        {
+          "latitude": -34.168046,
+          "longitude": -70.74224
+        },
+        {
+          "latitude": -34.168046,
+          "longitude": -70.74076
+        }
+      ]
+    }
+  ],
+  "Universidad Alberto Hurtado": [
+    {
+      "name": "Campus Almirante Barroso UAH",
+      "acronym": "UAH Barroso",
+      "centerLat": -33.4452,
+      "centerLng": -70.6612,
+      "polygon": [
+        {
+          "latitude": -33.444764,
+          "longitude": -70.660495
+        },
+        {
+          "latitude": -33.445636,
+          "longitude": -70.660495
+        },
+        {
+          "latitude": -33.445636,
+          "longitude": -70.661905
+        },
+        {
+          "latitude": -33.444764,
+          "longitude": -70.661905
+        },
+        {
+          "latitude": -33.444764,
+          "longitude": -70.660495
+        }
+      ]
+    },
+    {
+      "name": "Campus Erasmo Escala UAH",
+      "acronym": "UAH Escala",
+      "centerLat": -33.4462,
+      "centerLng": -70.6635,
+      "polygon": [
+        {
+          "latitude": -33.445805,
+          "longitude": -70.662861
+        },
+        {
+          "latitude": -33.446595,
+          "longitude": -70.662861
+        },
+        {
+          "latitude": -33.446595,
+          "longitude": -70.664139
+        },
+        {
+          "latitude": -33.445805,
+          "longitude": -70.664139
+        },
+        {
+          "latitude": -33.445805,
+          "longitude": -70.662861
+        }
+      ]
+    }
+  ],
+  "Universidad Adolfo Ibáñez": [
+    {
+      "name": "Campus Peñalolén UAI",
+      "acronym": "Peñalolén UAI",
+      "centerLat": -33.4735,
+      "centerLng": -70.5095,
+      "polygon": [
+        {
+          "latitude": -33.472916,
+          "longitude": -70.508555
+        },
+        {
+          "latitude": -33.474084,
+          "longitude": -70.508555
+        },
+        {
+          "latitude": -33.474084,
+          "longitude": -70.510445
+        },
+        {
+          "latitude": -33.472916,
+          "longitude": -70.510445
+        },
+        {
+          "latitude": -33.472916,
+          "longitude": -70.508555
+        }
+      ]
+    },
+    {
+      "name": "Campus Viña del Mar UAI",
+      "acronym": "Viña UAI",
+      "centerLat": -33.0185,
+      "centerLng": -71.5285,
+      "polygon": [
+        {
+          "latitude": -33.017992,
+          "longitude": -71.527683
+        },
+        {
+          "latitude": -33.019008,
+          "longitude": -71.527683
+        },
+        {
+          "latitude": -33.019008,
+          "longitude": -71.529317
+        },
+        {
+          "latitude": -33.017992,
+          "longitude": -71.529317
+        },
+        {
+          "latitude": -33.017992,
+          "longitude": -71.527683
+        }
+      ]
+    },
+    {
+      "name": "Sede Presidente Errázuriz UAI",
+      "acronym": "Errázuriz UAI",
+      "centerLat": -33.4215,
+      "centerLng": -70.5925,
+      "polygon": [
+        {
+          "latitude": -33.421159,
+          "longitude": -70.591948
+        },
+        {
+          "latitude": -33.421841,
+          "longitude": -70.591948
+        },
+        {
+          "latitude": -33.421841,
+          "longitude": -70.593052
+        },
+        {
+          "latitude": -33.421159,
+          "longitude": -70.593052
+        },
+        {
+          "latitude": -33.421159,
+          "longitude": -70.591948
+        }
+      ]
+    }
+  ],
+  "Universidad de Las Américas": [
+    {
+      "name": "Campus Providencia UDLA (Manuel Montt)",
+      "acronym": "UDLA Providencia",
+      "centerLat": -33.436445,
+      "centerLng": -70.615439,
+      "polygon": [
+        {
+          "latitude": -33.436565,
+          "longitude": -70.616064
+        },
+        {
+          "latitude": -33.43715,
+          "longitude": -70.615891
+        },
+        {
+          "latitude": -33.437093,
+          "longitude": -70.615638
+        },
+        {
+          "latitude": -33.43733,
+          "longitude": -70.615564
+        },
+        {
+          "latitude": -33.437262,
+          "longitude": -70.615254
+        },
+        {
+          "latitude": -33.436807,
+          "longitude": -70.615423
+        },
+        {
+          "latitude": -33.436772,
+          "longitude": -70.615285
+        },
+        {
+          "latitude": -33.436388,
+          "longitude": -70.615417
+        },
+        {
+          "latitude": -33.436254,
+          "longitude": -70.614812
+        },
+        {
+          "latitude": -33.435873,
+          "longitude": -70.614938
+        },
+        {
+          "latitude": -33.435884,
+          "longitude": -70.614988
+        },
+        {
+          "latitude": -33.435977,
+          "longitude": -70.615356
+        },
+        {
+          "latitude": -33.435783,
+          "longitude": -70.61543
+        },
+        {
+          "latitude": -33.435861,
+          "longitude": -70.615736
+        },
+        {
+          "latitude": -33.43608,
+          "longitude": -70.615654
+        },
+        {
+          "latitude": -33.436061,
+          "longitude": -70.615563
+        },
+        {
+          "latitude": -33.436426,
+          "longitude": -70.615446
+        },
+        {
+          "latitude": -33.436565,
+          "longitude": -70.616064
+        }
+      ]
+    },
+    {
+      "name": "Campus Santiago Centro UDLA (República)",
+      "acronym": "UDLA República",
+      "centerLat": -33.4495,
+      "centerLng": -70.6645,
+      "polygon": [
+        {
+          "latitude": -33.449028,
+          "longitude": -70.663737
+        },
+        {
+          "latitude": -33.449972,
+          "longitude": -70.663737
+        },
+        {
+          "latitude": -33.449972,
+          "longitude": -70.665263
+        },
+        {
+          "latitude": -33.449028,
+          "longitude": -70.665263
+        },
+        {
+          "latitude": -33.449028,
+          "longitude": -70.663737
+        }
+      ]
+    },
+    {
+      "name": "Campus La Florida UDLA",
+      "acronym": "UDLA La Florida",
+      "centerLat": -33.5185,
+      "centerLng": -70.5965,
+      "polygon": [
+        {
+          "latitude": -33.517952,
+          "longitude": -70.595613
+        },
+        {
+          "latitude": -33.519048,
+          "longitude": -70.595613
+        },
+        {
+          "latitude": -33.519048,
+          "longitude": -70.597387
+        },
+        {
+          "latitude": -33.517952,
+          "longitude": -70.597387
+        },
+        {
+          "latitude": -33.517952,
+          "longitude": -70.595613
+        }
+      ]
+    },
+    {
+      "name": "Campus Maipú UDLA",
+      "acronym": "UDLA Maipú",
+      "centerLat": -33.510008,
+      "centerLng": -70.750126,
+      "polygon": [
+        {
+          "latitude": -33.510175,
+          "longitude": -70.75041
+        },
+        {
+          "latitude": -33.510206,
+          "longitude": -70.750404
+        },
+        {
+          "latitude": -33.510247,
+          "longitude": -70.750391
+        },
+        {
+          "latitude": -33.510273,
+          "longitude": -70.750358
+        },
+        {
+          "latitude": -33.51025,
+          "longitude": -70.749489
+        },
+        {
+          "latitude": -33.509909,
+          "longitude": -70.749373
+        },
+        {
+          "latitude": -33.509811,
+          "longitude": -70.749971
+        },
+        {
+          "latitude": -33.509772,
+          "longitude": -70.750238
+        },
+        {
+          "latitude": -33.509716,
+          "longitude": -70.750245
+        },
+        {
+          "latitude": -33.509718,
+          "longitude": -70.750385
+        },
+        {
+          "latitude": -33.510175,
+          "longitude": -70.75041
+        }
+      ]
+    },
+    {
+      "name": "Campus Los Castaños UDLA (Viña del Mar)",
+      "acronym": "UDLA Viña",
+      "centerLat": -33.0235,
+      "centerLng": -71.5385,
+      "polygon": [
+        {
+          "latitude": -33.022992,
+          "longitude": -71.537683
+        },
+        {
+          "latitude": -33.024008,
+          "longitude": -71.537683
+        },
+        {
+          "latitude": -33.024008,
+          "longitude": -71.539317
+        },
+        {
+          "latitude": -33.022992,
+          "longitude": -71.539317
+        },
+        {
+          "latitude": -33.022992,
+          "longitude": -71.537683
+        }
+      ]
+    },
+    {
+      "name": "Campus El Trébol UDLA (Concepción)",
+      "acronym": "UDLA Concepción",
+      "centerLat": -36.7915,
+      "centerLng": -73.0645,
+      "polygon": [
+        {
+          "latitude": -36.790916,
+          "longitude": -73.063516
+        },
+        {
+          "latitude": -36.792084,
+          "longitude": -73.063516
+        },
+        {
+          "latitude": -36.792084,
+          "longitude": -73.065484
+        },
+        {
+          "latitude": -36.790916,
+          "longitude": -73.065484
+        },
+        {
+          "latitude": -36.790916,
+          "longitude": -73.063516
+        }
+      ]
+    }
+  ],
+  "Universidad de Los Andes": [
+    {
+      "name": "Campus San Carlos de Apoquindo UANDES",
+      "acronym": "UANDES",
+      "centerLat": -33.3985,
+      "centerLng": -70.505,
+      "polygon": [
+        {
+          "latitude": -33.397916,
+          "longitude": -70.504056
+        },
+        {
+          "latitude": -33.399084,
+          "longitude": -70.504056
+        },
+        {
+          "latitude": -33.399084,
+          "longitude": -70.505944
+        },
+        {
+          "latitude": -33.397916,
+          "longitude": -70.505944
+        },
+        {
+          "latitude": -33.397916,
+          "longitude": -70.504056
+        }
+      ]
+    },
+    {
+      "name": "ESE Business School & Clínica UANDES",
+      "acronym": "ESE UANDES",
+      "centerLat": -33.3995,
+      "centerLng": -70.5015,
+      "polygon": [
+        {
+          "latitude": -33.39901,
+          "longitude": -70.500708
+        },
+        {
+          "latitude": -33.39999,
+          "longitude": -70.500708
+        },
+        {
+          "latitude": -33.39999,
+          "longitude": -70.502292
+        },
+        {
+          "latitude": -33.39901,
+          "longitude": -70.502292
+        },
+        {
+          "latitude": -33.39901,
+          "longitude": -70.500708
+        }
+      ]
+    }
+  ],
+  "Universidad de Antofagasta": [
+    {
+      "name": "Campus Coloso UA",
+      "acronym": "UA Coloso",
+      "centerLat": -23.7025,
+      "centerLng": -70.418,
+      "polygon": [
+        {
+          "latitude": -23.701916,
+          "longitude": -70.417139
+        },
+        {
+          "latitude": -23.703084,
+          "longitude": -70.417139
+        },
+        {
+          "latitude": -23.703084,
+          "longitude": -70.418861
+        },
+        {
+          "latitude": -23.701916,
+          "longitude": -70.418861
+        },
+        {
+          "latitude": -23.701916,
+          "longitude": -70.417139
+        }
+      ]
+    },
+    {
+      "name": "Campus Angamos UA",
+      "acronym": "UA Angamos",
+      "centerLat": -23.669296,
+      "centerLng": -70.405725,
+      "polygon": [
+        {
+          "latitude": -23.669621,
+          "longitude": -70.406123
+        },
+        {
+          "latitude": -23.669719,
+          "longitude": -70.405898
+        },
+        {
+          "latitude": -23.669855,
+          "longitude": -70.405586
+        },
+        {
+          "latitude": -23.668935,
+          "longitude": -70.4051
+        },
+        {
+          "latitude": -23.668684,
+          "longitude": -70.405636
+        },
+        {
+          "latitude": -23.669118,
+          "longitude": -70.405862
+        },
+        {
+          "latitude": -23.669141,
+          "longitude": -70.405873
+        },
+        {
+          "latitude": -23.669621,
+          "longitude": -70.406123
+        }
+      ]
+    }
+  ],
+  "Universidad Autonoma del Sur": [
+    {
+      "name": "Campus Providencia U. Autónoma",
+      "acronym": "Autónoma Providencia",
+      "centerLat": -33.4285,
+      "centerLng": -70.6125,
+      "polygon": [
+        {
+          "latitude": -33.428028,
+          "longitude": -70.611737
+        },
+        {
+          "latitude": -33.428972,
+          "longitude": -70.611737
+        },
+        {
+          "latitude": -33.428972,
+          "longitude": -70.613263
+        },
+        {
+          "latitude": -33.428028,
+          "longitude": -70.613263
+        },
+        {
+          "latitude": -33.428028,
+          "longitude": -70.611737
+        }
+      ]
+    },
+    {
+      "name": "Campus San Miguel U. Autónoma",
+      "acronym": "Autónoma Llano",
+      "centerLat": -33.4925,
+      "centerLng": -70.6545,
+      "polygon": [
+        {
+          "latitude": -33.49201,
+          "longitude": -70.653707
+        },
+        {
+          "latitude": -33.49299,
+          "longitude": -70.653707
+        },
+        {
+          "latitude": -33.49299,
+          "longitude": -70.655293
+        },
+        {
+          "latitude": -33.49201,
+          "longitude": -70.655293
+        },
+        {
+          "latitude": -33.49201,
+          "longitude": -70.653707
+        }
+      ]
+    },
+    {
+      "name": "Campus Temuco U. Autónoma",
+      "acronym": "Autónoma Temuco",
+      "centerLat": -38.7395,
+      "centerLng": -72.6125,
+      "polygon": [
+        {
+          "latitude": -38.73897,
+          "longitude": -72.611583
+        },
+        {
+          "latitude": -38.74003,
+          "longitude": -72.611583
+        },
+        {
+          "latitude": -38.74003,
+          "longitude": -72.613417
+        },
+        {
+          "latitude": -38.73897,
+          "longitude": -72.613417
+        },
+        {
+          "latitude": -38.73897,
+          "longitude": -72.611583
+        }
+      ]
+    },
+    {
+      "name": "Campus Talca U. Autónoma",
+      "acronym": "Autónoma Talca",
+      "centerLat": -35.4375,
+      "centerLng": -71.6245,
+      "polygon": [
+        {
+          "latitude": -35.436992,
+          "longitude": -71.623659
+        },
+        {
+          "latitude": -35.438008,
+          "longitude": -71.623659
+        },
+        {
+          "latitude": -35.438008,
+          "longitude": -71.625341
+        },
+        {
+          "latitude": -35.436992,
+          "longitude": -71.625341
+        },
+        {
+          "latitude": -35.436992,
+          "longitude": -71.623659
+        }
+      ]
+    }
+  ],
+  "Universidad del Bío-Bío": [
+    {
+      "name": "Campus Concepción UBB",
+      "acronym": "UBB Concepción",
+      "centerLat": -36.8225,
+      "centerLng": -73.0135,
+      "polygon": [
+        {
+          "latitude": -36.821916,
+          "longitude": -73.012515
+        },
+        {
+          "latitude": -36.823084,
+          "longitude": -73.012515
+        },
+        {
+          "latitude": -36.823084,
+          "longitude": -73.014485
+        },
+        {
+          "latitude": -36.821916,
+          "longitude": -73.014485
+        },
+        {
+          "latitude": -36.821916,
+          "longitude": -73.012515
+        }
+      ]
+    },
+    {
+      "name": "Campus Fernando May UBB (Chillán)",
+      "acronym": "UBB Fernando May",
+      "centerLat": -36.6025,
+      "centerLng": -72.0785,
+      "polygon": [
+        {
+          "latitude": -36.601916,
+          "longitude": -72.077518
+        },
+        {
+          "latitude": -36.603084,
+          "longitude": -72.077518
+        },
+        {
+          "latitude": -36.603084,
+          "longitude": -72.079482
+        },
+        {
+          "latitude": -36.601916,
+          "longitude": -72.079482
+        },
+        {
+          "latitude": -36.601916,
+          "longitude": -72.077518
+        }
+      ]
+    },
+    {
+      "name": "Campus La Castilla UBB (Chillán)",
+      "acronym": "UBB La Castilla",
+      "centerLat": -36.610725,
+      "centerLng": -72.117224,
+      "polygon": [
+        {
+          "latitude": -36.610867,
+          "longitude": -72.120133
+        },
+        {
+          "latitude": -36.610908,
+          "longitude": -72.119951
+        },
+        {
+          "latitude": -36.611099,
+          "longitude": -72.118656
+        },
+        {
+          "latitude": -36.611896,
+          "longitude": -72.118792
+        },
+        {
+          "latitude": -36.61224,
+          "longitude": -72.116172
+        },
+        {
+          "latitude": -36.612535,
+          "longitude": -72.115049
+        },
+        {
+          "latitude": -36.611838,
+          "longitude": -72.114787
+        },
+        {
+          "latitude": -36.611764,
+          "longitude": -72.115058
+        },
+        {
+          "latitude": -36.611623,
+          "longitude": -72.115363
+        },
+        {
+          "latitude": -36.61155,
+          "longitude": -72.115521
+        },
+        {
+          "latitude": -36.611255,
+          "longitude": -72.115992
+        },
+        {
+          "latitude": -36.611006,
+          "longitude": -72.116503
+        },
+        {
+          "latitude": -36.61088,
+          "longitude": -72.116662
+        },
+        {
+          "latitude": -36.610725,
+          "longitude": -72.116707
+        },
+        {
+          "latitude": -36.610481,
+          "longitude": -72.116674
+        },
+        {
+          "latitude": -36.610309,
+          "longitude": -72.116629
+        },
+        {
+          "latitude": -36.610154,
+          "longitude": -72.116606
+        },
+        {
+          "latitude": -36.610079,
+          "longitude": -72.116626
+        },
+        {
+          "latitude": -36.610007,
+          "longitude": -72.116645
+        },
+        {
+          "latitude": -36.609892,
+          "longitude": -72.116793
+        },
+        {
+          "latitude": -36.609867,
+          "longitude": -72.117055
+        },
+        {
+          "latitude": -36.609908,
+          "longitude": -72.117366
+        },
+        {
+          "latitude": -36.610027,
+          "longitude": -72.117697
+        },
+        {
+          "latitude": -36.610034,
+          "longitude": -72.117899
+        },
+        {
+          "latitude": -36.610036,
+          "longitude": -72.117977
+        },
+        {
+          "latitude": -36.609987,
+          "longitude": -72.118516
+        },
+        {
+          "latitude": -36.610006,
+          "longitude": -72.118799
+        },
+        {
+          "latitude": -36.61003,
+          "longitude": -72.119288
+        },
+        {
+          "latitude": -36.610036,
+          "longitude": -72.119594
+        },
+        {
+          "latitude": -36.610867,
+          "longitude": -72.120133
+        }
+      ]
+    }
+  ],
+  "Universidad Bernardo O'Higgins": [
+    {
+      "name": "Campus Casa Central UBO",
+      "acronym": "UBO Central",
+      "centerLat": -33.4615,
+      "centerLng": -70.6625,
+      "polygon": [
+        {
+          "latitude": -33.460992,
+          "longitude": -70.661679
+        },
+        {
+          "latitude": -33.462008,
+          "longitude": -70.661679
+        },
+        {
+          "latitude": -33.462008,
+          "longitude": -70.663321
+        },
+        {
+          "latitude": -33.460992,
+          "longitude": -70.663321
+        },
+        {
+          "latitude": -33.460992,
+          "longitude": -70.661679
+        }
+      ]
+    },
+    {
+      "name": "Campus Rondizzoni UBO",
+      "acronym": "UBO Rondizzoni",
+      "centerLat": -33.4685,
+      "centerLng": -70.6585,
+      "polygon": [
+        {
+          "latitude": -33.468064,
+          "longitude": -70.657795
+        },
+        {
+          "latitude": -33.468936,
+          "longitude": -70.657795
+        },
+        {
+          "latitude": -33.468936,
+          "longitude": -70.659205
+        },
+        {
+          "latitude": -33.468064,
+          "longitude": -70.659205
+        },
+        {
+          "latitude": -33.468064,
+          "longitude": -70.657795
+        }
+      ]
+    }
+  ],
+  "Universidad Bolivariana": [
+    {
+      "name": "Universidad Bolivariana - Sede Principal",
+      "acronym": "Universidad ",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad Chileno Britanica de Cultura": [
+    {
+      "name": "Universidad Chileno Britanica de Cultura - Sede Principal",
+      "acronym": "UCBC",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad Central": [
+    {
+      "name": "Campus Gonzalo Hernández Uribe UCEN",
+      "acronym": "Lord Cochrane",
+      "centerLat": -33.4495,
+      "centerLng": -70.654,
+      "polygon": [
+        {
+          "latitude": -33.449064,
+          "longitude": -70.653295
+        },
+        {
+          "latitude": -33.449936,
+          "longitude": -70.653295
+        },
+        {
+          "latitude": -33.449936,
+          "longitude": -70.654705
+        },
+        {
+          "latitude": -33.449064,
+          "longitude": -70.654705
+        },
+        {
+          "latitude": -33.449064,
+          "longitude": -70.653295
+        }
+      ]
+    },
+    {
+      "name": "Campus Santa Isabel UCEN",
+      "acronym": "Santa Isabel",
+      "centerLat": -33.4515,
+      "centerLng": -70.6505,
+      "polygon": [
+        {
+          "latitude": -33.451105,
+          "longitude": -70.64986
+        },
+        {
+          "latitude": -33.451895,
+          "longitude": -70.64986
+        },
+        {
+          "latitude": -33.451895,
+          "longitude": -70.65114
+        },
+        {
+          "latitude": -33.451105,
+          "longitude": -70.65114
+        },
+        {
+          "latitude": -33.451105,
+          "longitude": -70.64986
+        }
+      ]
+    },
+    {
+      "name": "Campus La Serena UCEN",
+      "acronym": "UCEN La Serena",
+      "centerLat": -29.9055,
+      "centerLng": -71.2615,
+      "polygon": [
+        {
+          "latitude": -29.905028,
+          "longitude": -71.260766
+        },
+        {
+          "latitude": -29.905972,
+          "longitude": -71.260766
+        },
+        {
+          "latitude": -29.905972,
+          "longitude": -71.262234
+        },
+        {
+          "latitude": -29.905028,
+          "longitude": -71.262234
+        },
+        {
+          "latitude": -29.905028,
+          "longitude": -71.260766
+        }
+      ]
+    }
+  ],
+  "Universidad Miguel de Cervantes": [
+    {
+      "name": "Universidad Miguel de Cervantes - Sede Principal",
+      "acronym": "UMC",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad de Chile": [
+    {
+      "name": "Facultad de Ciencias Físicas y Matemáticas (Beauchef)",
+      "acronym": "FCFM",
+      "centerLat": -33.4578,
+      "centerLng": -70.6636,
+      "polygon": [
+        {
+          "latitude": -33.45727,
+          "longitude": -70.662742
+        },
+        {
+          "latitude": -33.45833,
+          "longitude": -70.662742
+        },
+        {
+          "latitude": -33.45833,
+          "longitude": -70.664458
+        },
+        {
+          "latitude": -33.45727,
+          "longitude": -70.664458
+        },
+        {
+          "latitude": -33.45727,
+          "longitude": -70.662742
+        }
+      ]
+    },
+    {
+      "name": "Campus Juan Gómez Millas",
+      "acronym": "JGM",
+      "centerLat": -33.4608,
+      "centerLng": -70.5982,
+      "polygon": [
+        {
+          "latitude": -33.460216,
+          "longitude": -70.597255
+        },
+        {
+          "latitude": -33.461384,
+          "longitude": -70.597255
+        },
+        {
+          "latitude": -33.461384,
+          "longitude": -70.599145
+        },
+        {
+          "latitude": -33.460216,
+          "longitude": -70.599145
+        },
+        {
+          "latitude": -33.460216,
+          "longitude": -70.597255
+        }
+      ]
+    },
+    {
+      "name": "Casa Central Universidad de Chile",
+      "acronym": "Casa Central",
+      "centerLat": -33.444513,
+      "centerLng": -70.650985,
+      "polygon": [
+        {
+          "latitude": -33.444433,
+          "longitude": -70.651444
+        },
+        {
+          "latitude": -33.444559,
+          "longitude": -70.651424
+        },
+        {
+          "latitude": -33.444554,
+          "longitude": -70.651404
+        },
+        {
+          "latitude": -33.444696,
+          "longitude": -70.651351
+        },
+        {
+          "latitude": -33.444707,
+          "longitude": -70.651393
+        },
+        {
+          "latitude": -33.444772,
+          "longitude": -70.651382
+        },
+        {
+          "latitude": -33.444774,
+          "longitude": -70.651388
+        },
+        {
+          "latitude": -33.444896,
+          "longitude": -70.651368
+        },
+        {
+          "latitude": -33.444867,
+          "longitude": -70.651254
+        },
+        {
+          "latitude": -33.444862,
+          "longitude": -70.651255
+        },
+        {
+          "latitude": -33.444682,
+          "longitude": -70.650564
+        },
+        {
+          "latitude": -33.444684,
+          "longitude": -70.650563
+        },
+        {
+          "latitude": -33.444659,
+          "longitude": -70.650466
+        },
+        {
+          "latitude": -33.444551,
+          "longitude": -70.650507
+        },
+        {
+          "latitude": -33.444552,
+          "longitude": -70.650509
+        },
+        {
+          "latitude": -33.444338,
+          "longitude": -70.650589
+        },
+        {
+          "latitude": -33.444338,
+          "longitude": -70.650586
+        },
+        {
+          "latitude": -33.444328,
+          "longitude": -70.65059
+        },
+        {
+          "latitude": -33.444248,
+          "longitude": -70.65062
+        },
+        {
+          "latitude": -33.444221,
+          "longitude": -70.65063
+        },
+        {
+          "latitude": -33.444249,
+          "longitude": -70.650735
+        },
+        {
+          "latitude": -33.444252,
+          "longitude": -70.650734
+        },
+        {
+          "latitude": -33.444315,
+          "longitude": -70.650978
+        },
+        {
+          "latitude": -33.444313,
+          "longitude": -70.650979
+        },
+        {
+          "latitude": -33.444344,
+          "longitude": -70.651099
+        },
+        {
+          "latitude": -33.444347,
+          "longitude": -70.651098
+        },
+        {
+          "latitude": -33.44441,
+          "longitude": -70.651339
+        },
+        {
+          "latitude": -33.444406,
+          "longitude": -70.651341
+        },
+        {
+          "latitude": -33.444433,
+          "longitude": -70.651444
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Economía y Negocios (FEN)",
+      "acronym": "FEN",
+      "centerLat": -33.453312,
+      "centerLng": -70.667728,
+      "polygon": [
+        {
+          "latitude": -33.453238,
+          "longitude": -70.667982
+        },
+        {
+          "latitude": -33.453451,
+          "longitude": -70.667941
+        },
+        {
+          "latitude": -33.453367,
+          "longitude": -70.667579
+        },
+        {
+          "latitude": -33.453328,
+          "longitude": -70.667555
+        },
+        {
+          "latitude": -33.453178,
+          "longitude": -70.667581
+        },
+        {
+          "latitude": -33.453238,
+          "longitude": -70.667982
+        }
+      ]
+    },
+    {
+      "name": "Campus Dra. Eloísa Díaz (Salud y Medicina)",
+      "acronym": "Salud UCH",
+      "centerLat": -33.4187,
+      "centerLng": -70.6548,
+      "polygon": [
+        {
+          "latitude": -33.418116,
+          "longitude": -70.653856
+        },
+        {
+          "latitude": -33.419284,
+          "longitude": -70.653856
+        },
+        {
+          "latitude": -33.419284,
+          "longitude": -70.655744
+        },
+        {
+          "latitude": -33.418116,
+          "longitude": -70.655744
+        },
+        {
+          "latitude": -33.418116,
+          "longitude": -70.653856
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Derecho Universidad de Chile",
+      "acronym": "Derecho UCH",
+      "centerLat": -33.435347,
+      "centerLng": -70.63482,
+      "polygon": [
+        {
+          "latitude": -33.434876,
+          "longitude": -70.63546
+        },
+        {
+          "latitude": -33.435055,
+          "longitude": -70.635422
+        },
+        {
+          "latitude": -33.435114,
+          "longitude": -70.635409
+        },
+        {
+          "latitude": -33.435343,
+          "longitude": -70.635354
+        },
+        {
+          "latitude": -33.435547,
+          "longitude": -70.635306
+        },
+        {
+          "latitude": -33.435558,
+          "longitude": -70.635303
+        },
+        {
+          "latitude": -33.43557,
+          "longitude": -70.6352
+        },
+        {
+          "latitude": -33.435643,
+          "longitude": -70.634634
+        },
+        {
+          "latitude": -33.435659,
+          "longitude": -70.634501
+        },
+        {
+          "latitude": -33.435657,
+          "longitude": -70.634454
+        },
+        {
+          "latitude": -33.435649,
+          "longitude": -70.634178
+        },
+        {
+          "latitude": -33.435633,
+          "longitude": -70.634184
+        },
+        {
+          "latitude": -33.435519,
+          "longitude": -70.634226
+        },
+        {
+          "latitude": -33.435406,
+          "longitude": -70.63427
+        },
+        {
+          "latitude": -33.435481,
+          "longitude": -70.634543
+        },
+        {
+          "latitude": -33.43502,
+          "longitude": -70.634714
+        },
+        {
+          "latitude": -33.43477,
+          "longitude": -70.634798
+        },
+        {
+          "latitude": -33.434747,
+          "longitude": -70.634805
+        },
+        {
+          "latitude": -33.434876,
+          "longitude": -70.63546
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Arquitectura y Urbanismo (FAU)",
+      "acronym": "FAU",
+      "centerLat": -33.441823,
+      "centerLng": -70.637243,
+      "polygon": [
+        {
+          "latitude": -33.441849,
+          "longitude": -70.638746
+        },
+        {
+          "latitude": -33.442671,
+          "longitude": -70.637953
+        },
+        {
+          "latitude": -33.4424,
+          "longitude": -70.637576
+        },
+        {
+          "latitude": -33.442521,
+          "longitude": -70.637445
+        },
+        {
+          "latitude": -33.442508,
+          "longitude": -70.637259
+        },
+        {
+          "latitude": -33.442181,
+          "longitude": -70.636796
+        },
+        {
+          "latitude": -33.44206,
+          "longitude": -70.636624
+        },
+        {
+          "latitude": -33.441997,
+          "longitude": -70.636676
+        },
+        {
+          "latitude": -33.44186,
+          "longitude": -70.636477
+        },
+        {
+          "latitude": -33.441689,
+          "longitude": -70.636227
+        },
+        {
+          "latitude": -33.440965,
+          "longitude": -70.636525
+        },
+        {
+          "latitude": -33.440926,
+          "longitude": -70.636541
+        },
+        {
+          "latitude": -33.441106,
+          "longitude": -70.637104
+        },
+        {
+          "latitude": -33.441229,
+          "longitude": -70.637486
+        },
+        {
+          "latitude": -33.441517,
+          "longitude": -70.638101
+        },
+        {
+          "latitude": -33.441694,
+          "longitude": -70.638357
+        },
+        {
+          "latitude": -33.441849,
+          "longitude": -70.638746
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Ciencias Químicas y Farmacéuticas",
+      "acronym": "Química UCH",
+      "centerLat": -33.4195,
+      "centerLng": -70.6515,
+      "polygon": [
+        {
+          "latitude": -33.419141,
+          "longitude": -70.650919
+        },
+        {
+          "latitude": -33.419859,
+          "longitude": -70.650919
+        },
+        {
+          "latitude": -33.419859,
+          "longitude": -70.652081
+        },
+        {
+          "latitude": -33.419141,
+          "longitude": -70.652081
+        },
+        {
+          "latitude": -33.419141,
+          "longitude": -70.650919
+        }
+      ]
+    },
+    {
+      "name": "Campus Antumapu (Ciencias Agronómicas)",
+      "acronym": "Antumapu",
+      "centerLat": -33.5685,
+      "centerLng": -70.6275,
+      "polygon": [
+        {
+          "latitude": -33.567916,
+          "longitude": -70.626554
+        },
+        {
+          "latitude": -33.569084,
+          "longitude": -70.626554
+        },
+        {
+          "latitude": -33.569084,
+          "longitude": -70.628446
+        },
+        {
+          "latitude": -33.567916,
+          "longitude": -70.628446
+        },
+        {
+          "latitude": -33.567916,
+          "longitude": -70.626554
+        }
+      ]
+    }
+  ],
+  "Universidad de Ciencias de la Informatica": [
+    {
+      "name": "Universidad de Ciencias de la Informatica - Sede Principal",
+      "acronym": "UCI",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad Catolica del Maule": [
+    {
+      "name": "Campus San Miguel UCM (Talca)",
+      "acronym": "UCM San Miguel",
+      "centerLat": -35.4345,
+      "centerLng": -71.6215,
+      "polygon": [
+        {
+          "latitude": -35.433916,
+          "longitude": -71.620533
+        },
+        {
+          "latitude": -35.435084,
+          "longitude": -71.620533
+        },
+        {
+          "latitude": -35.435084,
+          "longitude": -71.622467
+        },
+        {
+          "latitude": -35.433916,
+          "longitude": -71.622467
+        },
+        {
+          "latitude": -35.433916,
+          "longitude": -71.620533
+        }
+      ]
+    },
+    {
+      "name": "Campus Nuestra Señora del Carmen UCM (Curicó)",
+      "acronym": "UCM Curicó",
+      "centerLat": -34.9865,
+      "centerLng": -71.2425,
+      "polygon": [
+        {
+          "latitude": -34.98601,
+          "longitude": -71.241693
+        },
+        {
+          "latitude": -34.98699,
+          "longitude": -71.241693
+        },
+        {
+          "latitude": -34.98699,
+          "longitude": -71.243307
+        },
+        {
+          "latitude": -34.98601,
+          "longitude": -71.243307
+        },
+        {
+          "latitude": -34.98601,
+          "longitude": -71.241693
+        }
+      ]
+    }
+  ],
+  "Universidad Catolica del Norte": [
+    {
+      "name": "Campus Casa Central UCN (Antofagasta)",
+      "acronym": "UCN Central",
+      "centerLat": -23.6825,
+      "centerLng": -70.4095,
+      "polygon": [
+        {
+          "latitude": -23.681916,
+          "longitude": -70.408639
+        },
+        {
+          "latitude": -23.683084,
+          "longitude": -70.408639
+        },
+        {
+          "latitude": -23.683084,
+          "longitude": -70.410361
+        },
+        {
+          "latitude": -23.681916,
+          "longitude": -70.410361
+        },
+        {
+          "latitude": -23.681916,
+          "longitude": -70.408639
+        }
+      ]
+    },
+    {
+      "name": "Campus Guayacán UCN (Coquimbo)",
+      "acronym": "UCN Guayacán",
+      "centerLat": -29.9675,
+      "centerLng": -71.3485,
+      "polygon": [
+        {
+          "latitude": -29.966916,
+          "longitude": -71.34759
+        },
+        {
+          "latitude": -29.968084,
+          "longitude": -71.34759
+        },
+        {
+          "latitude": -29.968084,
+          "longitude": -71.34941
+        },
+        {
+          "latitude": -29.966916,
+          "longitude": -71.34941
+        },
+        {
+          "latitude": -29.966916,
+          "longitude": -71.34759
+        }
+      ]
+    }
+  ],
+  "Universidad Catolica de La Santísima Concepción": [
+    {
+      "name": "Campus San Andrés UCSC",
+      "acronym": "UCSC San Andrés",
+      "centerLat": -36.7975,
+      "centerLng": -73.0565,
+      "polygon": [
+        {
+          "latitude": -36.796916,
+          "longitude": -73.055516
+        },
+        {
+          "latitude": -36.798084,
+          "longitude": -73.055516
+        },
+        {
+          "latitude": -36.798084,
+          "longitude": -73.057484
+        },
+        {
+          "latitude": -36.796916,
+          "longitude": -73.057484
+        },
+        {
+          "latitude": -36.796916,
+          "longitude": -73.055516
+        }
+      ]
+    },
+    {
+      "name": "Campus Santo Domingo UCSC (Derecho)",
+      "acronym": "UCSC Derecho",
+      "centerLat": -36.8285,
+      "centerLng": -73.0535,
+      "polygon": [
+        {
+          "latitude": -36.828141,
+          "longitude": -73.052894
+        },
+        {
+          "latitude": -36.828859,
+          "longitude": -73.052894
+        },
+        {
+          "latitude": -36.828859,
+          "longitude": -73.054106
+        },
+        {
+          "latitude": -36.828141,
+          "longitude": -73.054106
+        },
+        {
+          "latitude": -36.828141,
+          "longitude": -73.052894
+        }
+      ]
+    }
+  ],
+  "Universidad Católica Cardenal Raúl Silva Henríquez": [
+    {
+      "name": "Campus Carmen UCSH",
+      "acronym": "UCSH Carmen",
+      "centerLat": -33.4485,
+      "centerLng": -70.644,
+      "polygon": [
+        {
+          "latitude": -33.448064,
+          "longitude": -70.643295
+        },
+        {
+          "latitude": -33.448936,
+          "longitude": -70.643295
+        },
+        {
+          "latitude": -33.448936,
+          "longitude": -70.644705
+        },
+        {
+          "latitude": -33.448064,
+          "longitude": -70.644705
+        },
+        {
+          "latitude": -33.448064,
+          "longitude": -70.643295
+        }
+      ]
+    },
+    {
+      "name": "Campus Lo Cañas UCSH",
+      "acronym": "UCSH Lo Cañas",
+      "centerLat": -33.523013,
+      "centerLng": -70.553783,
+      "polygon": [
+        {
+          "latitude": -33.524929,
+          "longitude": -70.554725
+        },
+        {
+          "latitude": -33.525047,
+          "longitude": -70.552654
+        },
+        {
+          "latitude": -33.524133,
+          "longitude": -70.552578
+        },
+        {
+          "latitude": -33.522925,
+          "longitude": -70.552009
+        },
+        {
+          "latitude": -33.522493,
+          "longitude": -70.552617
+        },
+        {
+          "latitude": -33.522274,
+          "longitude": -70.553668
+        },
+        {
+          "latitude": -33.522329,
+          "longitude": -70.554043
+        },
+        {
+          "latitude": -33.522388,
+          "longitude": -70.554122
+        },
+        {
+          "latitude": -33.522454,
+          "longitude": -70.554194
+        },
+        {
+          "latitude": -33.522525,
+          "longitude": -70.554257
+        },
+        {
+          "latitude": -33.522593,
+          "longitude": -70.554307
+        },
+        {
+          "latitude": -33.522664,
+          "longitude": -70.554349
+        },
+        {
+          "latitude": -33.522738,
+          "longitude": -70.554384
+        },
+        {
+          "latitude": -33.522814,
+          "longitude": -70.55441
+        },
+        {
+          "latitude": -33.522892,
+          "longitude": -70.554429
+        },
+        {
+          "latitude": -33.524929,
+          "longitude": -70.554725
+        }
+      ]
+    }
+  ],
+  "Universidad Catolica de Temuco": [
+    {
+      "name": "Campus San Francisco UCT",
+      "acronym": "UCT San Francisco",
+      "centerLat": -38.737928,
+      "centerLng": -72.602233,
+      "polygon": [
+        {
+          "latitude": -38.738599,
+          "longitude": -72.602982
+        },
+        {
+          "latitude": -38.738669,
+          "longitude": -72.602637
+        },
+        {
+          "latitude": -38.73868,
+          "longitude": -72.602585
+        },
+        {
+          "latitude": -38.738785,
+          "longitude": -72.602616
+        },
+        {
+          "latitude": -38.738916,
+          "longitude": -72.601563
+        },
+        {
+          "latitude": -38.737011,
+          "longitude": -72.600943
+        },
+        {
+          "latitude": -38.736886,
+          "longitude": -72.601715
+        },
+        {
+          "latitude": -38.737178,
+          "longitude": -72.601809
+        },
+        {
+          "latitude": -38.737153,
+          "longitude": -72.601934
+        },
+        {
+          "latitude": -38.737125,
+          "longitude": -72.602076
+        },
+        {
+          "latitude": -38.73719,
+          "longitude": -72.602097
+        },
+        {
+          "latitude": -38.737308,
+          "longitude": -72.602162
+        },
+        {
+          "latitude": -38.737629,
+          "longitude": -72.602277
+        },
+        {
+          "latitude": -38.738055,
+          "longitude": -72.602431
+        },
+        {
+          "latitude": -38.738522,
+          "longitude": -72.602588
+        },
+        {
+          "latitude": -38.738568,
+          "longitude": -72.602604
+        },
+        {
+          "latitude": -38.738495,
+          "longitude": -72.602946
+        },
+        {
+          "latitude": -38.738599,
+          "longitude": -72.602982
+        }
+      ]
+    },
+    {
+      "name": "Campus San Juan Pablo II UCT (Norte)",
+      "acronym": "UCT Norte",
+      "centerLat": -38.7085,
+      "centerLng": -72.5765,
+      "polygon": [
+        {
+          "latitude": -38.707916,
+          "longitude": -72.57549
+        },
+        {
+          "latitude": -38.709084,
+          "longitude": -72.57549
+        },
+        {
+          "latitude": -38.709084,
+          "longitude": -72.57751
+        },
+        {
+          "latitude": -38.707916,
+          "longitude": -72.57751
+        },
+        {
+          "latitude": -38.707916,
+          "longitude": -72.57549
+        }
+      ]
+    },
+    {
+      "name": "Campus Menchaca Lira UCT (Facultad de Artes)",
+      "acronym": "UCT Artes",
+      "centerLat": -38.7385,
+      "centerLng": -72.6075,
+      "polygon": [
+        {
+          "latitude": -38.738064,
+          "longitude": -72.606746
+        },
+        {
+          "latitude": -38.738936,
+          "longitude": -72.606746
+        },
+        {
+          "latitude": -38.738936,
+          "longitude": -72.608254
+        },
+        {
+          "latitude": -38.738064,
+          "longitude": -72.608254
+        },
+        {
+          "latitude": -38.738064,
+          "longitude": -72.606746
+        }
+      ]
+    }
+  ],
+  "Universidad Catolica de Valparaiso": [
+    {
+      "name": "Casa Central PUCV (Facultad de Derecho)",
+      "acronym": "Derecho PUCV",
+      "centerLat": -33.045,
+      "centerLng": -71.6052,
+      "polygon": [
+        {
+          "latitude": -33.044618,
+          "longitude": -71.604585
+        },
+        {
+          "latitude": -33.045382,
+          "longitude": -71.604585
+        },
+        {
+          "latitude": -33.045382,
+          "longitude": -71.605815
+        },
+        {
+          "latitude": -33.044618,
+          "longitude": -71.605815
+        },
+        {
+          "latitude": -33.044618,
+          "longitude": -71.604585
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Ingeniería PUCV (FIN)",
+      "acronym": "FIN PUCV",
+      "centerLat": -33.044536,
+      "centerLng": -71.612513,
+      "polygon": [
+        {
+          "latitude": -33.044453,
+          "longitude": -71.612864
+        },
+        {
+          "latitude": -33.044746,
+          "longitude": -71.612847
+        },
+        {
+          "latitude": -33.044714,
+          "longitude": -71.612142
+        },
+        {
+          "latitude": -33.044426,
+          "longitude": -71.612151
+        },
+        {
+          "latitude": -33.044431,
+          "longitude": -71.612324
+        },
+        {
+          "latitude": -33.044445,
+          "longitude": -71.612752
+        },
+        {
+          "latitude": -33.044453,
+          "longitude": -71.612864
+        }
+      ]
+    },
+    {
+      "name": "Campus Sausalito PUCV (Filosofía y Educación)",
+      "acronym": "Sausalito",
+      "centerLat": -33.0205,
+      "centerLng": -71.5365,
+      "polygon": [
+        {
+          "latitude": -33.019961,
+          "longitude": -71.535632
+        },
+        {
+          "latitude": -33.021039,
+          "longitude": -71.535632
+        },
+        {
+          "latitude": -33.021039,
+          "longitude": -71.537368
+        },
+        {
+          "latitude": -33.019961,
+          "longitude": -71.537368
+        },
+        {
+          "latitude": -33.019961,
+          "longitude": -71.535632
+        }
+      ]
+    },
+    {
+      "name": "Campus Curauma PUCV (Facultad de Ciencias)",
+      "acronym": "Curauma",
+      "centerLat": -33.136,
+      "centerLng": -71.5975,
+      "polygon": [
+        {
+          "latitude": -33.135371,
+          "longitude": -71.596486
+        },
+        {
+          "latitude": -33.136629,
+          "longitude": -71.596486
+        },
+        {
+          "latitude": -33.136629,
+          "longitude": -71.598514
+        },
+        {
+          "latitude": -33.135371,
+          "longitude": -71.598514
+        },
+        {
+          "latitude": -33.135371,
+          "longitude": -71.596486
+        }
+      ]
+    },
+    {
+      "name": "Escuela de Negocios y Economía PUCV",
+      "acronym": "Negocios PUCV",
+      "centerLat": -33.028,
+      "centerLng": -71.5785,
+      "polygon": [
+        {
+          "latitude": -33.027618,
+          "longitude": -71.577885
+        },
+        {
+          "latitude": -33.028382,
+          "longitude": -71.577885
+        },
+        {
+          "latitude": -33.028382,
+          "longitude": -71.579115
+        },
+        {
+          "latitude": -33.027618,
+          "longitude": -71.579115
+        },
+        {
+          "latitude": -33.027618,
+          "longitude": -71.577885
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Arquitectura y Urbanismo PUCV",
+      "acronym": "Arte PUCV",
+      "centerLat": -33.029,
+      "centerLng": -71.577,
+      "polygon": [
+        {
+          "latitude": -33.028618,
+          "longitude": -71.576385
+        },
+        {
+          "latitude": -33.029382,
+          "longitude": -71.576385
+        },
+        {
+          "latitude": -33.029382,
+          "longitude": -71.577615
+        },
+        {
+          "latitude": -33.028618,
+          "longitude": -71.577615
+        },
+        {
+          "latitude": -33.028618,
+          "longitude": -71.576385
+        }
+      ]
+    },
+    {
+      "name": "Instituto de Música PUCV (Cerro Concepción)",
+      "acronym": "Música PUCV",
+      "centerLat": -33.0425,
+      "centerLng": -71.6275,
+      "polygon": [
+        {
+          "latitude": -33.042141,
+          "longitude": -71.626921
+        },
+        {
+          "latitude": -33.042859,
+          "longitude": -71.626921
+        },
+        {
+          "latitude": -33.042859,
+          "longitude": -71.628079
+        },
+        {
+          "latitude": -33.042141,
+          "longitude": -71.628079
+        },
+        {
+          "latitude": -33.042141,
+          "longitude": -71.626921
+        }
+      ]
+    }
+  ],
+  "Universidad de Atacama": [
+    {
+      "name": "Campus Copayapu UDA (Copiapó)",
+      "acronym": "UDA Copiapó",
+      "centerLat": -27.3685,
+      "centerLng": -70.3385,
+      "polygon": [
+        {
+          "latitude": -27.367916,
+          "longitude": -70.337612
+        },
+        {
+          "latitude": -27.369084,
+          "longitude": -70.337612
+        },
+        {
+          "latitude": -27.369084,
+          "longitude": -70.339388
+        },
+        {
+          "latitude": -27.367916,
+          "longitude": -70.339388
+        },
+        {
+          "latitude": -27.367916,
+          "longitude": -70.337612
+        }
+      ]
+    },
+    {
+      "name": "Sede Vallenar UDA",
+      "acronym": "UDA Vallenar",
+      "centerLat": -28.5745,
+      "centerLng": -70.7615,
+      "polygon": [
+        {
+          "latitude": -28.573934,
+          "longitude": -70.76063
+        },
+        {
+          "latitude": -28.575066,
+          "longitude": -70.76063
+        },
+        {
+          "latitude": -28.575066,
+          "longitude": -70.76237
+        },
+        {
+          "latitude": -28.573934,
+          "longitude": -70.76237
+        },
+        {
+          "latitude": -28.573934,
+          "longitude": -70.76063
+        }
+      ]
+    }
+  ],
+  "Universidad de Concepcion": [
+    {
+      "name": "Ciudad Universitaria UdeC (Campus Concepción)",
+      "acronym": "UdeC Central",
+      "centerLat": -36.8298,
+      "centerLng": -73.0378,
+      "polygon": [
+        {
+          "latitude": -36.829216,
+          "longitude": -73.036815
+        },
+        {
+          "latitude": -36.830384,
+          "longitude": -73.036815
+        },
+        {
+          "latitude": -36.830384,
+          "longitude": -73.038785
+        },
+        {
+          "latitude": -36.829216,
+          "longitude": -73.038785
+        },
+        {
+          "latitude": -36.829216,
+          "longitude": -73.036815
+        }
+      ]
+    },
+    {
+      "name": "Campus Chillán UdeC",
+      "acronym": "UdeC Chillán",
+      "centerLat": -36.5975,
+      "centerLng": -72.0865,
+      "polygon": [
+        {
+          "latitude": -36.596916,
+          "longitude": -72.085518
+        },
+        {
+          "latitude": -36.598084,
+          "longitude": -72.085518
+        },
+        {
+          "latitude": -36.598084,
+          "longitude": -72.087482
+        },
+        {
+          "latitude": -36.596916,
+          "longitude": -72.087482
+        },
+        {
+          "latitude": -36.596916,
+          "longitude": -72.085518
+        }
+      ]
+    },
+    {
+      "name": "Campus Los Ángeles UdeC",
+      "acronym": "UdeC Los Ángeles",
+      "centerLat": -37.4725,
+      "centerLng": -72.3555,
+      "polygon": [
+        {
+          "latitude": -37.471916,
+          "longitude": -72.354507
+        },
+        {
+          "latitude": -37.473084,
+          "longitude": -72.354507
+        },
+        {
+          "latitude": -37.473084,
+          "longitude": -72.356493
+        },
+        {
+          "latitude": -37.471916,
+          "longitude": -72.356493
+        },
+        {
+          "latitude": -37.471916,
+          "longitude": -72.354507
+        }
+      ]
+    }
+  ],
+  "Universidad del Mar": [
+    {
+      "name": "Universidad del Mar - Sede Principal",
+      "acronym": "UM",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad del Desarrollo": [
+    {
+      "name": "Campus San Carlos de Apoquindo UDD",
+      "acronym": "San Carlos UDD",
+      "centerLat": -33.397,
+      "centerLng": -70.503,
+      "polygon": [
+        {
+          "latitude": -33.396416,
+          "longitude": -70.502056
+        },
+        {
+          "latitude": -33.397584,
+          "longitude": -70.502056
+        },
+        {
+          "latitude": -33.397584,
+          "longitude": -70.503944
+        },
+        {
+          "latitude": -33.396416,
+          "longitude": -70.503944
+        },
+        {
+          "latitude": -33.396416,
+          "longitude": -70.502056
+        }
+      ]
+    },
+    {
+      "name": "Campus Rector Ernesto Silva Bafalluy UDD",
+      "acronym": "RESB UDD",
+      "centerLat": -33.3955,
+      "centerLng": -70.5015,
+      "polygon": [
+        {
+          "latitude": -33.394916,
+          "longitude": -70.500556
+        },
+        {
+          "latitude": -33.396084,
+          "longitude": -70.500556
+        },
+        {
+          "latitude": -33.396084,
+          "longitude": -70.502444
+        },
+        {
+          "latitude": -33.394916,
+          "longitude": -70.502444
+        },
+        {
+          "latitude": -33.394916,
+          "longitude": -70.500556
+        }
+      ]
+    },
+    {
+      "name": "Campus Concepción UDD",
+      "acronym": "Concepción UDD",
+      "centerLat": -36.8285,
+      "centerLng": -73.0425,
+      "polygon": [
+        {
+          "latitude": -36.827992,
+          "longitude": -73.041644
+        },
+        {
+          "latitude": -36.829008,
+          "longitude": -73.041644
+        },
+        {
+          "latitude": -36.829008,
+          "longitude": -73.043356
+        },
+        {
+          "latitude": -36.827992,
+          "longitude": -73.043356
+        },
+        {
+          "latitude": -36.827992,
+          "longitude": -73.041644
+        }
+      ]
+    }
+  ],
+  "Universidad Diego Portales": [
+    {
+      "name": "Campus Ejército UDP (Ingeniería y Ciencias Sociales)",
+      "acronym": "Ejército UDP",
+      "centerLat": -33.4505,
+      "centerLng": -70.6625,
+      "polygon": [
+        {
+          "latitude": -33.450046,
+          "longitude": -70.661766
+        },
+        {
+          "latitude": -33.450954,
+          "longitude": -70.661766
+        },
+        {
+          "latitude": -33.450954,
+          "longitude": -70.663234
+        },
+        {
+          "latitude": -33.450046,
+          "longitude": -70.663234
+        },
+        {
+          "latitude": -33.450046,
+          "longitude": -70.661766
+        }
+      ]
+    },
+    {
+      "name": "Campus República UDP (Derecho y Economía)",
+      "acronym": "República UDP",
+      "centerLat": -33.4485,
+      "centerLng": -70.6665,
+      "polygon": [
+        {
+          "latitude": -33.448087,
+          "longitude": -70.665831
+        },
+        {
+          "latitude": -33.448913,
+          "longitude": -70.665831
+        },
+        {
+          "latitude": -33.448913,
+          "longitude": -70.667169
+        },
+        {
+          "latitude": -33.448087,
+          "longitude": -70.667169
+        },
+        {
+          "latitude": -33.448087,
+          "longitude": -70.665831
+        }
+      ]
+    },
+    {
+      "name": "Campus Manuel Rodríguez UDP (Salud y Medicina)",
+      "acronym": "Salud UDP",
+      "centerLat": -33.4475,
+      "centerLng": -70.6585,
+      "polygon": [
+        {
+          "latitude": -33.447123,
+          "longitude": -70.65789
+        },
+        {
+          "latitude": -33.447877,
+          "longitude": -70.65789
+        },
+        {
+          "latitude": -33.447877,
+          "longitude": -70.65911
+        },
+        {
+          "latitude": -33.447123,
+          "longitude": -70.65911
+        },
+        {
+          "latitude": -33.447123,
+          "longitude": -70.65789
+        }
+      ]
+    },
+    {
+      "name": "Campus Huechuraba UDP (Economía y Empresa)",
+      "acronym": "Empresas UDP",
+      "centerLat": -33.3765,
+      "centerLng": -70.621,
+      "polygon": [
+        {
+          "latitude": -33.375992,
+          "longitude": -70.620179
+        },
+        {
+          "latitude": -33.377008,
+          "longitude": -70.620179
+        },
+        {
+          "latitude": -33.377008,
+          "longitude": -70.621821
+        },
+        {
+          "latitude": -33.375992,
+          "longitude": -70.621821
+        },
+        {
+          "latitude": -33.375992,
+          "longitude": -70.620179
+        }
+      ]
+    }
+  ],
+  "Universidad Finis Terrae": [
+    {
+      "name": "Campus Pedro de Valdivia UFT",
+      "acronym": "UFT Valdivia",
+      "centerLat": -33.436972,
+      "centerLng": -70.608555,
+      "polygon": [
+        {
+          "latitude": -33.436586,
+          "longitude": -70.609274
+        },
+        {
+          "latitude": -33.437103,
+          "longitude": -70.609127
+        },
+        {
+          "latitude": -33.437569,
+          "longitude": -70.608993
+        },
+        {
+          "latitude": -33.437482,
+          "longitude": -70.608727
+        },
+        {
+          "latitude": -33.437417,
+          "longitude": -70.608564
+        },
+        {
+          "latitude": -33.437392,
+          "longitude": -70.608456
+        },
+        {
+          "latitude": -33.437353,
+          "longitude": -70.608266
+        },
+        {
+          "latitude": -33.437286,
+          "longitude": -70.607943
+        },
+        {
+          "latitude": -33.436942,
+          "longitude": -70.608042
+        },
+        {
+          "latitude": -33.436367,
+          "longitude": -70.608198
+        },
+        {
+          "latitude": -33.436421,
+          "longitude": -70.608458
+        },
+        {
+          "latitude": -33.436587,
+          "longitude": -70.60841
+        },
+        {
+          "latitude": -33.436633,
+          "longitude": -70.608633
+        },
+        {
+          "latitude": -33.436468,
+          "longitude": -70.608682
+        },
+        {
+          "latitude": -33.436586,
+          "longitude": -70.609274
+        }
+      ]
+    },
+    {
+      "name": "Campus Amberes UFT (Facultad de Artes)",
+      "acronym": "UFT Amberes",
+      "centerLat": -33.4415,
+      "centerLng": -70.6125,
+      "polygon": [
+        {
+          "latitude": -33.441141,
+          "longitude": -70.611919
+        },
+        {
+          "latitude": -33.441859,
+          "longitude": -70.611919
+        },
+        {
+          "latitude": -33.441859,
+          "longitude": -70.613081
+        },
+        {
+          "latitude": -33.441141,
+          "longitude": -70.613081
+        },
+        {
+          "latitude": -33.441141,
+          "longitude": -70.611919
+        }
+      ]
+    }
+  ],
+  "Universidad de La Frontera": [
+    {
+      "name": "Campus Andrés Bello UFRO",
+      "acronym": "UFRO Central",
+      "centerLat": -38.7475,
+      "centerLng": -72.6165,
+      "polygon": [
+        {
+          "latitude": -38.746916,
+          "longitude": -72.615489
+        },
+        {
+          "latitude": -38.748084,
+          "longitude": -72.615489
+        },
+        {
+          "latitude": -38.748084,
+          "longitude": -72.617511
+        },
+        {
+          "latitude": -38.746916,
+          "longitude": -72.617511
+        },
+        {
+          "latitude": -38.746916,
+          "longitude": -72.615489
+        }
+      ]
+    },
+    {
+      "name": "Campus Salud / Medicina UFRO",
+      "acronym": "UFRO Salud",
+      "centerLat": -38.7365,
+      "centerLng": -72.5895,
+      "polygon": [
+        {
+          "latitude": -38.735992,
+          "longitude": -72.588622
+        },
+        {
+          "latitude": -38.737008,
+          "longitude": -72.588622
+        },
+        {
+          "latitude": -38.737008,
+          "longitude": -72.590378
+        },
+        {
+          "latitude": -38.735992,
+          "longitude": -72.590378
+        },
+        {
+          "latitude": -38.735992,
+          "longitude": -72.588622
+        }
+      ]
+    },
+    {
+      "name": "Campus Pucón UFRO",
+      "acronym": "UFRO Pucón",
+      "centerLat": -39.2785,
+      "centerLng": -71.9745,
+      "polygon": [
+        {
+          "latitude": -39.278028,
+          "longitude": -71.973678
+        },
+        {
+          "latitude": -39.278972,
+          "longitude": -71.973678
+        },
+        {
+          "latitude": -39.278972,
+          "longitude": -71.975322
+        },
+        {
+          "latitude": -39.278028,
+          "longitude": -71.975322
+        },
+        {
+          "latitude": -39.278028,
+          "longitude": -71.973678
+        }
+      ]
+    }
+  ],
+  "Universidad Gabriela Mistral": [
+    {
+      "name": "Campus Ricardo Lyon UGM",
+      "acronym": "UGM Lyon",
+      "centerLat": -33.4325,
+      "centerLng": -70.6065,
+      "polygon": [
+        {
+          "latitude": -33.432046,
+          "longitude": -70.605766
+        },
+        {
+          "latitude": -33.432954,
+          "longitude": -70.605766
+        },
+        {
+          "latitude": -33.432954,
+          "longitude": -70.607234
+        },
+        {
+          "latitude": -33.432046,
+          "longitude": -70.607234
+        },
+        {
+          "latitude": -33.432046,
+          "longitude": -70.605766
+        }
+      ]
+    }
+  ],
+  "Universidad International SEK, Santiago": [
+    {
+      "name": "Campus Santa María USEK (Providencia)",
+      "acronym": "USEK Providencia",
+      "centerLat": -33.4185,
+      "centerLng": -70.6085,
+      "polygon": [
+        {
+          "latitude": -33.418087,
+          "longitude": -70.607832
+        },
+        {
+          "latitude": -33.418913,
+          "longitude": -70.607832
+        },
+        {
+          "latitude": -33.418913,
+          "longitude": -70.609168
+        },
+        {
+          "latitude": -33.418087,
+          "longitude": -70.609168
+        },
+        {
+          "latitude": -33.418087,
+          "longitude": -70.607832
+        }
+      ]
+    },
+    {
+      "name": "Campus Bombero Obregón USEK (Providencia)",
+      "acronym": "USEK Obregón",
+      "centerLat": -33.4425,
+      "centerLng": -70.6295,
+      "polygon": [
+        {
+          "latitude": -33.442123,
+          "longitude": -70.62889
+        },
+        {
+          "latitude": -33.442877,
+          "longitude": -70.62889
+        },
+        {
+          "latitude": -33.442877,
+          "longitude": -70.63011
+        },
+        {
+          "latitude": -33.442123,
+          "longitude": -70.63011
+        },
+        {
+          "latitude": -33.442123,
+          "longitude": -70.62889
+        }
+      ]
+    }
+  ],
+  "Universidad José Santos Ossa": [
+    {
+      "name": "Universidad José Santos Ossa - Sede Principal",
+      "acronym": "UJSO",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad de Los Lagos": [
+    {
+      "name": "Campus Chuyaca ULagos (Osorno)",
+      "acronym": "Chuyaca ULagos",
+      "centerLat": -40.5875,
+      "centerLng": -73.1115,
+      "polygon": [
+        {
+          "latitude": -40.586916,
+          "longitude": -73.110462
+        },
+        {
+          "latitude": -40.588084,
+          "longitude": -73.110462
+        },
+        {
+          "latitude": -40.588084,
+          "longitude": -73.112538
+        },
+        {
+          "latitude": -40.586916,
+          "longitude": -73.112538
+        },
+        {
+          "latitude": -40.586916,
+          "longitude": -73.110462
+        }
+      ]
+    },
+    {
+      "name": "Campus Puerto Montt ULagos (Chinquihue)",
+      "acronym": "Puerto Montt ULagos",
+      "centerLat": -41.494078,
+      "centerLng": -72.987954,
+      "polygon": [
+        {
+          "latitude": -41.49466,
+          "longitude": -72.98953
+        },
+        {
+          "latitude": -41.495206,
+          "longitude": -72.989458
+        },
+        {
+          "latitude": -41.495181,
+          "longitude": -72.98906
+        },
+        {
+          "latitude": -41.49499,
+          "longitude": -72.989014
+        },
+        {
+          "latitude": -41.494868,
+          "longitude": -72.988601
+        },
+        {
+          "latitude": -41.494797,
+          "longitude": -72.988228
+        },
+        {
+          "latitude": -41.494524,
+          "longitude": -72.987649
+        },
+        {
+          "latitude": -41.494436,
+          "longitude": -72.986852
+        },
+        {
+          "latitude": -41.49433,
+          "longitude": -72.986676
+        },
+        {
+          "latitude": -41.494313,
+          "longitude": -72.986655
+        },
+        {
+          "latitude": -41.494294,
+          "longitude": -72.98664
+        },
+        {
+          "latitude": -41.49427,
+          "longitude": -72.98663
+        },
+        {
+          "latitude": -41.494246,
+          "longitude": -72.986621
+        },
+        {
+          "latitude": -41.49374,
+          "longitude": -72.986479
+        },
+        {
+          "latitude": -41.493671,
+          "longitude": -72.986562
+        },
+        {
+          "latitude": -41.493586,
+          "longitude": -72.986715
+        },
+        {
+          "latitude": -41.493574,
+          "longitude": -72.986739
+        },
+        {
+          "latitude": -41.493688,
+          "longitude": -72.986861
+        },
+        {
+          "latitude": -41.493704,
+          "longitude": -72.986911
+        },
+        {
+          "latitude": -41.4937,
+          "longitude": -72.987147
+        },
+        {
+          "latitude": -41.493632,
+          "longitude": -72.987287
+        },
+        {
+          "latitude": -41.493513,
+          "longitude": -72.987719
+        },
+        {
+          "latitude": -41.493537,
+          "longitude": -72.987877
+        },
+        {
+          "latitude": -41.493521,
+          "longitude": -72.987951
+        },
+        {
+          "latitude": -41.493465,
+          "longitude": -72.988209
+        },
+        {
+          "latitude": -41.493407,
+          "longitude": -72.988603
+        },
+        {
+          "latitude": -41.493376,
+          "longitude": -72.989199
+        },
+        {
+          "latitude": -41.493539,
+          "longitude": -72.989345
+        },
+        {
+          "latitude": -41.493734,
+          "longitude": -72.989458
+        },
+        {
+          "latitude": -41.493961,
+          "longitude": -72.989497
+        },
+        {
+          "latitude": -41.494272,
+          "longitude": -72.989479
+        },
+        {
+          "latitude": -41.494376,
+          "longitude": -72.98945
+        },
+        {
+          "latitude": -41.494458,
+          "longitude": -72.989392
+        },
+        {
+          "latitude": -41.49466,
+          "longitude": -72.98953
+        }
+      ]
+    }
+  ],
+  "Universidad La Republica": [
+    {
+      "name": "Universidad La Republica - Sede Principal",
+      "acronym": "UR",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad de Magallanes": [
+    {
+      "name": "Campus Central UMAG (Punta Arenas)",
+      "acronym": "UMAG Central",
+      "centerLat": -53.1365,
+      "centerLng": -70.8845,
+      "polygon": [
+        {
+          "latitude": -53.135916,
+          "longitude": -70.883186
+        },
+        {
+          "latitude": -53.137084,
+          "longitude": -70.883186
+        },
+        {
+          "latitude": -53.137084,
+          "longitude": -70.885814
+        },
+        {
+          "latitude": -53.135916,
+          "longitude": -70.885814
+        },
+        {
+          "latitude": -53.135916,
+          "longitude": -70.883186
+        }
+      ]
+    },
+    {
+      "name": "Centro Universitario Puerto Natales UMAG",
+      "acronym": "UMAG Natales",
+      "centerLat": -51.709586,
+      "centerLng": -72.508165,
+      "polygon": [
+        {
+          "latitude": -51.708993,
+          "longitude": -72.508946
+        },
+        {
+          "latitude": -51.710285,
+          "longitude": -72.50859
+        },
+        {
+          "latitude": -51.711034,
+          "longitude": -72.508387
+        },
+        {
+          "latitude": -51.710842,
+          "longitude": -72.506645
+        },
+        {
+          "latitude": -51.708504,
+          "longitude": -72.507222
+        },
+        {
+          "latitude": -51.70867,
+          "longitude": -72.508564
+        },
+        {
+          "latitude": -51.708771,
+          "longitude": -72.508799
+        },
+        {
+          "latitude": -51.708993,
+          "longitude": -72.508946
+        }
+      ]
+    }
+  ],
+  "Universidad Maritima de Chile": [
+    {
+      "name": "Universidad Maritima de Chile - Sede Principal",
+      "acronym": "UMC",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad Mayor": [
+    {
+      "name": "Campus Manuel Montt UMayor",
+      "acronym": "Manuel Montt",
+      "centerLat": -33.4345,
+      "centerLng": -70.6175,
+      "polygon": [
+        {
+          "latitude": -33.434064,
+          "longitude": -70.616795
+        },
+        {
+          "latitude": -33.434936,
+          "longitude": -70.616795
+        },
+        {
+          "latitude": -33.434936,
+          "longitude": -70.618205
+        },
+        {
+          "latitude": -33.434064,
+          "longitude": -70.618205
+        },
+        {
+          "latitude": -33.434064,
+          "longitude": -70.616795
+        }
+      ]
+    },
+    {
+      "name": "Campus Huechuraba UMayor",
+      "acronym": "Huechuraba UM",
+      "centerLat": -33.3755,
+      "centerLng": -70.6235,
+      "polygon": [
+        {
+          "latitude": -33.374916,
+          "longitude": -70.622556
+        },
+        {
+          "latitude": -33.376084,
+          "longitude": -70.622556
+        },
+        {
+          "latitude": -33.376084,
+          "longitude": -70.624444
+        },
+        {
+          "latitude": -33.374916,
+          "longitude": -70.624444
+        },
+        {
+          "latitude": -33.374916,
+          "longitude": -70.622556
+        }
+      ]
+    },
+    {
+      "name": "Campus Temuco UMayor",
+      "acronym": "Temuco UM",
+      "centerLat": -38.7365,
+      "centerLng": -72.605,
+      "polygon": [
+        {
+          "latitude": -38.736028,
+          "longitude": -72.604184
+        },
+        {
+          "latitude": -38.736972,
+          "longitude": -72.604184
+        },
+        {
+          "latitude": -38.736972,
+          "longitude": -72.605816
+        },
+        {
+          "latitude": -38.736028,
+          "longitude": -72.605816
+        },
+        {
+          "latitude": -38.736028,
+          "longitude": -72.604184
+        }
+      ]
+    }
+  ],
+  "Universidad Metropolitana de Ciencias de la Educación": [
+    {
+      "name": "Campus Central Macul UMCE",
+      "acronym": "UMCE Central",
+      "centerLat": -33.4585,
+      "centerLng": -70.5985,
+      "polygon": [
+        {
+          "latitude": -33.457916,
+          "longitude": -70.597555
+        },
+        {
+          "latitude": -33.459084,
+          "longitude": -70.597555
+        },
+        {
+          "latitude": -33.459084,
+          "longitude": -70.599445
+        },
+        {
+          "latitude": -33.457916,
+          "longitude": -70.599445
+        },
+        {
+          "latitude": -33.457916,
+          "longitude": -70.597555
+        }
+      ]
+    },
+    {
+      "name": "Campus Joaquín Cabezas UMCE (DEFDER)",
+      "acronym": "UMCE DEFDER",
+      "centerLat": -33.4565,
+      "centerLng": -70.6015,
+      "polygon": [
+        {
+          "latitude": -33.45601,
+          "longitude": -70.600708
+        },
+        {
+          "latitude": -33.45699,
+          "longitude": -70.600708
+        },
+        {
+          "latitude": -33.45699,
+          "longitude": -70.602292
+        },
+        {
+          "latitude": -33.45601,
+          "longitude": -70.602292
+        },
+        {
+          "latitude": -33.45601,
+          "longitude": -70.600708
+        }
+      ]
+    }
+  ],
+  "Universidad Mariano Egaña": [
+    {
+      "name": "Universidad Mariano Egaña - Sede Principal",
+      "acronym": "UME",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad Nacional Andrés Bello": [
+    {
+      "name": "Campus República UNAB",
+      "acronym": "República UNAB",
+      "centerLat": -33.4485,
+      "centerLng": -70.6658,
+      "polygon": [
+        {
+          "latitude": -33.44801,
+          "longitude": -70.665008
+        },
+        {
+          "latitude": -33.44899,
+          "longitude": -70.665008
+        },
+        {
+          "latitude": -33.44899,
+          "longitude": -70.666592
+        },
+        {
+          "latitude": -33.44801,
+          "longitude": -70.666592
+        },
+        {
+          "latitude": -33.44801,
+          "longitude": -70.665008
+        }
+      ]
+    },
+    {
+      "name": "Campus Casona de Las Condes UNAB",
+      "acronym": "Casona UNAB",
+      "centerLat": -33.3785,
+      "centerLng": -70.5185,
+      "polygon": [
+        {
+          "latitude": -33.377916,
+          "longitude": -70.517556
+        },
+        {
+          "latitude": -33.379084,
+          "longitude": -70.517556
+        },
+        {
+          "latitude": -33.379084,
+          "longitude": -70.519444
+        },
+        {
+          "latitude": -33.377916,
+          "longitude": -70.519444
+        },
+        {
+          "latitude": -33.377916,
+          "longitude": -70.517556
+        }
+      ]
+    },
+    {
+      "name": "Campus Los Leones UNAB",
+      "acronym": "Los Leones UNAB",
+      "centerLat": -33.4265,
+      "centerLng": -70.6055,
+      "polygon": [
+        {
+          "latitude": -33.426064,
+          "longitude": -70.604795
+        },
+        {
+          "latitude": -33.426936,
+          "longitude": -70.604795
+        },
+        {
+          "latitude": -33.426936,
+          "longitude": -70.606205
+        },
+        {
+          "latitude": -33.426064,
+          "longitude": -70.606205
+        },
+        {
+          "latitude": -33.426064,
+          "longitude": -70.604795
+        }
+      ]
+    },
+    {
+      "name": "Campus Viña del Mar UNAB",
+      "acronym": "Viña UNAB",
+      "centerLat": -33.013152,
+      "centerLng": -71.540939,
+      "polygon": [
+        {
+          "latitude": -33.013267,
+          "longitude": -71.542
+        },
+        {
+          "latitude": -33.01399,
+          "longitude": -71.541129
+        },
+        {
+          "latitude": -33.013792,
+          "longitude": -71.540973
+        },
+        {
+          "latitude": -33.013563,
+          "longitude": -71.540957
+        },
+        {
+          "latitude": -33.013309,
+          "longitude": -71.540702
+        },
+        {
+          "latitude": -33.013255,
+          "longitude": -71.540634
+        },
+        {
+          "latitude": -33.01306,
+          "longitude": -71.540582
+        },
+        {
+          "latitude": -33.01288,
+          "longitude": -71.540677
+        },
+        {
+          "latitude": -33.01274,
+          "longitude": -71.540773
+        },
+        {
+          "latitude": -33.01246,
+          "longitude": -71.540882
+        },
+        {
+          "latitude": -33.012361,
+          "longitude": -71.541022
+        },
+        {
+          "latitude": -33.013267,
+          "longitude": -71.542
+        }
+      ]
+    },
+    {
+      "name": "Campus Concepción UNAB",
+      "acronym": "Concepción UNAB",
+      "centerLat": -36.7925,
+      "centerLng": -73.0685,
+      "polygon": [
+        {
+          "latitude": -36.791916,
+          "longitude": -73.067516
+        },
+        {
+          "latitude": -36.793084,
+          "longitude": -73.067516
+        },
+        {
+          "latitude": -36.793084,
+          "longitude": -73.069484
+        },
+        {
+          "latitude": -36.791916,
+          "longitude": -73.069484
+        },
+        {
+          "latitude": -36.791916,
+          "longitude": -73.067516
+        }
+      ]
+    }
+  ],
+  "Universidad Adventista de Chile": [
+    {
+      "name": "Campus Las Mariposas UNACH (Chillán)",
+      "acronym": "UNACH Chillán",
+      "centerLat": -36.6355,
+      "centerLng": -72.0075,
+      "polygon": [
+        {
+          "latitude": -36.634916,
+          "longitude": -72.006518
+        },
+        {
+          "latitude": -36.636084,
+          "longitude": -72.006518
+        },
+        {
+          "latitude": -36.636084,
+          "longitude": -72.008482
+        },
+        {
+          "latitude": -36.634916,
+          "longitude": -72.008482
+        },
+        {
+          "latitude": -36.634916,
+          "longitude": -72.006518
+        }
+      ]
+    }
+  ],
+  "Universidad \"Arturo Prat\"": [
+    {
+      "name": "Campus Playa Brava UNAP (Iquique)",
+      "acronym": "UNAP Iquique",
+      "centerLat": -20.2445,
+      "centerLng": -70.1385,
+      "polygon": [
+        {
+          "latitude": -20.243916,
+          "longitude": -70.13766
+        },
+        {
+          "latitude": -20.245084,
+          "longitude": -70.13766
+        },
+        {
+          "latitude": -20.245084,
+          "longitude": -70.13934
+        },
+        {
+          "latitude": -20.243916,
+          "longitude": -70.13934
+        },
+        {
+          "latitude": -20.243916,
+          "longitude": -70.13766
+        }
+      ]
+    },
+    {
+      "name": "Campus Huayquique UNAP (Arquitectura)",
+      "acronym": "UNAP Huayquique",
+      "centerLat": -20.271023,
+      "centerLng": -70.130726,
+      "polygon": [
+        {
+          "latitude": -20.271055,
+          "longitude": -70.131923
+        },
+        {
+          "latitude": -20.271217,
+          "longitude": -70.131779
+        },
+        {
+          "latitude": -20.271234,
+          "longitude": -70.131458
+        },
+        {
+          "latitude": -20.270963,
+          "longitude": -70.131079
+        },
+        {
+          "latitude": -20.271289,
+          "longitude": -70.130825
+        },
+        {
+          "latitude": -20.271992,
+          "longitude": -70.130825
+        },
+        {
+          "latitude": -20.272192,
+          "longitude": -70.130795
+        },
+        {
+          "latitude": -20.272218,
+          "longitude": -70.129837
+        },
+        {
+          "latitude": -20.270592,
+          "longitude": -70.12955
+        },
+        {
+          "latitude": -20.270298,
+          "longitude": -70.12957
+        },
+        {
+          "latitude": -20.270313,
+          "longitude": -70.129867
+        },
+        {
+          "latitude": -20.27036,
+          "longitude": -70.12993
+        },
+        {
+          "latitude": -20.270296,
+          "longitude": -70.130921
+        },
+        {
+          "latitude": -20.270298,
+          "longitude": -70.131805
+        },
+        {
+          "latitude": -20.271055,
+          "longitude": -70.131923
+        }
+      ]
+    },
+    {
+      "name": "Sede Victoria UNAP (Malleco)",
+      "acronym": "UNAP Victoria",
+      "centerLat": -38.2345,
+      "centerLng": -72.3365,
+      "polygon": [
+        {
+          "latitude": -38.233916,
+          "longitude": -72.335496
+        },
+        {
+          "latitude": -38.235084,
+          "longitude": -72.335496
+        },
+        {
+          "latitude": -38.235084,
+          "longitude": -72.337504
+        },
+        {
+          "latitude": -38.233916,
+          "longitude": -72.337504
+        },
+        {
+          "latitude": -38.233916,
+          "longitude": -72.335496
+        }
+      ]
+    },
+    {
+      "name": "Sede Santiago UNAP",
+      "acronym": "UNAP Santiago",
+      "centerLat": -33.4375,
+      "centerLng": -70.6645,
+      "polygon": [
+        {
+          "latitude": -33.437105,
+          "longitude": -70.663861
+        },
+        {
+          "latitude": -33.437895,
+          "longitude": -70.663861
+        },
+        {
+          "latitude": -33.437895,
+          "longitude": -70.665139
+        },
+        {
+          "latitude": -33.437105,
+          "longitude": -70.665139
+        },
+        {
+          "latitude": -33.437105,
+          "longitude": -70.663861
+        }
+      ]
+    }
+  ],
+  "Universidad Francisco de Aguirre": [
+    {
+      "name": "Universidad Francisco de Aguirre - Sede Principal",
+      "acronym": "UFA",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad de Artes, Ciencias y Comunicación": [
+    {
+      "name": "Campus Salvador UNIACC",
+      "acronym": "UNIACC Salvador",
+      "centerLat": -33.4415,
+      "centerLng": -70.6235,
+      "polygon": [
+        {
+          "latitude": -33.441064,
+          "longitude": -70.622795
+        },
+        {
+          "latitude": -33.441936,
+          "longitude": -70.622795
+        },
+        {
+          "latitude": -33.441936,
+          "longitude": -70.624205
+        },
+        {
+          "latitude": -33.441064,
+          "longitude": -70.624205
+        },
+        {
+          "latitude": -33.441064,
+          "longitude": -70.622795
+        }
+      ]
+    },
+    {
+      "name": "Campus Los Jesuitas UNIACC",
+      "acronym": "UNIACC Jesuitas",
+      "centerLat": -33.445118,
+      "centerLng": -70.624063,
+      "polygon": [
+        {
+          "latitude": -33.445151,
+          "longitude": -70.624509
+        },
+        {
+          "latitude": -33.445375,
+          "longitude": -70.624441
+        },
+        {
+          "latitude": -33.445297,
+          "longitude": -70.624067
+        },
+        {
+          "latitude": -33.445275,
+          "longitude": -70.623977
+        },
+        {
+          "latitude": -33.445125,
+          "longitude": -70.624021
+        },
+        {
+          "latitude": -33.444975,
+          "longitude": -70.623319
+        },
+        {
+          "latitude": -33.444758,
+          "longitude": -70.623384
+        },
+        {
+          "latitude": -33.444979,
+          "longitude": -70.624452
+        },
+        {
+          "latitude": -33.445129,
+          "longitude": -70.624401
+        },
+        {
+          "latitude": -33.445151,
+          "longitude": -70.624509
+        }
+      ]
+    }
+  ],
+  "Universidad Iberoamericana de Ciencias y Tecnologia": [
+    {
+      "name": "Universidad Iberoamericana de Ciencias y Tecnologia - Sede Principal",
+      "acronym": "UICT",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad Arcis": [
+    {
+      "name": "Universidad Arcis - Sede Principal",
+      "acronym": "Universidad ",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad del Pacífico": [
+    {
+      "name": "Universidad del Pacífico - Sede Principal",
+      "acronym": "UP",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad de Playa Ancha de Ciencias de la Educacion": [
+    {
+      "name": "Campus Central UPLA",
+      "acronym": "UPLA Central",
+      "centerLat": -33.023822,
+      "centerLng": -71.640725,
+      "polygon": [
+        {
+          "latitude": -33.023486,
+          "longitude": -71.64135
+        },
+        {
+          "latitude": -33.02368,
+          "longitude": -71.641349
+        },
+        {
+          "latitude": -33.023812,
+          "longitude": -71.641334
+        },
+        {
+          "latitude": -33.023944,
+          "longitude": -71.641305
+        },
+        {
+          "latitude": -33.024194,
+          "longitude": -71.641192
+        },
+        {
+          "latitude": -33.024402,
+          "longitude": -71.641024
+        },
+        {
+          "latitude": -33.02453,
+          "longitude": -71.64086
+        },
+        {
+          "latitude": -33.02463,
+          "longitude": -71.640673
+        },
+        {
+          "latitude": -33.024721,
+          "longitude": -71.640484
+        },
+        {
+          "latitude": -33.024729,
+          "longitude": -71.640426
+        },
+        {
+          "latitude": -33.024723,
+          "longitude": -71.640395
+        },
+        {
+          "latitude": -33.024586,
+          "longitude": -71.640285
+        },
+        {
+          "latitude": -33.024424,
+          "longitude": -71.640415
+        },
+        {
+          "latitude": -33.024392,
+          "longitude": -71.640376
+        },
+        {
+          "latitude": -33.02432,
+          "longitude": -71.640397
+        },
+        {
+          "latitude": -33.024271,
+          "longitude": -71.640409
+        },
+        {
+          "latitude": -33.02411,
+          "longitude": -71.640417
+        },
+        {
+          "latitude": -33.024012,
+          "longitude": -71.640398
+        },
+        {
+          "latitude": -33.023878,
+          "longitude": -71.640327
+        },
+        {
+          "latitude": -33.023809,
+          "longitude": -71.640291
+        },
+        {
+          "latitude": -33.023722,
+          "longitude": -71.640206
+        },
+        {
+          "latitude": -33.023687,
+          "longitude": -71.640213
+        },
+        {
+          "latitude": -33.023661,
+          "longitude": -71.640226
+        },
+        {
+          "latitude": -33.023644,
+          "longitude": -71.640251
+        },
+        {
+          "latitude": -33.023642,
+          "longitude": -71.640289
+        },
+        {
+          "latitude": -33.02362,
+          "longitude": -71.640392
+        },
+        {
+          "latitude": -33.023598,
+          "longitude": -71.640495
+        },
+        {
+          "latitude": -33.023571,
+          "longitude": -71.640617
+        },
+        {
+          "latitude": -33.023539,
+          "longitude": -71.640667
+        },
+        {
+          "latitude": -33.023421,
+          "longitude": -71.640848
+        },
+        {
+          "latitude": -33.023348,
+          "longitude": -71.640942
+        },
+        {
+          "latitude": -33.023244,
+          "longitude": -71.641021
+        },
+        {
+          "latitude": -33.023137,
+          "longitude": -71.641085
+        },
+        {
+          "latitude": -33.023059,
+          "longitude": -71.641133
+        },
+        {
+          "latitude": -33.02304,
+          "longitude": -71.641157
+        },
+        {
+          "latitude": -33.023035,
+          "longitude": -71.641198
+        },
+        {
+          "latitude": -33.023051,
+          "longitude": -71.641246
+        },
+        {
+          "latitude": -33.023112,
+          "longitude": -71.641267
+        },
+        {
+          "latitude": -33.02326,
+          "longitude": -71.641309
+        },
+        {
+          "latitude": -33.023486,
+          "longitude": -71.64135
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Ciencias Naturales y Exactas UPLA",
+      "acronym": "Ciencias UPLA",
+      "centerLat": -33.0252,
+      "centerLng": -71.642,
+      "polygon": [
+        {
+          "latitude": -33.024796,
+          "longitude": -71.641349
+        },
+        {
+          "latitude": -33.025604,
+          "longitude": -71.641349
+        },
+        {
+          "latitude": -33.025604,
+          "longitude": -71.642651
+        },
+        {
+          "latitude": -33.024796,
+          "longitude": -71.642651
+        },
+        {
+          "latitude": -33.024796,
+          "longitude": -71.641349
+        }
+      ]
+    },
+    {
+      "name": "Campus San Felipe UPLA",
+      "acronym": "UPLA San Felipe",
+      "centerLat": -32.7485,
+      "centerLng": -70.7285,
+      "polygon": [
+        {
+          "latitude": -32.748006,
+          "longitude": -70.727707
+        },
+        {
+          "latitude": -32.748994,
+          "longitude": -70.727707
+        },
+        {
+          "latitude": -32.748994,
+          "longitude": -70.729293
+        },
+        {
+          "latitude": -32.748006,
+          "longitude": -70.729293
+        },
+        {
+          "latitude": -32.748006,
+          "longitude": -70.727707
+        }
+      ]
+    }
+  ],
+  "Universidad de Santiago de Chile": [
+    {
+      "name": "Campus Único USACH",
+      "acronym": "USACH",
+      "centerLat": -33.4501,
+      "centerLng": -70.6865,
+      "polygon": [
+        {
+          "latitude": -33.449516,
+          "longitude": -70.685555
+        },
+        {
+          "latitude": -33.450684,
+          "longitude": -70.685555
+        },
+        {
+          "latitude": -33.450684,
+          "longitude": -70.687445
+        },
+        {
+          "latitude": -33.449516,
+          "longitude": -70.687445
+        },
+        {
+          "latitude": -33.449516,
+          "longitude": -70.685555
+        }
+      ]
+    }
+  ],
+  "Universidad de San Andres": [
+    {
+      "name": "Universidad de San Andres - Sede Principal",
+      "acronym": "USA",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad de La Serena": [
+    {
+      "name": "Campus Andrés Bello ULS (Colina El Pino)",
+      "acronym": "ULS Colina",
+      "centerLat": -29.9125,
+      "centerLng": -71.2385,
+      "polygon": [
+        {
+          "latitude": -29.911916,
+          "longitude": -71.237591
+        },
+        {
+          "latitude": -29.913084,
+          "longitude": -71.237591
+        },
+        {
+          "latitude": -29.913084,
+          "longitude": -71.239409
+        },
+        {
+          "latitude": -29.911916,
+          "longitude": -71.239409
+        },
+        {
+          "latitude": -29.911916,
+          "longitude": -71.237591
+        }
+      ]
+    },
+    {
+      "name": "Campus Ignacio Domeyko ULS",
+      "acronym": "ULS Domeyko",
+      "centerLat": -29.9075,
+      "centerLng": -71.2465,
+      "polygon": [
+        {
+          "latitude": -29.906992,
+          "longitude": -71.24571
+        },
+        {
+          "latitude": -29.908008,
+          "longitude": -71.24571
+        },
+        {
+          "latitude": -29.908008,
+          "longitude": -71.24729
+        },
+        {
+          "latitude": -29.906992,
+          "longitude": -71.24729
+        },
+        {
+          "latitude": -29.906992,
+          "longitude": -71.24571
+        }
+      ]
+    },
+    {
+      "name": "Campus Isabel Bongard ULS",
+      "acronym": "ULS Bongard",
+      "centerLat": -29.9095,
+      "centerLng": -71.2535,
+      "polygon": [
+        {
+          "latitude": -29.90901,
+          "longitude": -71.252738
+        },
+        {
+          "latitude": -29.90999,
+          "longitude": -71.252738
+        },
+        {
+          "latitude": -29.90999,
+          "longitude": -71.254262
+        },
+        {
+          "latitude": -29.90901,
+          "longitude": -71.254262
+        },
+        {
+          "latitude": -29.90901,
+          "longitude": -71.252738
+        }
+      ]
+    },
+    {
+      "name": "Campus Coquimbo ULS",
+      "acronym": "ULS Coquimbo",
+      "centerLat": -29.9655,
+      "centerLng": -71.3415,
+      "polygon": [
+        {
+          "latitude": -29.964952,
+          "longitude": -71.340646
+        },
+        {
+          "latitude": -29.966048,
+          "longitude": -71.340646
+        },
+        {
+          "latitude": -29.966048,
+          "longitude": -71.342354
+        },
+        {
+          "latitude": -29.964952,
+          "longitude": -71.342354
+        },
+        {
+          "latitude": -29.964952,
+          "longitude": -71.340646
+        }
+      ]
+    }
+  ],
+  "Universidad San Sebastian": [
+    {
+      "name": "Campus Bellavista USS",
+      "acronym": "Bellavista USS",
+      "centerLat": -33.4348,
+      "centerLng": -70.635,
+      "polygon": [
+        {
+          "latitude": -33.434328,
+          "longitude": -70.634237
+        },
+        {
+          "latitude": -33.435272,
+          "longitude": -70.634237
+        },
+        {
+          "latitude": -33.435272,
+          "longitude": -70.635763
+        },
+        {
+          "latitude": -33.434328,
+          "longitude": -70.635763
+        },
+        {
+          "latitude": -33.434328,
+          "longitude": -70.634237
+        }
+      ]
+    },
+    {
+      "name": "Campus Los Leones USS",
+      "acronym": "Los Leones USS",
+      "centerLat": -33.4215,
+      "centerLng": -70.6035,
+      "polygon": [
+        {
+          "latitude": -33.421064,
+          "longitude": -70.602795
+        },
+        {
+          "latitude": -33.421936,
+          "longitude": -70.602795
+        },
+        {
+          "latitude": -33.421936,
+          "longitude": -70.604205
+        },
+        {
+          "latitude": -33.421064,
+          "longitude": -70.604205
+        },
+        {
+          "latitude": -33.421064,
+          "longitude": -70.602795
+        }
+      ]
+    },
+    {
+      "name": "Campus Las Tres Pascualas USS (Concepción)",
+      "acronym": "3 Pascualas USS",
+      "centerLat": -36.8145,
+      "centerLng": -73.044,
+      "polygon": [
+        {
+          "latitude": -36.813916,
+          "longitude": -73.043015
+        },
+        {
+          "latitude": -36.815084,
+          "longitude": -73.043015
+        },
+        {
+          "latitude": -36.815084,
+          "longitude": -73.044985
+        },
+        {
+          "latitude": -36.813916,
+          "longitude": -73.044985
+        },
+        {
+          "latitude": -36.813916,
+          "longitude": -73.043015
+        }
+      ]
+    },
+    {
+      "name": "Campus Valdivia USS",
+      "acronym": "Valdivia USS",
+      "centerLat": -39.8225,
+      "centerLng": -73.2505,
+      "polygon": [
+        {
+          "latitude": -39.822028,
+          "longitude": -73.249671
+        },
+        {
+          "latitude": -39.822972,
+          "longitude": -73.249671
+        },
+        {
+          "latitude": -39.822972,
+          "longitude": -73.251329
+        },
+        {
+          "latitude": -39.822028,
+          "longitude": -73.251329
+        },
+        {
+          "latitude": -39.822028,
+          "longitude": -73.249671
+        }
+      ]
+    },
+    {
+      "name": "Campus Patagonia USS (Puerto Montt)",
+      "acronym": "Patagonia USS",
+      "centerLat": -41.4685,
+      "centerLng": -72.9315,
+      "polygon": [
+        {
+          "latitude": -41.467992,
+          "longitude": -72.930586
+        },
+        {
+          "latitude": -41.469008,
+          "longitude": -72.930586
+        },
+        {
+          "latitude": -41.469008,
+          "longitude": -72.932414
+        },
+        {
+          "latitude": -41.467992,
+          "longitude": -72.932414
+        },
+        {
+          "latitude": -41.467992,
+          "longitude": -72.930586
+        }
+      ]
+    }
+  ],
+  "Universidad Santo Tomás": [
+    {
+      "name": "Campus Ejército UST (Santiago)",
+      "acronym": "UST Ejército",
+      "centerLat": -33.448923,
+      "centerLng": -70.660568,
+      "polygon": [
+        {
+          "latitude": -33.448552,
+          "longitude": -70.661072
+        },
+        {
+          "latitude": -33.448662,
+          "longitude": -70.661051
+        },
+        {
+          "latitude": -33.44866,
+          "longitude": -70.661025
+        },
+        {
+          "latitude": -33.448901,
+          "longitude": -70.660973
+        },
+        {
+          "latitude": -33.448875,
+          "longitude": -70.660797
+        },
+        {
+          "latitude": -33.448866,
+          "longitude": -70.660725
+        },
+        {
+          "latitude": -33.449177,
+          "longitude": -70.660659
+        },
+        {
+          "latitude": -33.449151,
+          "longitude": -70.660453
+        },
+        {
+          "latitude": -33.449179,
+          "longitude": -70.660446
+        },
+        {
+          "latitude": -33.44916,
+          "longitude": -70.660318
+        },
+        {
+          "latitude": -33.449296,
+          "longitude": -70.660286
+        },
+        {
+          "latitude": -33.449269,
+          "longitude": -70.660175
+        },
+        {
+          "latitude": -33.449143,
+          "longitude": -70.660206
+        },
+        {
+          "latitude": -33.449142,
+          "longitude": -70.660197
+        },
+        {
+          "latitude": -33.448787,
+          "longitude": -70.660277
+        },
+        {
+          "latitude": -33.448792,
+          "longitude": -70.660312
+        },
+        {
+          "latitude": -33.448472,
+          "longitude": -70.660376
+        },
+        {
+          "latitude": -33.448526,
+          "longitude": -70.66087
+        },
+        {
+          "latitude": -33.448552,
+          "longitude": -70.661072
+        }
+      ]
+    },
+    {
+      "name": "Sede Viña del Mar UST (1 Norte)",
+      "acronym": "UST Viña",
+      "centerLat": -33.037252,
+      "centerLng": -71.521927,
+      "polygon": [
+        {
+          "latitude": -33.03758,
+          "longitude": -71.522509
+        },
+        {
+          "latitude": -33.037599,
+          "longitude": -71.522475
+        },
+        {
+          "latitude": -33.037627,
+          "longitude": -71.522417
+        },
+        {
+          "latitude": -33.037694,
+          "longitude": -71.522272
+        },
+        {
+          "latitude": -33.037766,
+          "longitude": -71.522081
+        },
+        {
+          "latitude": -33.037561,
+          "longitude": -71.521772
+        },
+        {
+          "latitude": -33.037486,
+          "longitude": -71.521669
+        },
+        {
+          "latitude": -33.037294,
+          "longitude": -71.521435
+        },
+        {
+          "latitude": -33.037269,
+          "longitude": -71.521504
+        },
+        {
+          "latitude": -33.037237,
+          "longitude": -71.521567
+        },
+        {
+          "latitude": -33.037197,
+          "longitude": -71.521625
+        },
+        {
+          "latitude": -33.03715,
+          "longitude": -71.521675
+        },
+        {
+          "latitude": -33.037109,
+          "longitude": -71.52171
+        },
+        {
+          "latitude": -33.037063,
+          "longitude": -71.521739
+        },
+        {
+          "latitude": -33.037016,
+          "longitude": -71.521761
+        },
+        {
+          "latitude": -33.036966,
+          "longitude": -71.521777
+        },
+        {
+          "latitude": -33.036471,
+          "longitude": -71.521383
+        },
+        {
+          "latitude": -33.036304,
+          "longitude": -71.521653
+        },
+        {
+          "latitude": -33.037271,
+          "longitude": -71.522393
+        },
+        {
+          "latitude": -33.037283,
+          "longitude": -71.522365
+        },
+        {
+          "latitude": -33.037292,
+          "longitude": -71.522336
+        },
+        {
+          "latitude": -33.037308,
+          "longitude": -71.522269
+        },
+        {
+          "latitude": -33.03758,
+          "longitude": -71.522509
+        }
+      ]
+    },
+    {
+      "name": "Sede Concepción UST",
+      "acronym": "UST Concepción",
+      "centerLat": -36.826789,
+      "centerLng": -73.061299,
+      "polygon": [
+        {
+          "latitude": -36.82637,
+          "longitude": -73.062253
+        },
+        {
+          "latitude": -36.827262,
+          "longitude": -73.061674
+        },
+        {
+          "latitude": -36.827112,
+          "longitude": -73.061324
+        },
+        {
+          "latitude": -36.826911,
+          "longitude": -73.060932
+        },
+        {
+          "latitude": -36.826894,
+          "longitude": -73.060919
+        },
+        {
+          "latitude": -36.826874,
+          "longitude": -73.060918
+        },
+        {
+          "latitude": -36.826849,
+          "longitude": -73.060928
+        },
+        {
+          "latitude": -36.826039,
+          "longitude": -73.061441
+        },
+        {
+          "latitude": -36.82637,
+          "longitude": -73.062253
+        }
+      ]
+    }
+  ],
+  "Universidad de Tarapacá": [
+    {
+      "name": "Campus Saucache UTA (Arica)",
+      "acronym": "UTA Saucache",
+      "centerLat": -18.4905,
+      "centerLng": -70.2985,
+      "polygon": [
+        {
+          "latitude": -18.489916,
+          "longitude": -70.297669
+        },
+        {
+          "latitude": -18.491084,
+          "longitude": -70.297669
+        },
+        {
+          "latitude": -18.491084,
+          "longitude": -70.299331
+        },
+        {
+          "latitude": -18.489916,
+          "longitude": -70.299331
+        },
+        {
+          "latitude": -18.489916,
+          "longitude": -70.297669
+        }
+      ]
+    },
+    {
+      "name": "Campus Velásquez UTA (Arica)",
+      "acronym": "UTA Velásquez",
+      "centerLat": -18.471333,
+      "centerLng": -70.312453,
+      "polygon": [
+        {
+          "latitude": -18.471975,
+          "longitude": -70.313969
+        },
+        {
+          "latitude": -18.47264,
+          "longitude": -70.313349
+        },
+        {
+          "latitude": -18.472787,
+          "longitude": -70.313534
+        },
+        {
+          "latitude": -18.472817,
+          "longitude": -70.313507
+        },
+        {
+          "latitude": -18.472847,
+          "longitude": -70.313558
+        },
+        {
+          "latitude": -18.473102,
+          "longitude": -70.313302
+        },
+        {
+          "latitude": -18.472727,
+          "longitude": -70.3129
+        },
+        {
+          "latitude": -18.471266,
+          "longitude": -70.311596
+        },
+        {
+          "latitude": -18.471037,
+          "longitude": -70.311376
+        },
+        {
+          "latitude": -18.470741,
+          "longitude": -70.311311
+        },
+        {
+          "latitude": -18.470631,
+          "longitude": -70.311323
+        },
+        {
+          "latitude": -18.470219,
+          "longitude": -70.311528
+        },
+        {
+          "latitude": -18.470166,
+          "longitude": -70.311589
+        },
+        {
+          "latitude": -18.47015,
+          "longitude": -70.311635
+        },
+        {
+          "latitude": -18.470235,
+          "longitude": -70.311878
+        },
+        {
+          "latitude": -18.470224,
+          "longitude": -70.31191
+        },
+        {
+          "latitude": -18.47031,
+          "longitude": -70.312163
+        },
+        {
+          "latitude": -18.470443,
+          "longitude": -70.31241
+        },
+        {
+          "latitude": -18.470723,
+          "longitude": -70.312696
+        },
+        {
+          "latitude": -18.47161,
+          "longitude": -70.313523
+        },
+        {
+          "latitude": -18.471975,
+          "longitude": -70.313969
+        }
+      ]
+    },
+    {
+      "name": "Sede Iquique UTA",
+      "acronym": "UTA Iquique",
+      "centerLat": -20.2485,
+      "centerLng": -70.1385,
+      "polygon": [
+        {
+          "latitude": -20.247916,
+          "longitude": -70.13766
+        },
+        {
+          "latitude": -20.249084,
+          "longitude": -70.13766
+        },
+        {
+          "latitude": -20.249084,
+          "longitude": -70.13934
+        },
+        {
+          "latitude": -20.247916,
+          "longitude": -70.13934
+        },
+        {
+          "latitude": -20.247916,
+          "longitude": -70.13766
+        }
+      ]
+    }
+  ],
+  "Universidad de Talca": [
+    {
+      "name": "Campus Lircay UTALCA (Talca)",
+      "acronym": "UTALCA Lircay",
+      "centerLat": -35.4055,
+      "centerLng": -71.6375,
+      "polygon": [
+        {
+          "latitude": -35.404916,
+          "longitude": -71.636533
+        },
+        {
+          "latitude": -35.406084,
+          "longitude": -71.636533
+        },
+        {
+          "latitude": -35.406084,
+          "longitude": -71.638467
+        },
+        {
+          "latitude": -35.404916,
+          "longitude": -71.638467
+        },
+        {
+          "latitude": -35.404916,
+          "longitude": -71.636533
+        }
+      ]
+    },
+    {
+      "name": "Campus Curicó UTALCA (Facultad de Ingeniería)",
+      "acronym": "UTALCA Curicó",
+      "centerLat": -35.002543,
+      "centerLng": -71.230155,
+      "polygon": [
+        {
+          "latitude": -35.004207,
+          "longitude": -71.232462
+        },
+        {
+          "latitude": -35.004358,
+          "longitude": -71.231208
+        },
+        {
+          "latitude": -35.00453,
+          "longitude": -71.229943
+        },
+        {
+          "latitude": -35.00422,
+          "longitude": -71.229665
+        },
+        {
+          "latitude": -35.00401,
+          "longitude": -71.228925
+        },
+        {
+          "latitude": -35.002842,
+          "longitude": -71.228733
+        },
+        {
+          "latitude": -35.001892,
+          "longitude": -71.228577
+        },
+        {
+          "latitude": -35.001755,
+          "longitude": -71.228943
+        },
+        {
+          "latitude": -35.001474,
+          "longitude": -71.229699
+        },
+        {
+          "latitude": -35.001426,
+          "longitude": -71.229828
+        },
+        {
+          "latitude": -35.001364,
+          "longitude": -71.229993
+        },
+        {
+          "latitude": -35.001253,
+          "longitude": -71.230222
+        },
+        {
+          "latitude": -35.000683,
+          "longitude": -71.231915
+        },
+        {
+          "latitude": -35.001586,
+          "longitude": -71.232055
+        },
+        {
+          "latitude": -35.004207,
+          "longitude": -71.232462
+        }
+      ]
+    },
+    {
+      "name": "Campus Santiago UTALCA",
+      "acronym": "UTALCA Santiago",
+      "centerLat": -33.472657,
+      "centerLng": -70.625918,
+      "polygon": [
+        {
+          "latitude": -33.472514,
+          "longitude": -70.626351
+        },
+        {
+          "latitude": -33.473078,
+          "longitude": -70.62618
+        },
+        {
+          "latitude": -33.473097,
+          "longitude": -70.626151
+        },
+        {
+          "latitude": -33.47298,
+          "longitude": -70.625519
+        },
+        {
+          "latitude": -33.472757,
+          "longitude": -70.625589
+        },
+        {
+          "latitude": -33.472496,
+          "longitude": -70.625667
+        },
+        {
+          "latitude": -33.472245,
+          "longitude": -70.625692
+        },
+        {
+          "latitude": -33.472293,
+          "longitude": -70.626083
+        },
+        {
+          "latitude": -33.47245,
+          "longitude": -70.626031
+        },
+        {
+          "latitude": -33.472514,
+          "longitude": -70.626351
+        }
+      ]
+    }
+  ],
+  "Universidad Tecnológica Metropolitana": [
+    {
+      "name": "Campus Dieciocho UTEM",
+      "acronym": "UTEM Dieciocho",
+      "centerLat": -33.4495,
+      "centerLng": -70.6565,
+      "polygon": [
+        {
+          "latitude": -33.449105,
+          "longitude": -70.65586
+        },
+        {
+          "latitude": -33.449895,
+          "longitude": -70.65586
+        },
+        {
+          "latitude": -33.449895,
+          "longitude": -70.65714
+        },
+        {
+          "latitude": -33.449105,
+          "longitude": -70.65714
+        },
+        {
+          "latitude": -33.449105,
+          "longitude": -70.65586
+        }
+      ]
+    },
+    {
+      "name": "Campus Macul UTEM",
+      "acronym": "UTEM Macul",
+      "centerLat": -33.4645,
+      "centerLng": -70.5975,
+      "polygon": [
+        {
+          "latitude": -33.463952,
+          "longitude": -70.596613
+        },
+        {
+          "latitude": -33.465048,
+          "longitude": -70.596613
+        },
+        {
+          "latitude": -33.465048,
+          "longitude": -70.598387
+        },
+        {
+          "latitude": -33.463952,
+          "longitude": -70.598387
+        },
+        {
+          "latitude": -33.463952,
+          "longitude": -70.596613
+        }
+      ]
+    },
+    {
+      "name": "Campus Providencia UTEM",
+      "acronym": "UTEM Providencia",
+      "centerLat": -33.4355,
+      "centerLng": -70.6145,
+      "polygon": [
+        {
+          "latitude": -33.435141,
+          "longitude": -70.613919
+        },
+        {
+          "latitude": -33.435859,
+          "longitude": -70.613919
+        },
+        {
+          "latitude": -33.435859,
+          "longitude": -70.615081
+        },
+        {
+          "latitude": -33.435141,
+          "longitude": -70.615081
+        },
+        {
+          "latitude": -33.435141,
+          "longitude": -70.613919
+        }
+      ]
+    }
+  ],
+  "Universidad Técnica \"Federico Santa María\"": [
+    {
+      "name": "USM Casa Central (Valparaíso)",
+      "acronym": "USM Central",
+      "centerLat": -33.0365,
+      "centerLng": -71.5935,
+      "polygon": [
+        {
+          "latitude": -33.035939,
+          "longitude": -71.592596
+        },
+        {
+          "latitude": -33.037061,
+          "longitude": -71.592596
+        },
+        {
+          "latitude": -33.037061,
+          "longitude": -71.594404
+        },
+        {
+          "latitude": -33.035939,
+          "longitude": -71.594404
+        },
+        {
+          "latitude": -33.035939,
+          "longitude": -71.592596
+        }
+      ]
+    },
+    {
+      "name": "USM Sede Viña del Mar",
+      "acronym": "USM Viña",
+      "centerLat": -33.036072,
+      "centerLng": -71.488695,
+      "polygon": [
+        {
+          "latitude": -33.036392,
+          "longitude": -71.489111
+        },
+        {
+          "latitude": -33.03643,
+          "longitude": -71.489101
+        },
+        {
+          "latitude": -33.036477,
+          "longitude": -71.489056
+        },
+        {
+          "latitude": -33.036524,
+          "longitude": -71.488984
+        },
+        {
+          "latitude": -33.036556,
+          "longitude": -71.488906
+        },
+        {
+          "latitude": -33.036577,
+          "longitude": -71.488822
+        },
+        {
+          "latitude": -33.036579,
+          "longitude": -71.488724
+        },
+        {
+          "latitude": -33.036559,
+          "longitude": -71.488633
+        },
+        {
+          "latitude": -33.036523,
+          "longitude": -71.488574
+        },
+        {
+          "latitude": -33.036124,
+          "longitude": -71.488402
+        },
+        {
+          "latitude": -33.035778,
+          "longitude": -71.488255
+        },
+        {
+          "latitude": -33.035746,
+          "longitude": -71.488268
+        },
+        {
+          "latitude": -33.035702,
+          "longitude": -71.488304
+        },
+        {
+          "latitude": -33.035661,
+          "longitude": -71.488356
+        },
+        {
+          "latitude": -33.035626,
+          "longitude": -71.488423
+        },
+        {
+          "latitude": -33.035598,
+          "longitude": -71.488505
+        },
+        {
+          "latitude": -33.035581,
+          "longitude": -71.488594
+        },
+        {
+          "latitude": -33.035581,
+          "longitude": -71.48868
+        },
+        {
+          "latitude": -33.035601,
+          "longitude": -71.488748
+        },
+        {
+          "latitude": -33.035627,
+          "longitude": -71.488791
+        },
+        {
+          "latitude": -33.035974,
+          "longitude": -71.488938
+        },
+        {
+          "latitude": -33.036367,
+          "longitude": -71.489107
+        },
+        {
+          "latitude": -33.036392,
+          "longitude": -71.489111
+        }
+      ]
+    },
+    {
+      "name": "USM Campus San Joaquín (Santiago)",
+      "acronym": "USM-SJ",
+      "centerLat": -33.490742,
+      "centerLng": -70.619373,
+      "polygon": [
+        {
+          "latitude": -33.48999,
+          "longitude": -70.620556
+        },
+        {
+          "latitude": -33.49037,
+          "longitude": -70.620473
+        },
+        {
+          "latitude": -33.490527,
+          "longitude": -70.620494
+        },
+        {
+          "latitude": -33.490567,
+          "longitude": -70.620117
+        },
+        {
+          "latitude": -33.491742,
+          "longitude": -70.619865
+        },
+        {
+          "latitude": -33.491772,
+          "longitude": -70.618857
+        },
+        {
+          "latitude": -33.491717,
+          "longitude": -70.61838
+        },
+        {
+          "latitude": -33.491669,
+          "longitude": -70.61809
+        },
+        {
+          "latitude": -33.491591,
+          "longitude": -70.617908
+        },
+        {
+          "latitude": -33.490557,
+          "longitude": -70.618118
+        },
+        {
+          "latitude": -33.489439,
+          "longitude": -70.618382
+        },
+        {
+          "latitude": -33.489766,
+          "longitude": -70.620323
+        },
+        {
+          "latitude": -33.489936,
+          "longitude": -70.620286
+        },
+        {
+          "latitude": -33.48999,
+          "longitude": -70.620556
+        }
+      ]
+    },
+    {
+      "name": "USM Campus Vitacura (Santiago)",
+      "acronym": "USM Vitacura",
+      "centerLat": -33.377482,
+      "centerLng": -70.577542,
+      "polygon": [
+        {
+          "latitude": -33.376805,
+          "longitude": -70.578873
+        },
+        {
+          "latitude": -33.377061,
+          "longitude": -70.578866
+        },
+        {
+          "latitude": -33.377732,
+          "longitude": -70.578835
+        },
+        {
+          "latitude": -33.377732,
+          "longitude": -70.578729
+        },
+        {
+          "latitude": -33.377732,
+          "longitude": -70.578613
+        },
+        {
+          "latitude": -33.377738,
+          "longitude": -70.578299
+        },
+        {
+          "latitude": -33.377726,
+          "longitude": -70.578193
+        },
+        {
+          "latitude": -33.377645,
+          "longitude": -70.57773
+        },
+        {
+          "latitude": -33.377831,
+          "longitude": -70.577428
+        },
+        {
+          "latitude": -33.378723,
+          "longitude": -70.577219
+        },
+        {
+          "latitude": -33.37871,
+          "longitude": -70.577158
+        },
+        {
+          "latitude": -33.378678,
+          "longitude": -70.576994
+        },
+        {
+          "latitude": -33.378545,
+          "longitude": -70.576405
+        },
+        {
+          "latitude": -33.378453,
+          "longitude": -70.57636
+        },
+        {
+          "latitude": -33.378136,
+          "longitude": -70.576419
+        },
+        {
+          "latitude": -33.377512,
+          "longitude": -70.576562
+        },
+        {
+          "latitude": -33.377061,
+          "longitude": -70.576667
+        },
+        {
+          "latitude": -33.37674,
+          "longitude": -70.576742
+        },
+        {
+          "latitude": -33.376665,
+          "longitude": -70.576759
+        },
+        {
+          "latitude": -33.376619,
+          "longitude": -70.576767
+        },
+        {
+          "latitude": -33.376695,
+          "longitude": -70.577172
+        },
+        {
+          "latitude": -33.376791,
+          "longitude": -70.577699
+        },
+        {
+          "latitude": -33.376798,
+          "longitude": -70.577754
+        },
+        {
+          "latitude": -33.3768,
+          "longitude": -70.577791
+        },
+        {
+          "latitude": -33.3768,
+          "longitude": -70.57782
+        },
+        {
+          "latitude": -33.376804,
+          "longitude": -70.578251
+        },
+        {
+          "latitude": -33.376805,
+          "longitude": -70.578873
+        }
+      ]
+    }
+  ],
+  "Universidad de Valparaiso": [
+    {
+      "name": "Casa Central Universidad de Valparaíso",
+      "acronym": "Central UV",
+      "centerLat": -33.0398,
+      "centerLng": -71.6265,
+      "polygon": [
+        {
+          "latitude": -33.039441,
+          "longitude": -71.625921
+        },
+        {
+          "latitude": -33.040159,
+          "longitude": -71.625921
+        },
+        {
+          "latitude": -33.040159,
+          "longitude": -71.627079
+        },
+        {
+          "latitude": -33.039441,
+          "longitude": -71.627079
+        },
+        {
+          "latitude": -33.039441,
+          "longitude": -71.625921
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Medicina y Salud UV (Campus Reñaca)",
+      "acronym": "Salud UV",
+      "centerLat": -32.9772,
+      "centerLng": -71.5415,
+      "polygon": [
+        {
+          "latitude": -32.976706,
+          "longitude": -71.540705
+        },
+        {
+          "latitude": -32.977694,
+          "longitude": -71.540705
+        },
+        {
+          "latitude": -32.977694,
+          "longitude": -71.542295
+        },
+        {
+          "latitude": -32.976706,
+          "longitude": -71.542295
+        },
+        {
+          "latitude": -32.976706,
+          "longitude": -71.540705
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Derecho UV",
+      "acronym": "Derecho UV",
+      "centerLat": -33.044,
+      "centerLng": -71.6195,
+      "polygon": [
+        {
+          "latitude": -33.043618,
+          "longitude": -71.618885
+        },
+        {
+          "latitude": -33.044382,
+          "longitude": -71.618885
+        },
+        {
+          "latitude": -33.044382,
+          "longitude": -71.620115
+        },
+        {
+          "latitude": -33.043618,
+          "longitude": -71.620115
+        },
+        {
+          "latitude": -33.043618,
+          "longitude": -71.618885
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Ingeniería UV",
+      "acronym": "FIN UV",
+      "centerLat": -33.0468,
+      "centerLng": -71.6105,
+      "polygon": [
+        {
+          "latitude": -33.046418,
+          "longitude": -71.609885
+        },
+        {
+          "latitude": -33.047182,
+          "longitude": -71.609885
+        },
+        {
+          "latitude": -33.047182,
+          "longitude": -71.611115
+        },
+        {
+          "latitude": -33.046418,
+          "longitude": -71.611115
+        },
+        {
+          "latitude": -33.046418,
+          "longitude": -71.609885
+        }
+      ]
+    },
+    {
+      "name": "Campus Playa Ancha UV (Arquitectura y Odontología)",
+      "acronym": "Playa Ancha UV",
+      "centerLat": -33.025149,
+      "centerLng": -71.639306,
+      "polygon": [
+        {
+          "latitude": -33.024923,
+          "longitude": -71.640098
+        },
+        {
+          "latitude": -33.024984,
+          "longitude": -71.640084
+        },
+        {
+          "latitude": -33.025036,
+          "longitude": -71.640028
+        },
+        {
+          "latitude": -33.025226,
+          "longitude": -71.639592
+        },
+        {
+          "latitude": -33.025296,
+          "longitude": -71.639461
+        },
+        {
+          "latitude": -33.02538,
+          "longitude": -71.639447
+        },
+        {
+          "latitude": -33.025576,
+          "longitude": -71.639443
+        },
+        {
+          "latitude": -33.025654,
+          "longitude": -71.639417
+        },
+        {
+          "latitude": -33.025724,
+          "longitude": -71.639362
+        },
+        {
+          "latitude": -33.025993,
+          "longitude": -71.639017
+        },
+        {
+          "latitude": -33.026006,
+          "longitude": -71.638964
+        },
+        {
+          "latitude": -33.025995,
+          "longitude": -71.638916
+        },
+        {
+          "latitude": -33.025965,
+          "longitude": -71.638885
+        },
+        {
+          "latitude": -33.025563,
+          "longitude": -71.638815
+        },
+        {
+          "latitude": -33.024988,
+          "longitude": -71.638694
+        },
+        {
+          "latitude": -33.024419,
+          "longitude": -71.638512
+        },
+        {
+          "latitude": -33.024375,
+          "longitude": -71.638522
+        },
+        {
+          "latitude": -33.024346,
+          "longitude": -71.638554
+        },
+        {
+          "latitude": -33.024356,
+          "longitude": -71.638607
+        },
+        {
+          "latitude": -33.024697,
+          "longitude": -71.639202
+        },
+        {
+          "latitude": -33.024777,
+          "longitude": -71.639456
+        },
+        {
+          "latitude": -33.024833,
+          "longitude": -71.639674
+        },
+        {
+          "latitude": -33.024853,
+          "longitude": -71.639835
+        },
+        {
+          "latitude": -33.024867,
+          "longitude": -71.640001
+        },
+        {
+          "latitude": -33.024885,
+          "longitude": -71.64007
+        },
+        {
+          "latitude": -33.024923,
+          "longitude": -71.640098
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Farmacia y Ciencias UV (Playa Ancha)",
+      "acronym": "Ciencias UV",
+      "centerLat": -33.0235,
+      "centerLng": -71.6395,
+      "polygon": [
+        {
+          "latitude": -33.023096,
+          "longitude": -71.638849
+        },
+        {
+          "latitude": -33.023904,
+          "longitude": -71.638849
+        },
+        {
+          "latitude": -33.023904,
+          "longitude": -71.640151
+        },
+        {
+          "latitude": -33.023096,
+          "longitude": -71.640151
+        },
+        {
+          "latitude": -33.023096,
+          "longitude": -71.638849
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Ciencias Económicas y Administrativas UV (FACEA)",
+      "acronym": "FACEA UV",
+      "centerLat": -33.0295,
+      "centerLng": -71.5625,
+      "polygon": [
+        {
+          "latitude": -33.029118,
+          "longitude": -71.561885
+        },
+        {
+          "latitude": -33.029882,
+          "longitude": -71.561885
+        },
+        {
+          "latitude": -33.029882,
+          "longitude": -71.563115
+        },
+        {
+          "latitude": -33.029118,
+          "longitude": -71.563115
+        },
+        {
+          "latitude": -33.029118,
+          "longitude": -71.561885
+        }
+      ]
+    },
+    {
+      "name": "Facultad de Humanidades y Educación UV",
+      "acronym": "Humanidades UV",
+      "centerLat": -33.038217,
+      "centerLng": -71.629997,
+      "polygon": [
+        {
+          "latitude": -33.038287,
+          "longitude": -71.630225
+        },
+        {
+          "latitude": -33.038347,
+          "longitude": -71.630187
+        },
+        {
+          "latitude": -33.038337,
+          "longitude": -71.630164
+        },
+        {
+          "latitude": -33.038363,
+          "longitude": -71.630148
+        },
+        {
+          "latitude": -33.03829,
+          "longitude": -71.629981
+        },
+        {
+          "latitude": -33.038231,
+          "longitude": -71.630018
+        },
+        {
+          "latitude": -33.038201,
+          "longitude": -71.629949
+        },
+        {
+          "latitude": -33.038223,
+          "longitude": -71.629935
+        },
+        {
+          "latitude": -33.03821,
+          "longitude": -71.629904
+        },
+        {
+          "latitude": -33.038142,
+          "longitude": -71.629751
+        },
+        {
+          "latitude": -33.038139,
+          "longitude": -71.629743
+        },
+        {
+          "latitude": -33.038026,
+          "longitude": -71.629814
+        },
+        {
+          "latitude": -33.038036,
+          "longitude": -71.629836
+        },
+        {
+          "latitude": -33.038182,
+          "longitude": -71.630167
+        },
+        {
+          "latitude": -33.038244,
+          "longitude": -71.630128
+        },
+        {
+          "latitude": -33.038287,
+          "longitude": -71.630225
+        }
+      ]
+    },
+    {
+      "name": "Campus Santiago UV (San Miguel)",
+      "acronym": "Santiago UV",
+      "centerLat": -33.4925,
+      "centerLng": -70.6515,
+      "polygon": [
+        {
+          "latitude": -33.492073,
+          "longitude": -70.650809
+        },
+        {
+          "latitude": -33.492927,
+          "longitude": -70.650809
+        },
+        {
+          "latitude": -33.492927,
+          "longitude": -70.652191
+        },
+        {
+          "latitude": -33.492073,
+          "longitude": -70.652191
+        },
+        {
+          "latitude": -33.492073,
+          "longitude": -70.650809
+        }
+      ]
+    }
+  ],
+  "Universidad Tecnologica \"Vicente Perez Rosales\"": [
+    {
+      "name": "Universidad Tecnologica \"Vicente Perez Rosales\" - Sede Principal",
+      "acronym": "UTVPR",
+      "centerLat": -33.4489,
+      "centerLng": -70.6693,
+      "polygon": [
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66861
+        },
+        {
+          "latitude": -33.449327,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66999
+        },
+        {
+          "latitude": -33.448473,
+          "longitude": -70.66861
+        }
+      ]
+    }
+  ],
+  "Universidad de Viña del Mar": [
+    {
+      "name": "Campus Rodelillo UVM",
+      "acronym": "UVM Rodelillo",
+      "centerLat": -33.0645,
+      "centerLng": -71.545,
+      "polygon": [
+        {
+          "latitude": -33.063916,
+          "longitude": -71.544059
+        },
+        {
+          "latitude": -33.065084,
+          "longitude": -71.544059
+        },
+        {
+          "latitude": -33.065084,
+          "longitude": -71.545941
+        },
+        {
+          "latitude": -33.063916,
+          "longitude": -71.545941
+        },
+        {
+          "latitude": -33.063916,
+          "longitude": -71.544059
+        }
+      ]
+    },
+    {
+      "name": "Campus Miraflores UVM",
+      "acronym": "UVM Miraflores",
+      "centerLat": -33.027,
+      "centerLng": -71.539,
+      "polygon": [
+        {
+          "latitude": -33.026573,
+          "longitude": -71.538313
+        },
+        {
+          "latitude": -33.027427,
+          "longitude": -71.538313
+        },
+        {
+          "latitude": -33.027427,
+          "longitude": -71.539687
+        },
+        {
+          "latitude": -33.026573,
+          "longitude": -71.539687
+        },
+        {
+          "latitude": -33.026573,
+          "longitude": -71.538313
+        }
+      ]
+    },
+    {
+      "name": "Campus Recreo UVM",
+      "acronym": "UVM Recreo",
+      "centerLat": -33.0285,
+      "centerLng": -71.5775,
+      "polygon": [
+        {
+          "latitude": -33.028118,
+          "longitude": -71.576885
+        },
+        {
+          "latitude": -33.028882,
+          "longitude": -71.576885
+        },
+        {
+          "latitude": -33.028882,
+          "longitude": -71.578115
+        },
+        {
+          "latitude": -33.028118,
+          "longitude": -71.578115
+        },
+        {
+          "latitude": -33.028118,
+          "longitude": -71.576885
+        }
+      ]
+    },
+    {
+      "name": "Campus Diego Portales UVM (Viña Centro)",
+      "acronym": "UVM Centro",
+      "centerLat": -33.024913,
+      "centerLng": -71.564396,
+      "polygon": [
+        {
+          "latitude": -33.024696,
+          "longitude": -71.565114
+        },
+        {
+          "latitude": -33.024812,
+          "longitude": -71.564925
+        },
+        {
+          "latitude": -33.024875,
+          "longitude": -71.564864
+        },
+        {
+          "latitude": -33.024962,
+          "longitude": -71.56475
+        },
+        {
+          "latitude": -33.025093,
+          "longitude": -71.564568
+        },
+        {
+          "latitude": -33.02507,
+          "longitude": -71.564524
+        },
+        {
+          "latitude": -33.025091,
+          "longitude": -71.564501
+        },
+        {
+          "latitude": -33.025312,
+          "longitude": -71.564288
+        },
+        {
+          "latitude": -33.025246,
+          "longitude": -71.56419
+        },
+        {
+          "latitude": -33.025234,
+          "longitude": -71.564172
+        },
+        {
+          "latitude": -33.025222,
+          "longitude": -71.564188
+        },
+        {
+          "latitude": -33.02509,
+          "longitude": -71.564004
+        },
+        {
+          "latitude": -33.025105,
+          "longitude": -71.563988
+        },
+        {
+          "latitude": -33.025019,
+          "longitude": -71.563875
+        },
+        {
+          "latitude": -33.02501,
+          "longitude": -71.563851
+        },
+        {
+          "latitude": -33.025103,
+          "longitude": -71.563671
+        },
+        {
+          "latitude": -33.024775,
+          "longitude": -71.563569
+        },
+        {
+          "latitude": -33.024639,
+          "longitude": -71.564188
+        },
+        {
+          "latitude": -33.024618,
+          "longitude": -71.564378
+        },
+        {
+          "latitude": -33.024544,
+          "longitude": -71.564347
+        },
+        {
+          "latitude": -33.024423,
+          "longitude": -71.565024
+        },
+        {
+          "latitude": -33.024454,
+          "longitude": -71.565043
+        },
+        {
+          "latitude": -33.024605,
+          "longitude": -71.565082
+        },
+        {
+          "latitude": -33.024696,
+          "longitude": -71.565114
+        }
+      ]
+    }
+  ],
+  "Universidad de Aysen": [
+    {
+      "name": "Campus Coyhaique UAYSEN",
+      "acronym": "UAYSEN",
+      "centerLat": -45.574837,
+      "centerLng": -72.068122,
+      "polygon": [
+        {
+          "latitude": -45.575056,
+          "longitude": -72.068663
+        },
+        {
+          "latitude": -45.575174,
+          "longitude": -72.068262
+        },
+        {
+          "latitude": -45.574771,
+          "longitude": -72.068021
+        },
+        {
+          "latitude": -45.574907,
+          "longitude": -72.067561
+        },
+        {
+          "latitude": -45.574681,
+          "longitude": -72.067426
+        },
+        {
+          "latitude": -45.574498,
+          "longitude": -72.068048
+        },
+        {
+          "latitude": -45.574726,
+          "longitude": -72.068184
+        },
+        {
+          "latitude": -45.574788,
+          "longitude": -72.068221
+        },
+        {
+          "latitude": -45.574918,
+          "longitude": -72.068299
+        },
+        {
+          "latitude": -45.574848,
+          "longitude": -72.068538
+        },
+        {
+          "latitude": -45.575056,
+          "longitude": -72.068663
+        }
+      ]
+    }
+  ]
+}

@@ -18,6 +18,7 @@ export type DraftUser = {
   role: Role;
   gender: 'MALE' | 'FEMALE';
   universityId: string | null;
+  favoritePensionIds: string[];
 };
 
 export type DraftRoom = {
@@ -89,6 +90,9 @@ export type DraftPension = {
   images: DraftPensionImage[];
   nearbyUniversities: DraftNearbyUniversity[];
   landlordId: string;
+  ratingAverage: number;
+  ratingCount: number;
+  communityScore: number;
 };
 
 export type DraftReview = {
