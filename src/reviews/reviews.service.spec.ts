@@ -13,6 +13,7 @@ type MockPrismaService = {
     findUnique: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
+    aggregate: ReturnType<typeof vi.fn>;
   };
   pension: {
     findUnique: ReturnType<typeof vi.fn>;
@@ -61,6 +62,7 @@ describe('ReviewsService', () => {
         findUnique: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+        aggregate: vi.fn(),
       },
       pension: {
         findUnique: vi.fn(),
@@ -94,7 +96,10 @@ describe('ReviewsService', () => {
         overallRating: 5,
         pensionId: 'pension-1',
       });
-      mockPrisma.review.findMany.mockResolvedValue([{ overallRating: 5 }]);
+      mockPrisma.review.aggregate.mockResolvedValue({
+        _avg: { overallRating: 5 },
+        _count: { id: 1 },
+      });
       mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.create(
@@ -137,7 +142,10 @@ describe('ReviewsService', () => {
         pensionId: 'pension-1',
       });
       mockPrisma.review.update.mockResolvedValue({ id: 'rev-1', overallRating: 4 });
-      mockPrisma.review.findMany.mockResolvedValue([{ overallRating: 4 }]);
+      mockPrisma.review.aggregate.mockResolvedValue({
+        _avg: { overallRating: 4 },
+        _count: { id: 1 },
+      });
       mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.update('rev-1', { overallRating: 4 }, mockStudent);
@@ -166,7 +174,10 @@ describe('ReviewsService', () => {
         pensionId: 'pension-1',
       });
       mockPrisma.review.update.mockResolvedValue({ id: 'rev-1', deletedAt: new Date() });
-      mockPrisma.review.findMany.mockResolvedValue([]);
+      mockPrisma.review.aggregate.mockResolvedValue({
+        _avg: { overallRating: null },
+        _count: { id: 0 },
+      });
       mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1' });
 
       const result = await service.delete('rev-1', mockStudent);

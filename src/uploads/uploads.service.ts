@@ -114,8 +114,7 @@ export class UploadsService {
       .webp({ quality: 82 })
       .toBuffer({ resolveWithObject: true });
 
-    const thumbProcessed = await sharp(buffer)
-      .rotate()
+    const thumbProcessed = await sharp(primaryProcessed.data)
       .resize({ width: 400, withoutEnlargement: true })
       .webp({ quality: 80 })
       .toBuffer();

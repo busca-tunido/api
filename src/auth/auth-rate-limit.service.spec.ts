@@ -77,4 +77,31 @@ describe('AuthRateLimitService', () => {
       expect(() => service.assertCheckEmailRateLimit(ip)).toThrow(HttpException);
     });
   });
+
+  describe('memory bounding and expiration', () => {
+    it('should reset expired login attempts after TTL', async () => {
+      const originalNow = Date.now;
+      let currentTime = 1_000_000;
+      Date.now = () => currentTime;
+
+      try {
+        for (let i = 0; i < 10; i++) {
+          service.recordFailedLogin('10.0.0.1', 'ttl@uchile.cl');
+        }
+
+        await expect(service.assertLoginAllowed('10.0.0.1', 'ttl@uchile.cl')).rejects.toThrow(
+          HttpException,
+        );
+
+        currentTime += 16 * 60 * 1000;
+
+        await expect(
+          service.assertLoginAllowed('10.0.0.1', 'ttl@uchile.cl'),
+        ).resolves.toBeUndefined();
+        expect(service.recordFailedLogin('10.0.0.1', 'ttl@uchile.cl')).toBe(1);
+      } finally {
+        Date.now = originalNow;
+      }
+    });
+  });
 });

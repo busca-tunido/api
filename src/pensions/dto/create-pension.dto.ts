@@ -15,6 +15,8 @@ import {
   MinLength,
 } from 'class-validator';
 
+const TIME_24H_REGEX = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+
 export class CreatePensionDto {
   @ApiProperty({ example: 'Residencia San Joaquín', minLength: 3, maxLength: 100 })
   @IsString()
@@ -95,7 +97,7 @@ export class CreatePensionDto {
   @ApiPropertyOptional({ example: '23:00' })
   @IsOptional()
   @IsString()
-  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Must be HH:mm 24-hour format' })
+  @Matches(TIME_24H_REGEX, { message: 'Must be HH:mm 24-hour format' })
   curfewTime?: string;
 
   @ApiPropertyOptional({ example: true, default: false })
@@ -125,13 +127,13 @@ export class CreatePensionDto {
   @ApiPropertyOptional({ example: '23:00' })
   @IsOptional()
   @IsString()
-  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Must be HH:mm 24-hour format' })
+  @Matches(TIME_24H_REGEX, { message: 'Must be HH:mm 24-hour format' })
   quietHoursStart?: string;
 
   @ApiPropertyOptional({ example: '07:00' })
   @IsOptional()
   @IsString()
-  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Must be HH:mm 24-hour format' })
+  @Matches(TIME_24H_REGEX, { message: 'Must be HH:mm 24-hour format' })
   quietHoursEnd?: string;
 
   @ApiPropertyOptional({ example: ['wifi-alta-velocidad', 'bano-privado'] })

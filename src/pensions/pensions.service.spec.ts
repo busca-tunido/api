@@ -292,11 +292,7 @@ describe('PensionsService', () => {
 
   describe('getPriceHistogram', () => {
     it('should return null minPrice and maxPrice when no listings exist', async () => {
-      mockPrisma.pension.aggregate.mockResolvedValue({
-        _count: { id: 0 },
-        _min: { baseMonthlyPrice: null },
-        _max: { baseMonthlyPrice: null },
-      });
+      mockPrisma.pension.findMany.mockResolvedValue([]);
 
       const result = await service.getPriceHistogram({});
       expect(result).toEqual({
@@ -308,12 +304,7 @@ describe('PensionsService', () => {
       });
     });
 
-    it('should compute 28 bins when listings exist', async () => {
-      mockPrisma.pension.aggregate.mockResolvedValue({
-        _count: { id: 2 },
-        _min: { baseMonthlyPrice: 200000 },
-        _max: { baseMonthlyPrice: 300000 },
-      });
+    it('should compute 28 bins when listings exist using a single query', async () => {
       mockPrisma.pension.findMany.mockResolvedValue([
         { baseMonthlyPrice: 200000 },
         { baseMonthlyPrice: 300000 },
@@ -324,6 +315,52 @@ describe('PensionsService', () => {
       expect(result.maxPrice).toBe(300000);
       expect(result.totalListings).toBe(2);
       expect(result.bins).toHaveLength(28);
+      expect(mockPrisma.pension.aggregate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('buildWhere filter combination', () => {
+    it('should preserve both amenities and includesMeals filters without overwriting', async () => {
+      mockPrisma.pension.findMany.mockResolvedValue([]);
+      mockPrisma.pension.count.mockResolvedValue(0);
+
+      await service.findAll({
+        amenities: ['wifi-alta-velocidad'],
+        includesMeals: true,
+      });
+
+      expect(mockPrisma.pension.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              { amenities: { hasEvery: ['wifi-alta-velocidad'] } },
+              { amenities: { hasSome: expect.arrayContaining(['comida-incluida']) } },
+            ]),
+          }),
+        }),
+      );
+    });
+
+    it('should apply geo bounding box to prisma query when coordinates are given without bounds', async () => {
+      mockPrisma.pension.findMany.mockResolvedValue([]);
+
+      await service.findAll({
+        latitude: -33.4489,
+        longitude: -70.6693,
+        radiusKm: 10,
+      });
+
+      expect(mockPrisma.pension.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            latitude: expect.objectContaining({ gte: expect.any(Number), lte: expect.any(Number) }),
+            longitude: expect.objectContaining({
+              gte: expect.any(Number),
+              lte: expect.any(Number),
+            }),
+          }),
+        }),
+      );
     });
   });
 

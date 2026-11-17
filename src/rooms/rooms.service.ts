@@ -2,12 +2,13 @@ import crypto from 'node:crypto';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
+import { isValidObjectId } from '../common/utils/string.util.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateRoomDto } from './dto/create-room.dto.js';
 import { BathType } from './dto/room-response.dto.js';
 import type { UpdateRoomDto } from './dto/update-room.dto.js';
 
-interface EmbeddedRoomData {
+type EmbeddedRoomData = {
   id: string;
   roomNumber: string | null;
   title: string;
@@ -24,14 +25,65 @@ interface EmbeddedRoomData {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+};
+
+function formatRoomResponse(room: EmbeddedRoomData, pensionId: string) {
+  return {
+    ...room,
+    pensionId,
+    name: room.title,
+    priceMonthlyClp: room.monthlyPrice,
+    bathType: room.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
+  };
+}
+
+function getMinAvailableRoomPrice(rooms: EmbeddedRoomData[]): number | undefined {
+  let min: number | undefined;
+  for (const r of rooms) {
+    if (!r.deletedAt && r.isAvailable && r.isActive !== false) {
+      if (min === undefined || r.monthlyPrice < min) {
+        min = r.monthlyPrice;
+      }
+    }
+  }
+  return min;
 }
 
 @Injectable()
 export class RoomsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async findPensionAndRoomForMutation(
+    id: string,
+    user: SanitizedUser,
+    actionVerb: 'update' | 'delete',
+  ) {
+    const pension = await this.prisma.pension.findFirst({
+      where: {
+        rooms: {
+          some: { id },
+        },
+      },
+    });
+
+    if (!pension) {
+      throw new NotFoundException(`Room '${id}' not found`);
+    }
+
+    if (user.role !== Role.ADMIN && pension.landlordId !== user.id) {
+      throw new ForbiddenException(`You can only ${actionVerb} rooms in your own pensions`);
+    }
+
+    const roomIndex = pension.rooms.findIndex((r) => r.id === id && !r.deletedAt);
+    if (roomIndex === -1) {
+      throw new NotFoundException(`Room '${id}' not found`);
+    }
+
+    return { pension, roomIndex };
+  }
+
   async findByPension(pensionId: string): Promise<unknown[]> {
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(pensionId);
+    const isObjectId = isValidObjectId(pensionId);
     const pension = await this.prisma.pension.findFirst({
       where: isObjectId ? { OR: [{ id: pensionId }, { slug: pensionId }] } : { slug: pensionId },
       select: { id: true, rooms: true },
@@ -44,22 +96,14 @@ export class RoomsService {
     return (pension.rooms || [])
       .filter((room) => !room.deletedAt)
       .sort((a, b) => a.monthlyPrice - b.monthlyPrice)
-      .map((room) => ({
-        ...room,
-        pensionId: pension.id,
-        name: room.title,
-        priceMonthlyClp: room.monthlyPrice,
-        bathType: room.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
-      }));
+      .map((room) => formatRoomResponse(room, pension.id));
   }
 
   async findById(id: string): Promise<unknown> {
     const pension = await this.prisma.pension.findFirst({
       where: {
         rooms: {
-          some: {
-            id,
-          },
+          some: { id },
         },
       },
       select: {
@@ -82,11 +126,7 @@ export class RoomsService {
     }
 
     return {
-      ...room,
-      pensionId: pension.id,
-      name: room.title,
-      priceMonthlyClp: room.monthlyPrice,
-      bathType: room.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
+      ...formatRoomResponse(room, pension.id),
       pension: {
         id: pension.id,
         title: pension.title,
@@ -98,7 +138,7 @@ export class RoomsService {
   }
 
   async create(pensionId: string, dto: CreateRoomDto, user: SanitizedUser): Promise<unknown> {
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(pensionId);
+    const isObjectId = isValidObjectId(pensionId);
     const pension = await this.prisma.pension.findFirst({
       where: isObjectId ? { OR: [{ id: pensionId }, { slug: pensionId }] } : { slug: pensionId },
     });
@@ -116,9 +156,8 @@ export class RoomsService {
         ? dto.bathType === BathType.PRIVATE
         : (dto.hasPrivateBathroom ?? false);
 
-    const roomId = crypto.randomUUID();
     const newRoom: EmbeddedRoomData = {
-      id: roomId,
+      id: crypto.randomUUID(),
       roomNumber: dto.roomNumber ?? null,
       title: dto.title,
       description: dto.description ?? null,
@@ -137,53 +176,21 @@ export class RoomsService {
     };
 
     const allRooms = [...(pension.rooms || []), newRoom];
-    const availablePrices = allRooms
-      .filter((r) => !r.deletedAt && r.isAvailable && r.isActive !== false)
-      .map((r) => r.monthlyPrice);
-    const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
+    const minMonthlyPrice = getMinAvailableRoomPrice(allRooms);
 
     await this.prisma.pension.update({
       where: { id: pension.id },
       data: {
-        rooms: {
-          push: newRoom,
-        },
+        rooms: { push: newRoom },
         ...(minMonthlyPrice !== undefined ? { baseMonthlyPrice: minMonthlyPrice } : {}),
       },
     });
 
-    return {
-      ...newRoom,
-      pensionId: pension.id,
-      name: newRoom.title,
-      priceMonthlyClp: newRoom.monthlyPrice,
-      bathType: newRoom.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
-    };
+    return formatRoomResponse(newRoom, pension.id);
   }
 
   async update(id: string, dto: UpdateRoomDto, user: SanitizedUser): Promise<unknown> {
-    const pension = await this.prisma.pension.findFirst({
-      where: {
-        rooms: {
-          some: {
-            id,
-          },
-        },
-      },
-    });
-
-    if (!pension) {
-      throw new NotFoundException(`Room '${id}' not found`);
-    }
-
-    if (user.role !== Role.ADMIN && pension.landlordId !== user.id) {
-      throw new ForbiddenException('You can only update rooms in your own pensions');
-    }
-
-    const roomIndex = pension.rooms.findIndex((r) => r.id === id && !r.deletedAt);
-    if (roomIndex === -1) {
-      throw new NotFoundException(`Room '${id}' not found`);
-    }
+    const { pension, roomIndex } = await this.findPensionAndRoomForMutation(id, user, 'update');
 
     const existing = pension.rooms[roomIndex];
     const hasPrivateBathroom =
@@ -202,69 +209,32 @@ export class RoomsService {
     const updatedRooms = [...pension.rooms];
     updatedRooms[roomIndex] = updatedRoom;
 
-    const availablePrices = updatedRooms
-      .filter((r) => !r.deletedAt && r.isAvailable && r.isActive !== false)
-      .map((r) => r.monthlyPrice);
-    const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
+    const minMonthlyPrice = getMinAvailableRoomPrice(updatedRooms);
 
     await this.prisma.pension.update({
       where: { id: pension.id },
       data: {
-        rooms: {
-          set: updatedRooms,
-        },
+        rooms: { set: updatedRooms },
         ...(minMonthlyPrice !== undefined ? { baseMonthlyPrice: minMonthlyPrice } : {}),
       },
     });
 
-    return {
-      ...updatedRoom,
-      pensionId: pension.id,
-      name: updatedRoom.title,
-      priceMonthlyClp: updatedRoom.monthlyPrice,
-      bathType: updatedRoom.hasPrivateBathroom ? BathType.PRIVATE : BathType.SHARED,
-    };
+    return formatRoomResponse(updatedRoom, pension.id);
   }
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
-    const pension = await this.prisma.pension.findFirst({
-      where: {
-        rooms: {
-          some: {
-            id,
-          },
-        },
-      },
-    });
-
-    if (!pension) {
-      throw new NotFoundException(`Room '${id}' not found`);
-    }
-
-    if (user.role !== Role.ADMIN && pension.landlordId !== user.id) {
-      throw new ForbiddenException('You can only delete rooms in your own pensions');
-    }
-
-    const roomIndex = pension.rooms.findIndex((r) => r.id === id && !r.deletedAt);
-    if (roomIndex === -1) {
-      throw new NotFoundException(`Room '${id}' not found`);
-    }
+    const { pension } = await this.findPensionAndRoomForMutation(id, user, 'delete');
 
     const updatedRooms = pension.rooms.map((r) =>
       r.id === id ? { ...r, deletedAt: new Date(), updatedAt: new Date() } : r,
     );
 
-    const availablePrices = updatedRooms
-      .filter((r) => !r.deletedAt && r.isAvailable && r.isActive !== false)
-      .map((r) => r.monthlyPrice);
-    const minMonthlyPrice = availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
+    const minMonthlyPrice = getMinAvailableRoomPrice(updatedRooms);
 
     await this.prisma.pension.update({
       where: { id: pension.id },
       data: {
-        rooms: {
-          set: updatedRooms,
-        },
+        rooms: { set: updatedRooms },
         ...(minMonthlyPrice !== undefined ? { baseMonthlyPrice: minMonthlyPrice } : {}),
       },
     });

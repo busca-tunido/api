@@ -10,6 +10,9 @@ import {
   MinLength,
 } from 'class-validator';
 
+const SPANISH_NAME_REGEX = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/;
+const CHILE_MOBILE_PHONE_REGEX = /^(?:\+?56)?\s?0?9\s?(?:\d{4}\s?\d{4}|\d{8})$/;
+
 export class RegisterDto {
   @ApiProperty({ example: 'juan.perez@alumnos.uchile.cl', maxLength: 100 })
   @IsEmail({}, { message: 'El correo electrónico no es válido' })
@@ -31,7 +34,7 @@ export class RegisterDto {
   @IsString()
   @MinLength(2, { message: 'El nombre debe tener al menos 2 caracteres' })
   @MaxLength(40, { message: 'El nombre no puede superar los 40 caracteres' })
-  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/, {
+  @Matches(SPANISH_NAME_REGEX, {
     message: 'El nombre solo debe contener letras',
   })
   firstName!: string;
@@ -45,7 +48,7 @@ export class RegisterDto {
   @IsString()
   @MinLength(2, { message: 'El apellido debe tener al menos 2 caracteres' })
   @MaxLength(40, { message: 'El apellido no puede superar los 40 caracteres' })
-  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/, {
+  @Matches(SPANISH_NAME_REGEX, {
     message: 'El apellido solo debe contener letras',
   })
   lastName!: string;
@@ -58,7 +61,7 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   @MaxLength(16, { message: 'El teléfono no puede superar los 16 caracteres' })
-  @Matches(/^(\+?56)?\s?0?9\s?[0-9]{4}\s?[0-9]{4}$|^(\+?56)?\s?0?9\s?[0-9]{8}$/, {
+  @Matches(CHILE_MOBILE_PHONE_REGEX, {
     message: 'Formato de teléfono chileno inválido',
   })
   phone?: string;

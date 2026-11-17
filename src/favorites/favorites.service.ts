@@ -1,14 +1,14 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
-interface EmbeddedPensionImageRaw {
+type EmbeddedPensionImageRaw = {
   id: string;
   url: string;
   thumbnailUrl: string;
   caption?: string | null;
   isFeatured?: boolean;
   sortOrder?: number;
-}
+};
 
 @Injectable()
 export class FavoritesService {
@@ -30,6 +30,19 @@ export class FavoritesService {
         id: { in: ids },
         isActive: true,
         deletedAt: null,
+      },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        city: true,
+        neighborhood: true,
+        baseMonthlyPrice: true,
+        ratingAverage: true,
+        ratingCount: true,
+        verificationStatus: true,
+        images: true,
+        createdAt: true,
       },
     });
 
@@ -63,19 +76,20 @@ export class FavoritesService {
   }
 
   async addFavorite(userId: string, pensionId: string): Promise<{ added: boolean }> {
-    const pension = await this.prisma.pension.findUnique({
-      where: { id: pensionId },
-      select: { id: true },
-    });
+    const [pension, user] = await Promise.all([
+      this.prisma.pension.findUnique({
+        where: { id: pensionId },
+        select: { id: true },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { favoritePensionIds: true },
+      }),
+    ]);
 
     if (!pension) {
       throw new NotFoundException(`Pension '${pensionId}' not found`);
     }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { favoritePensionIds: true },
-    });
 
     if (!user) {
       throw new NotFoundException(`User '${userId}' not found`);
