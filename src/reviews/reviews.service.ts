@@ -11,6 +11,25 @@ import type { CreateReviewDto } from './dto/create-review.dto.js';
 import { FilterReviewsDto } from './dto/filter-reviews.dto.js';
 import type { UpdateReviewDto } from './dto/update-review.dto.js';
 
+export type ReviewSummary = {
+  totalReviews: number;
+  averageRating: number;
+  withPhotosCount: number;
+  starDistribution: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+  categoryAverages: {
+    cleanliness: number;
+    landlord: number;
+    quietness: number;
+    wifi: number;
+  };
+};
+
 export type PaginatedReviews<T = unknown> = {
   items: T[];
   pagination: {
@@ -25,6 +44,7 @@ export type PaginatedReviews<T = unknown> = {
   limit: number;
   totalPages: number;
   hasMore: boolean;
+  summary?: ReviewSummary;
 };
 
 type EmbeddedPensionImageRaw = {
@@ -99,7 +119,8 @@ const REVIEW_SORT_MAP: Record<string, Prisma.ReviewOrderByWithRelationInput> = {
   rating_asc: { overallRating: 'asc' },
 };
 
-function buildReviewAliases<T extends ReviewAliasedInput>(review: T) {
+function buildReviewAliases<T extends ReviewAliasedInput>(review: T, currentUserId?: string) {
+  const helpfulVotes = review.helpfulUserIds || [];
   return {
     ...review,
     rating: review.overallRating,
@@ -110,7 +131,72 @@ function buildReviewAliases<T extends ReviewAliasedInput>(review: T) {
     landlordRating: review.landlordRating,
     locationRating: review.quietnessRating,
     quietnessRating: review.quietnessRating,
-    helpfulCount: review.helpfulUserIds?.length || 0,
+    helpfulCount: helpfulVotes.length,
+    ...(currentUserId ? { userVoted: helpfulVotes.includes(currentUserId) } : {}),
+  };
+}
+
+function buildReviewSummary(
+  rows: Array<{
+    overallRating: number;
+    cleanlinessRating: number | null;
+    landlordRating: number | null;
+    quietnessRating: number | null;
+    wifiRating: number | null;
+    images?: string[] | null;
+  }>,
+): ReviewSummary {
+  const starDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  let ratingSum = 0;
+  let withPhotosCount = 0;
+  let cleanSum = 0;
+  let cleanCount = 0;
+  let landlordSum = 0;
+  let landlordCount = 0;
+  let quietSum = 0;
+  let quietCount = 0;
+  let wifiSum = 0;
+  let wifiCount = 0;
+
+  for (const r of rows) {
+    ratingSum += r.overallRating;
+    const rounded = Math.round(r.overallRating);
+    if (rounded >= 1 && rounded <= 5) {
+      starDistribution[rounded as 1 | 2 | 3 | 4 | 5] += 1;
+    }
+    if (Array.isArray(r.images) && r.images.length > 0) {
+      withPhotosCount += 1;
+    }
+    if (typeof r.cleanlinessRating === 'number' && r.cleanlinessRating > 0) {
+      cleanSum += r.cleanlinessRating;
+      cleanCount += 1;
+    }
+    if (typeof r.landlordRating === 'number' && r.landlordRating > 0) {
+      landlordSum += r.landlordRating;
+      landlordCount += 1;
+    }
+    if (typeof r.quietnessRating === 'number' && r.quietnessRating > 0) {
+      quietSum += r.quietnessRating;
+      quietCount += 1;
+    }
+    if (typeof r.wifiRating === 'number' && r.wifiRating > 0) {
+      wifiSum += r.wifiRating;
+      wifiCount += 1;
+    }
+  }
+
+  const totalReviews = rows.length;
+  return {
+    totalReviews,
+    averageRating: totalReviews > 0 ? Number((ratingSum / totalReviews).toFixed(1)) : 0,
+    withPhotosCount,
+    starDistribution,
+    categoryAverages: {
+      cleanliness: cleanCount > 0 ? Number((cleanSum / cleanCount).toFixed(1)) : 0,
+      landlord: landlordCount > 0 ? Number((landlordSum / landlordCount).toFixed(1)) : 0,
+      quietness: quietCount > 0 ? Number((quietSum / quietCount).toFixed(1)) : 0,
+      wifi: wifiCount > 0 ? Number((wifiSum / wifiCount).toFixed(1)) : 0,
+    },
   };
 }
 
@@ -158,21 +244,37 @@ export class ReviewsService {
   async findByPension(
     pensionId: string,
     filter: FilterReviewsDto = new FilterReviewsDto(),
+    currentUserId?: string,
   ): Promise<PaginatedReviews> {
     const page = Math.max(1, Number(filter.page) || 1);
     const limit = Math.min(50, Math.max(1, Number(filter.limit) || 10));
     const skip = (page - 1) * limit;
 
-    const where: Prisma.ReviewWhereInput = {
+    const baseWhere: Prisma.ReviewWhereInput = {
       pensionId,
       isHidden: false,
       deletedAt: null,
-      ...(filter.rating ? { overallRating: filter.rating } : {}),
+    };
+
+    const where: Prisma.ReviewWhereInput = {
+      ...baseWhere,
+      ...(filter.rating
+        ? { overallRating: filter.rating }
+        : filter.minRating !== undefined || filter.maxRating !== undefined
+          ? {
+              overallRating: {
+                ...(filter.minRating !== undefined ? { gte: filter.minRating } : {}),
+                ...(filter.maxRating !== undefined ? { lte: filter.maxRating } : {}),
+              },
+            }
+          : {}),
+      ...(filter.hasPhotos ? { images: { isEmpty: false } } : {}),
+      ...(filter.stayDurationCategory ? { stayDurationCategory: filter.stayDurationCategory } : {}),
     };
 
     const orderBy = REVIEW_SORT_MAP[filter.sortBy ?? ''] ?? { createdAt: 'desc' };
 
-    const [total, items] = await Promise.all([
+    const [total, items, summaryRows] = await Promise.all([
       this.prisma.review.count({ where }),
       this.prisma.review.findMany({
         where,
@@ -183,10 +285,21 @@ export class ReviewsService {
           user: { select: REVIEW_USER_SELECT },
         },
       }),
+      this.prisma.review.findMany({
+        where: baseWhere,
+        select: {
+          overallRating: true,
+          cleanlinessRating: true,
+          landlordRating: true,
+          quietnessRating: true,
+          wifiRating: true,
+          images: true,
+        },
+      }),
     ]);
 
     const mappedItems = items.map((review) => ({
-      ...buildReviewAliases(review),
+      ...buildReviewAliases(review, currentUserId),
       stayDuration: review.stayDurationCategory ?? null,
     }));
 
@@ -207,6 +320,7 @@ export class ReviewsService {
       limit,
       totalPages,
       hasMore,
+      summary: buildReviewSummary(summaryRows ?? []),
     };
   }
 
@@ -443,11 +557,12 @@ export class ReviewsService {
     };
   }
 
-  async findUserHelpfulVotes(userId: string): Promise<{ reviewIds: string[] }> {
+  async findUserHelpfulVotes(userId: string, pensionId?: string): Promise<{ reviewIds: string[] }> {
     const reviews = await this.prisma.review.findMany({
       where: {
         helpfulUserIds: { has: userId },
         deletedAt: null,
+        ...(pensionId ? { pensionId } : {}),
       },
       select: { id: true },
     });

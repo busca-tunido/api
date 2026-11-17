@@ -9,9 +9,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard.js';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import {
   ApiEnvelopeResponse,
@@ -36,6 +37,7 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Get('pensions/:pensionId/reviews')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
     summary: 'Get paginated reviews for a pension with optional rating filter and sorting',
   })
@@ -48,8 +50,9 @@ export class ReviewsController {
   async findByPension(
     @Param('pensionId') pensionId: string,
     @Query() filter: FilterReviewsDto,
+    @CurrentUser() user?: SanitizedUser,
   ): Promise<PaginatedReviews> {
-    return this.reviewsService.findByPension(pensionId, filter);
+    return this.reviewsService.findByPension(pensionId, filter, user?.id);
   }
 
   @Get('stays')
@@ -125,13 +128,17 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List review IDs the current user has voted as helpful' })
+  @ApiQuery({ name: 'pensionId', required: false, type: String })
   @ApiEnvelopeResponse(HelpfulVotesResponseDto, {
     status: 200,
     description: 'List of review IDs voted helpful',
   })
   @ApiStandardErrors([401, 500])
-  async findUserHelpfulVotes(@CurrentUser() user: SanitizedUser): Promise<{ reviewIds: string[] }> {
-    return this.reviewsService.findUserHelpfulVotes(user.id);
+  async findUserHelpfulVotes(
+    @CurrentUser() user: SanitizedUser,
+    @Query('pensionId') pensionId?: string,
+  ): Promise<{ reviewIds: string[] }> {
+    return this.reviewsService.findUserHelpfulVotes(user.id, pensionId);
   }
 
   @Post('reviews/:id/helpful')

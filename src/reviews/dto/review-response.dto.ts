@@ -130,6 +130,9 @@ export class ReviewResponseDto {
   @ApiProperty({ type: Number, example: 4 })
   helpfulCount!: number;
 
+  @ApiPropertyOptional({ type: Boolean, example: false })
+  userVoted?: boolean;
+
   @ApiProperty({ type: [String], example: ['https://example.com/review1.jpg'] })
   images!: string[];
 
@@ -223,6 +226,54 @@ export class VoteHelpfulResultResponseDto {
   voted!: boolean;
 }
 
+export class ReviewStarDistributionDto {
+  @ApiProperty({ type: Number, example: 10 })
+  5!: number;
+
+  @ApiProperty({ type: Number, example: 5 })
+  4!: number;
+
+  @ApiProperty({ type: Number, example: 2 })
+  3!: number;
+
+  @ApiProperty({ type: Number, example: 1 })
+  2!: number;
+
+  @ApiProperty({ type: Number, example: 0 })
+  1!: number;
+}
+
+export class ReviewCategoryAveragesDto {
+  @ApiProperty({ type: Number, example: 4.7 })
+  cleanliness!: number;
+
+  @ApiProperty({ type: Number, example: 4.6 })
+  landlord!: number;
+
+  @ApiProperty({ type: Number, example: 4.5 })
+  quietness!: number;
+
+  @ApiProperty({ type: Number, example: 4.4 })
+  wifi!: number;
+}
+
+export class ReviewSummaryDto {
+  @ApiProperty({ type: Number, example: 18 })
+  totalReviews!: number;
+
+  @ApiProperty({ type: Number, example: 4.6 })
+  averageRating!: number;
+
+  @ApiProperty({ type: Number, example: 4 })
+  withPhotosCount!: number;
+
+  @ApiProperty({ type: () => ReviewStarDistributionDto })
+  starDistribution!: ReviewStarDistributionDto;
+
+  @ApiProperty({ type: () => ReviewCategoryAveragesDto })
+  categoryAverages!: ReviewCategoryAveragesDto;
+}
+
 export class PaginatedReviewsResponseDto {
   @ApiProperty({ type: () => [ReviewResponseDto] })
   items!: ReviewResponseDto[];
@@ -244,4 +295,7 @@ export class PaginatedReviewsResponseDto {
 
   @ApiPropertyOptional({ type: Boolean, example: true })
   hasMore?: boolean;
+
+  @ApiPropertyOptional({ type: () => ReviewSummaryDto })
+  summary?: ReviewSummaryDto;
 }

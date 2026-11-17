@@ -193,4 +193,28 @@ describe('ProposalsService', () => {
       );
     });
   });
+
+  describe('findModerationProposals', () => {
+    it('should return OpenAPI-aligned items and pagination metadata', async () => {
+      mockPrisma.pensionProposal.count.mockResolvedValue(1);
+      mockPrisma.pensionProposal.findMany.mockResolvedValue([{ id: 'prop-1' }]);
+
+      const result = await service.findModerationProposals(ProposalStatus.PENDING, 1, 20);
+      expect(result).toEqual({
+        items: [{ id: 'prop-1' }],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 1,
+          totalPages: 1,
+          hasMore: false,
+        },
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+        hasMore: false,
+      });
+    });
+  });
 });

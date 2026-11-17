@@ -23,6 +23,19 @@ export enum PensionSortBy {
   PRICE_DESC = 'price_desc',
 }
 
+export enum PensionViewMode {
+  FULL = 'full',
+  CARD = 'card',
+  MAP = 'map',
+}
+
+export enum PensionRatingTierFilter {
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  UNREVIEWED = 'unreviewed',
+}
+
 export class FilterPensionsDto {
   @ApiPropertyOptional({ example: 'Santiago', maxLength: 60 })
   @IsOptional()
@@ -178,4 +191,33 @@ export class FilterPensionsDto {
   @IsOptional()
   @IsIn(['relevance', 'distance', 'rating', 'price_asc', 'price_desc'])
   sortBy?: PensionSortBy | 'relevance' | 'distance' | 'rating' | 'price_asc' | 'price_desc';
+
+  @ApiPropertyOptional({
+    example: PensionViewMode.FULL,
+    enum: PensionViewMode,
+    enumName: 'PensionViewMode',
+    default: PensionViewMode.FULL,
+    description: 'Payload projection mode (full, card, or map)',
+  })
+  @IsOptional()
+  @IsIn(['full', 'card', 'map'])
+  view?: PensionViewMode | 'full' | 'card' | 'map';
+
+  @ApiPropertyOptional({
+    enum: PensionRatingTierFilter,
+    enumName: 'PensionRatingTierFilter',
+    description: 'Filter by community rating tier (high, medium, low, unreviewed)',
+  })
+  @IsOptional()
+  @IsIn(['high', 'medium', 'low', 'unreviewed'])
+  ratingTier?: PensionRatingTierFilter | 'high' | 'medium' | 'low' | 'unreviewed';
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions that have at least one available active room',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  onlyAvailable?: boolean;
 }

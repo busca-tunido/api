@@ -63,6 +63,15 @@ describe('FavoritesService', () => {
     );
   });
 
+  it('should return only favorite pension ids', async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({
+      favoritePensionIds: ['pen-1', 'pen-2'],
+    });
+
+    const result = await service.findIdsByUser('user-1');
+    expect(result).toEqual({ pensionIds: ['pen-1', 'pen-2'] });
+  });
+
   it('should add pension to favorites', async () => {
     mockPrisma.pension.findUnique.mockResolvedValue({ id: 'pen-1' });
     mockPrisma.user.findUnique.mockResolvedValue({ favoritePensionIds: [] });

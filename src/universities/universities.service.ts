@@ -121,42 +121,52 @@ export class UniversitiesService {
     });
   }
 
-  async findAll(city?: string): Promise<UniversityResponseDto[]> {
+  async findAll(city?: string, includeCampuses = true): Promise<UniversityResponseDto[]> {
     const where: Prisma.UniversityWhereInput = {
       deletedAt: null,
       ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
     };
 
+    const select = includeCampuses
+      ? UNIVERSITY_PUBLIC_SELECT
+      : {
+          ...UNIVERSITY_PUBLIC_SELECT,
+          campuses: false,
+        };
+
     const [universities, countMap] = await Promise.all([
       this.prisma.university.findMany({
         where,
         orderBy: { name: 'asc' },
-        select: UNIVERSITY_PUBLIC_SELECT,
+        select,
       }),
       this.getNearbyPensionCountMap(),
     ]);
 
-    return universities.map((u) => ({
-      id: u.id,
-      name: u.name,
-      shortName: u.shortName ?? null,
-      acronym: u.shortName ?? null,
-      city: u.city ?? '',
-      address: u.address ?? '',
-      emailDomains: u.emailDomains || [],
-      emailDomain: u.emailDomains?.[0] ?? null,
-      latitude: u.latitude ?? 0,
-      longitude: u.longitude ?? 0,
-      campuses: (u.campuses || []) as CampusAreaResponseDto[],
-      imageUrl: null,
-      logoUrl: null,
-      createdAt: u.createdAt || new Date(),
-      updatedAt: u.updatedAt || new Date(),
-      _count: {
-        students: u._count?.students ?? 0,
-        nearbyPensions: countMap.get(u.id) ?? 0,
-      },
-    }));
+    return universities.map((u) => {
+      const campuses = includeCampuses && 'campuses' in u ? u.campuses : [];
+      return {
+        id: u.id,
+        name: u.name,
+        shortName: u.shortName ?? null,
+        acronym: u.shortName ?? null,
+        city: u.city ?? '',
+        address: u.address ?? '',
+        emailDomains: u.emailDomains || [],
+        emailDomain: u.emailDomains?.[0] ?? null,
+        latitude: u.latitude ?? 0,
+        longitude: u.longitude ?? 0,
+        campuses: (campuses || []) as CampusAreaResponseDto[],
+        imageUrl: null,
+        logoUrl: null,
+        createdAt: u.createdAt || new Date(),
+        updatedAt: u.updatedAt || new Date(),
+        _count: {
+          students: u._count?.students ?? 0,
+          nearbyPensions: countMap.get(u.id) ?? 0,
+        },
+      };
+    });
   }
 
   async findCampusAreas(city?: string): Promise<CampusAreaResponseDto[]> {

@@ -50,9 +50,29 @@ export class ProposalsService {
     });
   }
 
-  async findByPension(pensionId: string): Promise<unknown[]> {
+  async findByPension(
+    pensionId: string,
+    user?: SanitizedUser,
+    status?: ProposalStatus,
+  ): Promise<unknown[]> {
+    if (user && user.role !== Role.ADMIN && user.role !== Role.MODERATOR) {
+      const pension = await this.prisma.pension.findUnique({
+        where: { id: pensionId, deletedAt: null },
+        select: { id: true, landlordId: true },
+      });
+      if (!pension) {
+        throw new NotFoundException(`Pension '${pensionId}' not found`);
+      }
+      if (pension.landlordId !== user.id) {
+        throw new ForbiddenException('No tienes permisos para ver sugerencias de esta pensión');
+      }
+    }
+
     return this.prisma.pensionProposal.findMany({
-      where: { pensionId },
+      where: {
+        pensionId,
+        ...(status ? { status } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       include: {
         submittedBy: { select: PROPOSAL_NAME_SELECT },
@@ -65,16 +85,32 @@ export class ProposalsService {
     status?: ProposalStatus,
     page: number = 1,
     limit: number = 20,
-  ): Promise<{ data: unknown[]; total: number; page: number; limit: number; totalPages: number }> {
+  ): Promise<{
+    items: unknown[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasMore: boolean;
+    };
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasMore: boolean;
+  }> {
+    const safePage = Math.max(1, page || 1);
+    const safeLimit = Math.min(100, Math.max(1, limit || 20));
     const where: Prisma.PensionProposalWhereInput = status ? { status } : {};
-    const skip = (page - 1) * limit;
+    const skip = (safePage - 1) * safeLimit;
 
-    const [total, data] = await Promise.all([
+    const [total, items] = await Promise.all([
       this.prisma.pensionProposal.count({ where }),
       this.prisma.pensionProposal.findMany({
         where,
         skip,
-        take: limit,
+        take: safeLimit,
         orderBy: { createdAt: 'desc' },
         include: {
           pension: {
@@ -91,12 +127,23 @@ export class ProposalsService {
       }),
     ]);
 
+    const totalPages = Math.ceil(total / safeLimit) || 1;
+    const hasMore = skip + safeLimit < total;
+
     return {
-      data,
+      items,
+      pagination: {
+        page: safePage,
+        limit: safeLimit,
+        total,
+        totalPages,
+        hasMore,
+      },
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      page: safePage,
+      limit: safeLimit,
+      totalPages,
+      hasMore,
     };
   }
 

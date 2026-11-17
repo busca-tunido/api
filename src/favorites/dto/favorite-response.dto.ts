@@ -61,3 +61,8 @@ export class FavoriteRemovedResponseDto {
   @ApiProperty({ type: Boolean, example: true })
   removed!: boolean;
 }
+
+export class FavoriteIdsResponseDto {
+  @ApiProperty({ type: [String], example: ['6659f8c123456789abcdef01'] })
+  pensionIds!: string[];
+}

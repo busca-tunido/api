@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -21,6 +22,10 @@ import {
   ApiEnvelopeResponse,
   ApiStandardErrors,
 } from '../common/decorators/api-envelope-response.decorator.js';
+import {
+  CacheControl,
+  CacheControlInterceptor,
+} from '../common/interceptors/cache-control.interceptor.js';
 import { CreatePensionDto } from './dto/create-pension.dto.js';
 import { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import {
@@ -45,6 +50,8 @@ export class PensionsController {
   constructor(private readonly pensionsService: PensionsService) {}
 
   @Get()
+  @UseInterceptors(CacheControlInterceptor)
+  @CacheControl(60, 300)
   @ApiOperation({ summary: 'List pensions with filtering and pagination' })
   @ApiEnvelopeResponse(PaginatedPensionsResponseDto, {
     status: 200,
@@ -56,6 +63,8 @@ export class PensionsController {
   }
 
   @Get('price-histogram')
+  @UseInterceptors(CacheControlInterceptor)
+  @CacheControl(300, 900)
   @ApiOperation({ summary: 'Get price distribution histogram for pensions' })
   @ApiEnvelopeResponse(PriceHistogramResponseDto, {
     status: 200,
@@ -82,7 +91,12 @@ export class PensionsController {
   }
 
   @Get('cities')
-  @ApiOperation({ summary: 'List all cities with absolute pension counts and coordinates' })
+  @UseInterceptors(CacheControlInterceptor)
+  @CacheControl(300, 1800)
+  @ApiOperation({
+    summary: 'List all cities with absolute pension counts and coordinates',
+    deprecated: true,
+  })
   @ApiEnvelopeResponse(CitySummaryResponseDto, {
     status: 200,
     isArray: true,
@@ -94,6 +108,8 @@ export class PensionsController {
   }
 
   @Get('amenities')
+  @UseInterceptors(CacheControlInterceptor)
+  @CacheControl(86400, 604800)
   @ApiOperation({ summary: 'List all available pension amenities catalog' })
   @ApiEnvelopeResponse(PensionAmenityCatalogItemDto, {
     status: 200,

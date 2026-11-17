@@ -40,14 +40,19 @@ export class UniversitiesController {
   @CacheControl(3600, 86400)
   @ApiOperation({ summary: 'List all universities with optional city filter' })
   @ApiQuery({ name: 'city', required: false, type: String })
+  @ApiQuery({ name: 'includeCampuses', required: false, type: Boolean })
   @ApiEnvelopeResponse(UniversityResponseDto, {
     status: 200,
     isArray: true,
     description: 'List of universities',
   })
   @ApiStandardErrors([500])
-  async findAll(@Query('city') city?: string): Promise<UniversityResponseDto[]> {
-    return this.universitiesService.findAll(city);
+  async findAll(
+    @Query('city') city?: string,
+    @Query('includeCampuses') includeCampuses?: string,
+  ): Promise<UniversityResponseDto[]> {
+    const withCampuses = includeCampuses === undefined ? true : includeCampuses !== 'false';
+    return this.universitiesService.findAll(city, withCampuses);
   }
 
   @Get('campuses')

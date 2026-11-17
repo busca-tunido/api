@@ -103,6 +103,9 @@ export class PensionRoomSummaryDto {
 
   @ApiPropertyOptional({ type: Boolean, example: true })
   isActive?: boolean;
+
+  @ApiPropertyOptional({ type: [String], example: ['https://example.com/room.webp'] })
+  images?: string[];
 }
 
 export class PensionCountDto {
@@ -111,6 +114,9 @@ export class PensionCountDto {
 
   @ApiProperty({ type: Number, example: 12 })
   reviews!: number;
+
+  @ApiPropertyOptional({ type: Number, example: 2 })
+  proposals?: number;
 }
 
 export class PensionNearestUniversitySummaryDto {
@@ -258,6 +264,12 @@ export class PensionItemResponseDto {
 
   @ApiProperty({ type: () => PensionCountDto })
   _count!: PensionCountDto;
+
+  @ApiPropertyOptional({ type: Number, example: 3 })
+  availableRoomsCount?: number;
+
+  @ApiPropertyOptional({ type: Number, example: 1 })
+  pendingProposalsCount?: number;
 }
 
 export class NearbyCityCountDto {
