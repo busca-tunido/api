@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { type AmenityCategory, PrismaClient } from '@prisma/client';
 
 try {
@@ -166,7 +169,34 @@ export const generateShortName = (name: string): string => {
   return initials.slice(0, 10);
 };
 
-export const fetchAndValidateUniversities = async (): Promise<ExternalUniversity[]> => {
+const seedDataDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'data');
+const universitiesCachePath = path.join(seedDataDir, 'chile-universities.json');
+const citiesCachePath = path.join(seedDataDir, 'chile-cities.json');
+
+export const normalizeText = (value: string): string =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const PRIMARY_CITY_KEYS = new Set(PRIMARY_CITIES.map(normalizeText));
+
+export type FetchCatalogOptions = {
+  sync?: boolean;
+};
+
+export const fetchAndValidateUniversities = async (
+  options?: FetchCatalogOptions,
+): Promise<ExternalUniversity[]> => {
+  if (!options?.sync && fs.existsSync(universitiesCachePath)) {
+    const cached = JSON.parse(
+      fs.readFileSync(universitiesCachePath, 'utf-8'),
+    ) as ExternalUniversity[];
+    if (Array.isArray(cached) && cached.length > 0) {
+      return cached;
+    }
+  }
+
   const url = 'http://universities.hipolabs.com/search?country=Chile';
   const res = await fetch(url);
   if (!res.ok) {
@@ -197,10 +227,21 @@ export const fetchAndValidateUniversities = async (): Promise<ExternalUniversity
     }
   }
 
+  fs.mkdirSync(seedDataDir, { recursive: true });
+  fs.writeFileSync(universitiesCachePath, JSON.stringify(data, null, 2));
   return data;
 };
 
-export const fetchAndValidateChileCities = async (): Promise<ValidatedCity[]> => {
+export const fetchAndValidateChileCities = async (
+  options?: FetchCatalogOptions,
+): Promise<ValidatedCity[]> => {
+  if (!options?.sync && fs.existsSync(citiesCachePath)) {
+    const cached = JSON.parse(fs.readFileSync(citiesCachePath, 'utf-8')) as ValidatedCity[];
+    if (Array.isArray(cached) && cached.length >= 20) {
+      return cached;
+    }
+  }
+
   const url = 'https://raw.githubusercontent.com/lutangar/cities.json/master/cities.json';
   const res = await fetch(url);
   if (!res.ok) {
@@ -235,17 +276,8 @@ export const fetchAndValidateChileCities = async (): Promise<ValidatedCity[]> =>
       throw new Error(`City ${cityName} has out-of-bounds Chilean longitude: ${raw.lng}`);
     }
 
-    const normalized = cityName
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-    const isPrimary = PRIMARY_CITIES.some(
-      (p) =>
-        p
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') === normalized,
-    );
+    const normalized = normalizeText(cityName);
+    const isPrimary = PRIMARY_CITY_KEYS.has(normalized);
 
     validated.push({
       city: cityName,
@@ -257,11 +289,7 @@ export const fetchAndValidateChileCities = async (): Promise<ValidatedCity[]> =>
   }
 
   for (const primary of PRIMARY_CITIES) {
-    const normalized = primary
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-    if (!foundNames.has(normalized)) {
+    if (!foundNames.has(normalizeText(primary))) {
       throw new Error(`Mandatory primary city missing from external dataset: ${primary}`);
     }
   }
@@ -272,47 +300,46 @@ export const fetchAndValidateChileCities = async (): Promise<ValidatedCity[]> =>
     return a.city.localeCompare(b.city);
   });
 
-  return validated.slice(0, 100);
+  fs.mkdirSync(seedDataDir, { recursive: true });
+  fs.writeFileSync(citiesCachePath, JSON.stringify(validated, null, 2));
+  return validated;
 };
+
+type UniversityCityRule = {
+  keywords: readonly string[];
+  cityFragment: string;
+};
+
+const UNIVERSITY_CITY_RULES: readonly UniversityCityRule[] = [
+  { keywords: ['valpara', 'playa ancha', 'santa mar'], cityFragment: 'valparaiso' },
+  { keywords: ['vina del mar', 'maritima', 'del mar'], cityFragment: 'vina del mar' },
+  { keywords: ['concepci', 'bio'], cityFragment: 'concepcion' },
+  { keywords: ['valdivia', 'austral'], cityFragment: 'valdivia' },
+  { keywords: ['antofagasta', 'norte'], cityFragment: 'antofagasta' },
+  { keywords: ['temuco', 'frontera', 'araucan'], cityFragment: 'temuco' },
+  { keywords: ['serena', 'coquimbo'], cityFragment: 'serena' },
+  { keywords: ['talca', 'maule'], cityFragment: 'talca' },
+  { keywords: ['tarapaca', 'arica'], cityFragment: 'arica' },
+  { keywords: ['arturo prat', 'iquique'], cityFragment: 'iquique' },
+  { keywords: ['atacama', 'copiapo'], cityFragment: 'copiapo' },
+  { keywords: ['adventista', 'chillan'], cityFragment: 'chillan' },
+  { keywords: ['los lagos', 'osorno'], cityFragment: 'osorno' },
+  { keywords: ['magallanes', 'punta arenas'], cityFragment: 'punta arenas' },
+  { keywords: ['aysen', 'coyhaique'], cityFragment: 'coyhaique' },
+];
 
 export const assignCityToUniversity = (
   uniName: string,
   cities: readonly ValidatedCity[],
 ): ValidatedCity => {
-  const lower = uniName.toLowerCase();
-  if (lower.includes('valpara') || lower.includes('playa ancha') || lower.includes('santa mar')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('valpara'));
-    if (found) return found;
+  const normalizedName = normalizeText(uniName);
+  for (const rule of UNIVERSITY_CITY_RULES) {
+    if (rule.keywords.some((kw) => normalizedName.includes(kw))) {
+      const found = cities.find((c) => normalizeText(c.city).includes(rule.cityFragment));
+      if (found) return found;
+    }
   }
-  if (lower.includes('viña') || lower.includes('vina')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('viña'));
-    if (found) return found;
-  }
-  if (lower.includes('concepci') || lower.includes('bio') || lower.includes('bío')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('concepci'));
-    if (found) return found;
-  }
-  if (lower.includes('valdivia') || lower.includes('austral')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('valdivia'));
-    if (found) return found;
-  }
-  if (lower.includes('antofagasta') || lower.includes('norte')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('antofagasta'));
-    if (found) return found;
-  }
-  if (lower.includes('temuco') || lower.includes('frontera') || lower.includes('araucan')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('temuco'));
-    if (found) return found;
-  }
-  if (lower.includes('serena') || lower.includes('coquimbo')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('serena'));
-    if (found) return found;
-  }
-  if (lower.includes('talca') || lower.includes('maule')) {
-    const found = cities.find((c) => c.city.toLowerCase().includes('talca'));
-    if (found) return found;
-  }
-  const santiago = cities.find((c) => c.city.toLowerCase() === 'santiago');
+  const santiago = cities.find((c) => normalizeText(c.city) === 'santiago');
   return santiago || cities[0];
 };
 

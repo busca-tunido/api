@@ -1,0 +1,1832 @@
+[
+  {
+    "city": "Antofagasta",
+    "latitude": -23.65094,
+    "longitude": -70.39752,
+    "isPrimary": true
+  },
+  {
+    "city": "Concepción",
+    "latitude": -36.82699,
+    "longitude": -73.04977,
+    "isPrimary": true
+  },
+  {
+    "city": "La Serena",
+    "latitude": -29.90591,
+    "longitude": -71.25014,
+    "isPrimary": true
+  },
+  {
+    "city": "Santiago",
+    "latitude": -33.45694,
+    "longitude": -70.64827,
+    "isPrimary": true
+  },
+  {
+    "city": "Talca",
+    "latitude": -35.4232,
+    "longitude": -71.64974,
+    "isPrimary": true
+  },
+  {
+    "city": "Temuco",
+    "latitude": -38.73628,
+    "longitude": -72.59738,
+    "isPrimary": true
+  },
+  {
+    "city": "Valdivia",
+    "latitude": -39.81422,
+    "longitude": -73.24589,
+    "isPrimary": true
+  },
+  {
+    "city": "Valparaíso",
+    "latitude": -33.036,
+    "longitude": -71.62963,
+    "isPrimary": true
+  },
+  {
+    "city": "Viña del Mar",
+    "latitude": -33.02457,
+    "longitude": -71.55183,
+    "isPrimary": true
+  },
+  {
+    "city": "Algarrobo",
+    "latitude": -33.36952,
+    "longitude": -71.67654,
+    "isPrimary": false
+  },
+  {
+    "city": "Alto del Carmen",
+    "latitude": -28.75946,
+    "longitude": -70.48651,
+    "isPrimary": false
+  },
+  {
+    "city": "Alto Hospicio",
+    "latitude": -20.26871,
+    "longitude": -70.1049,
+    "isPrimary": false
+  },
+  {
+    "city": "Ancud",
+    "latitude": -41.8707,
+    "longitude": -73.81622,
+    "isPrimary": false
+  },
+  {
+    "city": "Andacollo",
+    "latitude": -30.23449,
+    "longitude": -71.08534,
+    "isPrimary": false
+  },
+  {
+    "city": "Angol",
+    "latitude": -37.79519,
+    "longitude": -72.71636,
+    "isPrimary": false
+  },
+  {
+    "city": "Antuco",
+    "latitude": -37.33007,
+    "longitude": -71.67467,
+    "isPrimary": false
+  },
+  {
+    "city": "Arauco",
+    "latitude": -37.2463,
+    "longitude": -73.31752,
+    "isPrimary": false
+  },
+  {
+    "city": "Arica",
+    "latitude": -18.47552,
+    "longitude": -70.30058,
+    "isPrimary": false
+  },
+  {
+    "city": "Baquedano",
+    "latitude": -23.33374,
+    "longitude": -69.84055,
+    "isPrimary": false
+  },
+  {
+    "city": "Batuco",
+    "latitude": -33.23283,
+    "longitude": -70.80922,
+    "isPrimary": false
+  },
+  {
+    "city": "Buin",
+    "latitude": -33.73257,
+    "longitude": -70.74281,
+    "isPrimary": false
+  },
+  {
+    "city": "Bulnes",
+    "latitude": -36.74232,
+    "longitude": -72.29854,
+    "isPrimary": false
+  },
+  {
+    "city": "Cabildo",
+    "latitude": -32.43134,
+    "longitude": -71.07167,
+    "isPrimary": false
+  },
+  {
+    "city": "Cabrero",
+    "latitude": -37.03394,
+    "longitude": -72.40468,
+    "isPrimary": false
+  },
+  {
+    "city": "Calama",
+    "latitude": -22.45667,
+    "longitude": -68.92371,
+    "isPrimary": false
+  },
+  {
+    "city": "Calbuco",
+    "latitude": -41.77338,
+    "longitude": -73.13049,
+    "isPrimary": false
+  },
+  {
+    "city": "Caldera",
+    "latitude": -27.06812,
+    "longitude": -70.81921,
+    "isPrimary": false
+  },
+  {
+    "city": "Calera de Tango",
+    "latitude": -33.62238,
+    "longitude": -70.79912,
+    "isPrimary": false
+  },
+  {
+    "city": "Calle Larga",
+    "latitude": -32.85473,
+    "longitude": -70.62595,
+    "isPrimary": false
+  },
+  {
+    "city": "Cámeron",
+    "latitude": -53.63988,
+    "longitude": -69.64693,
+    "isPrimary": false
+  },
+  {
+    "city": "Camiña",
+    "latitude": -19.31286,
+    "longitude": -69.4261,
+    "isPrimary": false
+  },
+  {
+    "city": "Canela",
+    "latitude": -31.58333,
+    "longitude": -70.85,
+    "isPrimary": false
+  },
+  {
+    "city": "Cañete",
+    "latitude": -37.80128,
+    "longitude": -73.39616,
+    "isPrimary": false
+  },
+  {
+    "city": "Cañete",
+    "latitude": -37.8,
+    "longitude": -73.38333,
+    "isPrimary": false
+  },
+  {
+    "city": "Capitán Pastene",
+    "latitude": -38.19356,
+    "longitude": -72.99253,
+    "isPrimary": false
+  },
+  {
+    "city": "Carahue",
+    "latitude": -38.71122,
+    "longitude": -73.16101,
+    "isPrimary": false
+  },
+  {
+    "city": "Cartagena",
+    "latitude": -33.55384,
+    "longitude": -71.60761,
+    "isPrimary": false
+  },
+  {
+    "city": "Casablanca",
+    "latitude": -33.31712,
+    "longitude": -71.40311,
+    "isPrimary": false
+  },
+  {
+    "city": "Castro",
+    "latitude": -42.4721,
+    "longitude": -73.77319,
+    "isPrimary": false
+  },
+  {
+    "city": "Catemu",
+    "latitude": -32.63333,
+    "longitude": -71.03333,
+    "isPrimary": false
+  },
+  {
+    "city": "Cauquenes",
+    "latitude": -35.9671,
+    "longitude": -72.32248,
+    "isPrimary": false
+  },
+  {
+    "city": "Chaitén",
+    "latitude": -42.91596,
+    "longitude": -72.70632,
+    "isPrimary": false
+  },
+  {
+    "city": "Chanco",
+    "latitude": -35.73674,
+    "longitude": -72.53305,
+    "isPrimary": false
+  },
+  {
+    "city": "Chañaral",
+    "latitude": -26.34298,
+    "longitude": -70.61648,
+    "isPrimary": false
+  },
+  {
+    "city": "Chépica",
+    "latitude": -34.72731,
+    "longitude": -71.27292,
+    "isPrimary": false
+  },
+  {
+    "city": "Chicureo",
+    "latitude": -33.28379,
+    "longitude": -70.65333,
+    "isPrimary": false
+  },
+  {
+    "city": "Chiguayante",
+    "latitude": -36.9256,
+    "longitude": -73.02841,
+    "isPrimary": false
+  },
+  {
+    "city": "Chile Chico",
+    "latitude": -46.541,
+    "longitude": -71.72375,
+    "isPrimary": false
+  },
+  {
+    "city": "Chillán",
+    "latitude": -36.60664,
+    "longitude": -72.10344,
+    "isPrimary": false
+  },
+  {
+    "city": "Chillán Viejo",
+    "latitude": -36.62297,
+    "longitude": -72.13194,
+    "isPrimary": false
+  },
+  {
+    "city": "Chimbarongo",
+    "latitude": -34.71247,
+    "longitude": -71.0434,
+    "isPrimary": false
+  },
+  {
+    "city": "Cholchol",
+    "latitude": -38.60183,
+    "longitude": -72.84572,
+    "isPrimary": false
+  },
+  {
+    "city": "Chonchi",
+    "latitude": -42.62387,
+    "longitude": -73.775,
+    "isPrimary": false
+  },
+  {
+    "city": "Cobquecura",
+    "latitude": -36.13251,
+    "longitude": -72.79401,
+    "isPrimary": false
+  },
+  {
+    "city": "Cochamó",
+    "latitude": -41.49752,
+    "longitude": -72.30789,
+    "isPrimary": false
+  },
+  {
+    "city": "Cochrane",
+    "latitude": -47.2557,
+    "longitude": -72.5695,
+    "isPrimary": false
+  },
+  {
+    "city": "Codegua",
+    "latitude": -34.03563,
+    "longitude": -70.66876,
+    "isPrimary": false
+  },
+  {
+    "city": "Coelemu",
+    "latitude": -36.48741,
+    "longitude": -72.7032,
+    "isPrimary": false
+  },
+  {
+    "city": "Coihueco",
+    "latitude": -36.62785,
+    "longitude": -71.83068,
+    "isPrimary": false
+  },
+  {
+    "city": "Colbún",
+    "latitude": -35.69494,
+    "longitude": -71.40568,
+    "isPrimary": false
+  },
+  {
+    "city": "Colchane",
+    "latitude": -19.27588,
+    "longitude": -68.63763,
+    "isPrimary": false
+  },
+  {
+    "city": "Colina",
+    "latitude": -33.20443,
+    "longitude": -70.67474,
+    "isPrimary": false
+  },
+  {
+    "city": "Collipulli",
+    "latitude": -37.95453,
+    "longitude": -72.43438,
+    "isPrimary": false
+  },
+  {
+    "city": "Coltauco",
+    "latitude": -34.28846,
+    "longitude": -71.08374,
+    "isPrimary": false
+  },
+  {
+    "city": "Combarbalá",
+    "latitude": -31.17863,
+    "longitude": -71.00304,
+    "isPrimary": false
+  },
+  {
+    "city": "Concón",
+    "latitude": -32.92203,
+    "longitude": -71.51619,
+    "isPrimary": false
+  },
+  {
+    "city": "Constitución",
+    "latitude": -35.33321,
+    "longitude": -72.41156,
+    "isPrimary": false
+  },
+  {
+    "city": "Contulmo",
+    "latitude": -38.01556,
+    "longitude": -73.22991,
+    "isPrimary": false
+  },
+  {
+    "city": "Copiapó",
+    "latitude": -27.36737,
+    "longitude": -70.33219,
+    "isPrimary": false
+  },
+  {
+    "city": "Coquimbo",
+    "latitude": -29.95332,
+    "longitude": -71.33947,
+    "isPrimary": false
+  },
+  {
+    "city": "Coronel",
+    "latitude": -37.03386,
+    "longitude": -73.14019,
+    "isPrimary": false
+  },
+  {
+    "city": "Corral",
+    "latitude": -39.8873,
+    "longitude": -73.43101,
+    "isPrimary": false
+  },
+  {
+    "city": "Coya",
+    "latitude": -34.20557,
+    "longitude": -70.53138,
+    "isPrimary": false
+  },
+  {
+    "city": "Coyhaique",
+    "latitude": -45.57524,
+    "longitude": -72.06619,
+    "isPrimary": false
+  },
+  {
+    "city": "Cunco",
+    "latitude": -38.93181,
+    "longitude": -72.03151,
+    "isPrimary": false
+  },
+  {
+    "city": "Curacautín",
+    "latitude": -38.44064,
+    "longitude": -71.88923,
+    "isPrimary": false
+  },
+  {
+    "city": "Curacaví",
+    "latitude": -33.39762,
+    "longitude": -71.12708,
+    "isPrimary": false
+  },
+  {
+    "city": "Curanilahue",
+    "latitude": -37.47793,
+    "longitude": -73.34495,
+    "isPrimary": false
+  },
+  {
+    "city": "Curarrehue",
+    "latitude": -39.36019,
+    "longitude": -71.58748,
+    "isPrimary": false
+  },
+  {
+    "city": "Curicó",
+    "latitude": -34.98279,
+    "longitude": -71.23943,
+    "isPrimary": false
+  },
+  {
+    "city": "Cuya",
+    "latitude": -19.16062,
+    "longitude": -70.17953,
+    "isPrimary": false
+  },
+  {
+    "city": "Dalcahue",
+    "latitude": -42.37845,
+    "longitude": -73.65011,
+    "isPrimary": false
+  },
+  {
+    "city": "Dichato",
+    "latitude": -36.54823,
+    "longitude": -72.9352,
+    "isPrimary": false
+  },
+  {
+    "city": "Diego de Almagro",
+    "latitude": -26.39022,
+    "longitude": -70.04556,
+    "isPrimary": false
+  },
+  {
+    "city": "Doñihue",
+    "latitude": -34.22631,
+    "longitude": -70.96479,
+    "isPrimary": false
+  },
+  {
+    "city": "El Carmen",
+    "latitude": -36.89834,
+    "longitude": -72.0261,
+    "isPrimary": false
+  },
+  {
+    "city": "El Carmen",
+    "latitude": -36.29126,
+    "longitude": -72.03713,
+    "isPrimary": false
+  },
+  {
+    "city": "El Monte",
+    "latitude": -33.67969,
+    "longitude": -70.98482,
+    "isPrimary": false
+  },
+  {
+    "city": "El Quisco",
+    "latitude": -33.39772,
+    "longitude": -71.69388,
+    "isPrimary": false
+  },
+  {
+    "city": "El Tabo",
+    "latitude": -33.45548,
+    "longitude": -71.66683,
+    "isPrimary": false
+  },
+  {
+    "city": "Empedrado",
+    "latitude": -35.59157,
+    "longitude": -72.2776,
+    "isPrimary": false
+  },
+  {
+    "city": "Ercilla",
+    "latitude": -38.06323,
+    "longitude": -72.37425,
+    "isPrimary": false
+  },
+  {
+    "city": "Florida",
+    "latitude": -36.82399,
+    "longitude": -72.66097,
+    "isPrimary": false
+  },
+  {
+    "city": "Freire",
+    "latitude": -38.95252,
+    "longitude": -72.62653,
+    "isPrimary": false
+  },
+  {
+    "city": "Freirina",
+    "latitude": -28.50917,
+    "longitude": -71.08124,
+    "isPrimary": false
+  },
+  {
+    "city": "Fresia",
+    "latitude": -41.15364,
+    "longitude": -73.42102,
+    "isPrimary": false
+  },
+  {
+    "city": "Frutillar",
+    "latitude": -41.12162,
+    "longitude": -73.0581,
+    "isPrimary": false
+  },
+  {
+    "city": "Futaleufú",
+    "latitude": -43.18492,
+    "longitude": -71.86722,
+    "isPrimary": false
+  },
+  {
+    "city": "Futrono",
+    "latitude": -40.1295,
+    "longitude": -72.38536,
+    "isPrimary": false
+  },
+  {
+    "city": "Galvarino",
+    "latitude": -38.41359,
+    "longitude": -72.78151,
+    "isPrimary": false
+  },
+  {
+    "city": "Gorbea",
+    "latitude": -39.10164,
+    "longitude": -72.67602,
+    "isPrimary": false
+  },
+  {
+    "city": "Graneros",
+    "latitude": -34.06863,
+    "longitude": -70.72747,
+    "isPrimary": false
+  },
+  {
+    "city": "Hacienda La Calera",
+    "latitude": -32.78333,
+    "longitude": -71.21667,
+    "isPrimary": false
+  },
+  {
+    "city": "Hanga Roa",
+    "latitude": -27.15253,
+    "longitude": -109.42438,
+    "isPrimary": false
+  },
+  {
+    "city": "Hijuelas",
+    "latitude": -32.79828,
+    "longitude": -71.14635,
+    "isPrimary": false
+  },
+  {
+    "city": "Hualañe",
+    "latitude": -34.9754,
+    "longitude": -71.80252,
+    "isPrimary": false
+  },
+  {
+    "city": "Hualpén",
+    "latitude": -36.78908,
+    "longitude": -73.10165,
+    "isPrimary": false
+  },
+  {
+    "city": "Hualqui",
+    "latitude": -36.97266,
+    "longitude": -72.93559,
+    "isPrimary": false
+  },
+  {
+    "city": "Huara",
+    "latitude": -19.99631,
+    "longitude": -69.77205,
+    "isPrimary": false
+  },
+  {
+    "city": "Huasco",
+    "latitude": -28.46599,
+    "longitude": -71.22276,
+    "isPrimary": false
+  },
+  {
+    "city": "Huentelauquén",
+    "latitude": -31.58442,
+    "longitude": -71.53425,
+    "isPrimary": false
+  },
+  {
+    "city": "Huepil",
+    "latitude": -37.23943,
+    "longitude": -71.94161,
+    "isPrimary": false
+  },
+  {
+    "city": "Illapel",
+    "latitude": -31.63349,
+    "longitude": -71.16967,
+    "isPrimary": false
+  },
+  {
+    "city": "Iquique",
+    "latitude": -20.21326,
+    "longitude": -70.15027,
+    "isPrimary": false
+  },
+  {
+    "city": "Isla de Maipo",
+    "latitude": -33.74681,
+    "longitude": -70.8977,
+    "isPrimary": false
+  },
+  {
+    "city": "La Calera",
+    "latitude": -32.78676,
+    "longitude": -71.19795,
+    "isPrimary": false
+  },
+  {
+    "city": "La Cruz",
+    "latitude": -32.82748,
+    "longitude": -71.22634,
+    "isPrimary": false
+  },
+  {
+    "city": "La Ensenada",
+    "latitude": -41.20746,
+    "longitude": -72.5384,
+    "isPrimary": false
+  },
+  {
+    "city": "La Higuera",
+    "latitude": -29.51195,
+    "longitude": -71.2019,
+    "isPrimary": false
+  },
+  {
+    "city": "La Islita",
+    "latitude": -33.75,
+    "longitude": -70.86667,
+    "isPrimary": false
+  },
+  {
+    "city": "La Junta",
+    "latitude": -43.97434,
+    "longitude": -72.40554,
+    "isPrimary": false
+  },
+  {
+    "city": "La Ligua",
+    "latitude": -32.45242,
+    "longitude": -71.23106,
+    "isPrimary": false
+  },
+  {
+    "city": "La Pintana",
+    "latitude": -33.58331,
+    "longitude": -70.63419,
+    "isPrimary": false
+  },
+  {
+    "city": "La Unión",
+    "latitude": -40.29313,
+    "longitude": -73.08167,
+    "isPrimary": false
+  },
+  {
+    "city": "Labranza",
+    "latitude": -38.76523,
+    "longitude": -72.75296,
+    "isPrimary": false
+  },
+  {
+    "city": "Lago Ranco",
+    "latitude": -40.32272,
+    "longitude": -72.48049,
+    "isPrimary": false
+  },
+  {
+    "city": "Laja",
+    "latitude": -37.28415,
+    "longitude": -72.71105,
+    "isPrimary": false
+  },
+  {
+    "city": "Lampa",
+    "latitude": -33.2863,
+    "longitude": -70.87561,
+    "isPrimary": false
+  },
+  {
+    "city": "Lanco",
+    "latitude": -39.45246,
+    "longitude": -72.77117,
+    "isPrimary": false
+  },
+  {
+    "city": "Las Animas",
+    "latitude": -39.80867,
+    "longitude": -73.21821,
+    "isPrimary": false
+  },
+  {
+    "city": "Las Cabras",
+    "latitude": -34.29027,
+    "longitude": -71.30616,
+    "isPrimary": false
+  },
+  {
+    "city": "Las Gaviotas",
+    "latitude": -39.86653,
+    "longitude": -73.18834,
+    "isPrimary": false
+  },
+  {
+    "city": "Lautaro",
+    "latitude": -38.53066,
+    "longitude": -72.43652,
+    "isPrimary": false
+  },
+  {
+    "city": "Lebu",
+    "latitude": -37.60825,
+    "longitude": -73.65356,
+    "isPrimary": false
+  },
+  {
+    "city": "Limache",
+    "latitude": -33.01327,
+    "longitude": -71.26084,
+    "isPrimary": false
+  },
+  {
+    "city": "Linares",
+    "latitude": -35.84667,
+    "longitude": -71.59308,
+    "isPrimary": false
+  },
+  {
+    "city": "Llaillay",
+    "latitude": -32.84043,
+    "longitude": -70.95623,
+    "isPrimary": false
+  },
+  {
+    "city": "Llanquihue",
+    "latitude": -41.25603,
+    "longitude": -73.00649,
+    "isPrimary": false
+  },
+  {
+    "city": "Lo Prado",
+    "latitude": -33.4443,
+    "longitude": -70.72552,
+    "isPrimary": false
+  },
+  {
+    "city": "Lolol",
+    "latitude": -34.73703,
+    "longitude": -71.6107,
+    "isPrimary": false
+  },
+  {
+    "city": "Loncoche",
+    "latitude": -39.36708,
+    "longitude": -72.63087,
+    "isPrimary": false
+  },
+  {
+    "city": "Loncura",
+    "latitude": -32.78778,
+    "longitude": -71.50556,
+    "isPrimary": false
+  },
+  {
+    "city": "Longaví",
+    "latitude": -35.96496,
+    "longitude": -71.6836,
+    "isPrimary": false
+  },
+  {
+    "city": "Lonquimay",
+    "latitude": -38.45389,
+    "longitude": -71.37049,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Álamos",
+    "latitude": -37.62797,
+    "longitude": -73.46008,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Andes",
+    "latitude": -32.83369,
+    "longitude": -70.59827,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Ángeles",
+    "latitude": -37.46973,
+    "longitude": -72.35366,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Lagos",
+    "latitude": -39.8635,
+    "longitude": -72.80914,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Laureles",
+    "latitude": -38.25818,
+    "longitude": -73.0594,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Muermos",
+    "latitude": -41.39556,
+    "longitude": -73.46237,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Sauces",
+    "latitude": -37.98119,
+    "longitude": -72.83393,
+    "isPrimary": false
+  },
+  {
+    "city": "Los Vilos",
+    "latitude": -31.91292,
+    "longitude": -71.50045,
+    "isPrimary": false
+  },
+  {
+    "city": "Lota",
+    "latitude": -37.08994,
+    "longitude": -73.1577,
+    "isPrimary": false
+  },
+  {
+    "city": "Lumaco",
+    "latitude": -38.16485,
+    "longitude": -72.90551,
+    "isPrimary": false
+  },
+  {
+    "city": "Machalí",
+    "latitude": -34.18082,
+    "longitude": -70.64933,
+    "isPrimary": false
+  },
+  {
+    "city": "Maipú",
+    "latitude": -33.51421,
+    "longitude": -70.7651,
+    "isPrimary": false
+  },
+  {
+    "city": "Marchihue",
+    "latitude": -34.39754,
+    "longitude": -71.61938,
+    "isPrimary": false
+  },
+  {
+    "city": "María Elena",
+    "latitude": -22.34449,
+    "longitude": -69.66178,
+    "isPrimary": false
+  },
+  {
+    "city": "María Pinto",
+    "latitude": -33.5172,
+    "longitude": -71.12199,
+    "isPrimary": false
+  },
+  {
+    "city": "Maule",
+    "latitude": -35.52249,
+    "longitude": -71.68891,
+    "isPrimary": false
+  },
+  {
+    "city": "Maullín",
+    "latitude": -41.61778,
+    "longitude": -73.59833,
+    "isPrimary": false
+  },
+  {
+    "city": "Mejillones",
+    "latitude": -23.10003,
+    "longitude": -70.44703,
+    "isPrimary": false
+  },
+  {
+    "city": "Melipeuco",
+    "latitude": -38.85243,
+    "longitude": -71.69334,
+    "isPrimary": false
+  },
+  {
+    "city": "Melipilla",
+    "latitude": -33.68909,
+    "longitude": -71.21528,
+    "isPrimary": false
+  },
+  {
+    "city": "Molina",
+    "latitude": -35.11428,
+    "longitude": -71.28232,
+    "isPrimary": false
+  },
+  {
+    "city": "Monte Patria",
+    "latitude": -30.69496,
+    "longitude": -70.9577,
+    "isPrimary": false
+  },
+  {
+    "city": "Mulchén",
+    "latitude": -37.71893,
+    "longitude": -72.24099,
+    "isPrimary": false
+  },
+  {
+    "city": "Nacimiento",
+    "latitude": -37.50253,
+    "longitude": -72.67307,
+    "isPrimary": false
+  },
+  {
+    "city": "Nancagua",
+    "latitude": -34.65187,
+    "longitude": -71.19724,
+    "isPrimary": false
+  },
+  {
+    "city": "Negrete",
+    "latitude": -37.58668,
+    "longitude": -72.52833,
+    "isPrimary": false
+  },
+  {
+    "city": "Ninhue",
+    "latitude": -36.39418,
+    "longitude": -72.3987,
+    "isPrimary": false
+  },
+  {
+    "city": "Nogales",
+    "latitude": -32.71667,
+    "longitude": -71.23333,
+    "isPrimary": false
+  },
+  {
+    "city": "Nueva Imperial",
+    "latitude": -38.74451,
+    "longitude": -72.95025,
+    "isPrimary": false
+  },
+  {
+    "city": "Nueva Toltén",
+    "latitude": -39.17852,
+    "longitude": -73.16448,
+    "isPrimary": false
+  },
+  {
+    "city": "Ñuñoa",
+    "latitude": -33.44735,
+    "longitude": -70.58279,
+    "isPrimary": false
+  },
+  {
+    "city": "Olivar",
+    "latitude": -34.20968,
+    "longitude": -70.81944,
+    "isPrimary": false
+  },
+  {
+    "city": "Olmué",
+    "latitude": -32.99577,
+    "longitude": -71.19136,
+    "isPrimary": false
+  },
+  {
+    "city": "Osorno",
+    "latitude": -40.57395,
+    "longitude": -73.13348,
+    "isPrimary": false
+  },
+  {
+    "city": "Ovalle",
+    "latitude": -30.60106,
+    "longitude": -71.19901,
+    "isPrimary": false
+  },
+  {
+    "city": "Padre Hurtado",
+    "latitude": -33.56839,
+    "longitude": -70.80584,
+    "isPrimary": false
+  },
+  {
+    "city": "Padre Las Casas",
+    "latitude": -38.76081,
+    "longitude": -72.5982,
+    "isPrimary": false
+  },
+  {
+    "city": "Paiguano",
+    "latitude": -30.02884,
+    "longitude": -70.51708,
+    "isPrimary": false
+  },
+  {
+    "city": "Paillaco",
+    "latitude": -40.06822,
+    "longitude": -72.87935,
+    "isPrimary": false
+  },
+  {
+    "city": "Paine",
+    "latitude": -33.80796,
+    "longitude": -70.74109,
+    "isPrimary": false
+  },
+  {
+    "city": "Palena",
+    "latitude": -43.61876,
+    "longitude": -71.80434,
+    "isPrimary": false
+  },
+  {
+    "city": "Palmilla",
+    "latitude": -34.59258,
+    "longitude": -71.36368,
+    "isPrimary": false
+  },
+  {
+    "city": "Panguipulli",
+    "latitude": -39.64355,
+    "longitude": -72.33269,
+    "isPrimary": false
+  },
+  {
+    "city": "Panquehue",
+    "latitude": -32.77143,
+    "longitude": -70.83614,
+    "isPrimary": false
+  },
+  {
+    "city": "Papudo",
+    "latitude": -32.50799,
+    "longitude": -71.44362,
+    "isPrimary": false
+  },
+  {
+    "city": "Paredones",
+    "latitude": -34.64808,
+    "longitude": -71.89922,
+    "isPrimary": false
+  },
+  {
+    "city": "Parral",
+    "latitude": -36.14311,
+    "longitude": -71.82605,
+    "isPrimary": false
+  },
+  {
+    "city": "Pelarco",
+    "latitude": -35.38442,
+    "longitude": -71.44508,
+    "isPrimary": false
+  },
+  {
+    "city": "Pemuco",
+    "latitude": -36.97792,
+    "longitude": -72.09611,
+    "isPrimary": false
+  },
+  {
+    "city": "Pencahue",
+    "latitude": -35.39346,
+    "longitude": -71.80054,
+    "isPrimary": false
+  },
+  {
+    "city": "Penco",
+    "latitude": -36.74075,
+    "longitude": -72.99528,
+    "isPrimary": false
+  },
+  {
+    "city": "Peñaflor",
+    "latitude": -33.60627,
+    "longitude": -70.87649,
+    "isPrimary": false
+  },
+  {
+    "city": "Peñalolén",
+    "latitude": -33.46836,
+    "longitude": -70.53411,
+    "isPrimary": false
+  },
+  {
+    "city": "Peor Es Nada",
+    "latitude": -34.78238,
+    "longitude": -71.04045,
+    "isPrimary": false
+  },
+  {
+    "city": "Peralillo",
+    "latitude": -34.47804,
+    "longitude": -71.48043,
+    "isPrimary": false
+  },
+  {
+    "city": "Perquenco",
+    "latitude": -38.42178,
+    "longitude": -72.3773,
+    "isPrimary": false
+  },
+  {
+    "city": "Petorca",
+    "latitude": -32.25231,
+    "longitude": -70.93478,
+    "isPrimary": false
+  },
+  {
+    "city": "Peumo",
+    "latitude": -34.38689,
+    "longitude": -71.17559,
+    "isPrimary": false
+  },
+  {
+    "city": "Pica",
+    "latitude": -20.49128,
+    "longitude": -69.33118,
+    "isPrimary": false
+  },
+  {
+    "city": "Pichidegua",
+    "latitude": -34.35497,
+    "longitude": -71.28826,
+    "isPrimary": false
+  },
+  {
+    "city": "Pichilemu",
+    "latitude": -34.38333,
+    "longitude": -72,
+    "isPrimary": false
+  },
+  {
+    "city": "Pinto",
+    "latitude": -36.70356,
+    "longitude": -71.89226,
+    "isPrimary": false
+  },
+  {
+    "city": "Pirque",
+    "latitude": -33.63638,
+    "longitude": -70.57361,
+    "isPrimary": false
+  },
+  {
+    "city": "Pitrufquén",
+    "latitude": -38.98635,
+    "longitude": -72.63721,
+    "isPrimary": false
+  },
+  {
+    "city": "Placilla",
+    "latitude": -33.1144,
+    "longitude": -71.56806,
+    "isPrimary": false
+  },
+  {
+    "city": "Porvenir",
+    "latitude": -53.296,
+    "longitude": -70.36629,
+    "isPrimary": false
+  },
+  {
+    "city": "Pozo Almonte",
+    "latitude": -20.25585,
+    "longitude": -69.7863,
+    "isPrimary": false
+  },
+  {
+    "city": "Providencia",
+    "latitude": -33.43107,
+    "longitude": -70.60454,
+    "isPrimary": false
+  },
+  {
+    "city": "Puchuncaví",
+    "latitude": -32.72575,
+    "longitude": -71.41514,
+    "isPrimary": false
+  },
+  {
+    "city": "Pucón",
+    "latitude": -39.28223,
+    "longitude": -71.95427,
+    "isPrimary": false
+  },
+  {
+    "city": "Puente Alto",
+    "latitude": -33.61169,
+    "longitude": -70.57577,
+    "isPrimary": false
+  },
+  {
+    "city": "Puerto Aysén",
+    "latitude": -45.40303,
+    "longitude": -72.69184,
+    "isPrimary": false
+  },
+  {
+    "city": "Puerto Chacabuco",
+    "latitude": -45.46667,
+    "longitude": -72.81667,
+    "isPrimary": false
+  },
+  {
+    "city": "Puerto Cisnes",
+    "latitude": -44.74736,
+    "longitude": -72.69695,
+    "isPrimary": false
+  },
+  {
+    "city": "Puerto Montt",
+    "latitude": -41.4693,
+    "longitude": -72.94237,
+    "isPrimary": false
+  },
+  {
+    "city": "Puerto Natales",
+    "latitude": -51.72987,
+    "longitude": -72.50603,
+    "isPrimary": false
+  },
+  {
+    "city": "Puerto Varas",
+    "latitude": -41.31946,
+    "longitude": -72.98538,
+    "isPrimary": false
+  },
+  {
+    "city": "Puerto Williams",
+    "latitude": -54.93355,
+    "longitude": -67.60963,
+    "isPrimary": false
+  },
+  {
+    "city": "Punitaqui",
+    "latitude": -30.83448,
+    "longitude": -71.2586,
+    "isPrimary": false
+  },
+  {
+    "city": "Punta Arenas",
+    "latitude": -53.16282,
+    "longitude": -70.90922,
+    "isPrimary": false
+  },
+  {
+    "city": "Purén",
+    "latitude": -38.0334,
+    "longitude": -73.07145,
+    "isPrimary": false
+  },
+  {
+    "city": "Purranque",
+    "latitude": -40.91305,
+    "longitude": -73.15913,
+    "isPrimary": false
+  },
+  {
+    "city": "Putaendo",
+    "latitude": -32.62642,
+    "longitude": -70.7184,
+    "isPrimary": false
+  },
+  {
+    "city": "Putre",
+    "latitude": -18.19821,
+    "longitude": -69.56071,
+    "isPrimary": false
+  },
+  {
+    "city": "Puyehue",
+    "latitude": -40.65944,
+    "longitude": -72.60172,
+    "isPrimary": false
+  },
+  {
+    "city": "Quellón",
+    "latitude": -43.11819,
+    "longitude": -73.61661,
+    "isPrimary": false
+  },
+  {
+    "city": "Quilaco",
+    "latitude": -37.68371,
+    "longitude": -71.99948,
+    "isPrimary": false
+  },
+  {
+    "city": "Quilicura",
+    "latitude": -33.36799,
+    "longitude": -70.71388,
+    "isPrimary": false
+  },
+  {
+    "city": "Quilleco",
+    "latitude": -37.47023,
+    "longitude": -71.98157,
+    "isPrimary": false
+  },
+  {
+    "city": "Quillón",
+    "latitude": -36.74553,
+    "longitude": -72.47481,
+    "isPrimary": false
+  },
+  {
+    "city": "Quillota",
+    "latitude": -32.88341,
+    "longitude": -71.24882,
+    "isPrimary": false
+  },
+  {
+    "city": "Quilpué",
+    "latitude": -33.04752,
+    "longitude": -71.44249,
+    "isPrimary": false
+  },
+  {
+    "city": "Quinta de Tilcoco",
+    "latitude": -34.3555,
+    "longitude": -70.96527,
+    "isPrimary": false
+  },
+  {
+    "city": "Quintero",
+    "latitude": -32.78588,
+    "longitude": -71.53222,
+    "isPrimary": false
+  },
+  {
+    "city": "Quirihue",
+    "latitude": -36.27998,
+    "longitude": -72.54118,
+    "isPrimary": false
+  },
+  {
+    "city": "Rancagua",
+    "latitude": -34.1691,
+    "longitude": -70.74053,
+    "isPrimary": false
+  },
+  {
+    "city": "Rauco",
+    "latitude": -34.92546,
+    "longitude": -71.31722,
+    "isPrimary": false
+  },
+  {
+    "city": "Renaico",
+    "latitude": -37.67141,
+    "longitude": -72.58412,
+    "isPrimary": false
+  },
+  {
+    "city": "Renca",
+    "latitude": -33.4019,
+    "longitude": -70.70619,
+    "isPrimary": false
+  },
+  {
+    "city": "Rengo",
+    "latitude": -34.40639,
+    "longitude": -70.85834,
+    "isPrimary": false
+  },
+  {
+    "city": "Requínoa",
+    "latitude": -34.28557,
+    "longitude": -70.81683,
+    "isPrimary": false
+  },
+  {
+    "city": "Retiro",
+    "latitude": -36.05172,
+    "longitude": -71.75771,
+    "isPrimary": false
+  },
+  {
+    "city": "Rinconada de Los Andes",
+    "latitude": -32.83316,
+    "longitude": -70.68841,
+    "isPrimary": false
+  },
+  {
+    "city": "Rinconada de Malloa",
+    "latitude": -34.43975,
+    "longitude": -70.94183,
+    "isPrimary": false
+  },
+  {
+    "city": "Río Bueno",
+    "latitude": -40.33494,
+    "longitude": -72.95564,
+    "isPrimary": false
+  },
+  {
+    "city": "Río Negro",
+    "latitude": -40.79644,
+    "longitude": -73.21546,
+    "isPrimary": false
+  },
+  {
+    "city": "Romeral",
+    "latitude": -34.96127,
+    "longitude": -71.1235,
+    "isPrimary": false
+  },
+  {
+    "city": "Saavedra",
+    "latitude": -38.78702,
+    "longitude": -73.39713,
+    "isPrimary": false
+  },
+  {
+    "city": "Sagrada Familia",
+    "latitude": -34.99919,
+    "longitude": -71.38424,
+    "isPrimary": false
+  },
+  {
+    "city": "Salamanca",
+    "latitude": -31.77922,
+    "longitude": -70.96389,
+    "isPrimary": false
+  },
+  {
+    "city": "San Antonio",
+    "latitude": -33.59473,
+    "longitude": -71.60746,
+    "isPrimary": false
+  },
+  {
+    "city": "San Bernardo",
+    "latitude": -33.59217,
+    "longitude": -70.6996,
+    "isPrimary": false
+  },
+  {
+    "city": "San Carlos",
+    "latitude": -36.42477,
+    "longitude": -71.958,
+    "isPrimary": false
+  },
+  {
+    "city": "San Clemente",
+    "latitude": -35.53777,
+    "longitude": -71.487,
+    "isPrimary": false
+  },
+  {
+    "city": "San Esteban",
+    "latitude": -32.79871,
+    "longitude": -70.5807,
+    "isPrimary": false
+  },
+  {
+    "city": "San Fabián de Alico",
+    "latitude": -36.51952,
+    "longitude": -71.58608,
+    "isPrimary": false
+  },
+  {
+    "city": "San Felipe",
+    "latitude": -32.74976,
+    "longitude": -70.72584,
+    "isPrimary": false
+  },
+  {
+    "city": "San Francisco de Mostazal",
+    "latitude": -33.98219,
+    "longitude": -70.7104,
+    "isPrimary": false
+  },
+  {
+    "city": "San Ignacio",
+    "latitude": -36.79971,
+    "longitude": -72.03153,
+    "isPrimary": false
+  },
+  {
+    "city": "San Javier",
+    "latitude": -35.5952,
+    "longitude": -71.72924,
+    "isPrimary": false
+  },
+  {
+    "city": "San José de la Mariquina",
+    "latitude": -39.53635,
+    "longitude": -72.9657,
+    "isPrimary": false
+  },
+  {
+    "city": "San José de Maipo",
+    "latitude": -33.63912,
+    "longitude": -70.35318,
+    "isPrimary": false
+  },
+  {
+    "city": "San Nicolás",
+    "latitude": -36.50122,
+    "longitude": -72.21555,
+    "isPrimary": false
+  },
+  {
+    "city": "San Pablo",
+    "latitude": -40.41348,
+    "longitude": -73.01085,
+    "isPrimary": false
+  },
+  {
+    "city": "San Pedro de Atacama",
+    "latitude": -22.9111,
+    "longitude": -68.20113,
+    "isPrimary": false
+  },
+  {
+    "city": "San Pedro de la Paz",
+    "latitude": -36.83897,
+    "longitude": -73.10028,
+    "isPrimary": false
+  },
+  {
+    "city": "San Rafael",
+    "latitude": -35.30624,
+    "longitude": -71.51906,
+    "isPrimary": false
+  },
+  {
+    "city": "San Vicente",
+    "latitude": -34.43333,
+    "longitude": -71.08333,
+    "isPrimary": false
+  },
+  {
+    "city": "San Vicente de Tagua Tagua",
+    "latitude": -34.43859,
+    "longitude": -71.07751,
+    "isPrimary": false
+  },
+  {
+    "city": "Santa Bárbara",
+    "latitude": -37.66824,
+    "longitude": -72.02252,
+    "isPrimary": false
+  },
+  {
+    "city": "Santa Cruz",
+    "latitude": -34.63881,
+    "longitude": -71.36576,
+    "isPrimary": false
+  },
+  {
+    "city": "Santa Juana",
+    "latitude": -37.1751,
+    "longitude": -72.9433,
+    "isPrimary": false
+  },
+  {
+    "city": "Santa María",
+    "latitude": -32.74732,
+    "longitude": -70.65666,
+    "isPrimary": false
+  },
+  {
+    "city": "Santo Domingo",
+    "latitude": -33.63615,
+    "longitude": -71.62723,
+    "isPrimary": false
+  },
+  {
+    "city": "Sierra Gorda",
+    "latitude": -22.89061,
+    "longitude": -69.31959,
+    "isPrimary": false
+  },
+  {
+    "city": "Talagante",
+    "latitude": -33.66386,
+    "longitude": -70.92734,
+    "isPrimary": false
+  },
+  {
+    "city": "Talcahuano",
+    "latitude": -36.72494,
+    "longitude": -73.11684,
+    "isPrimary": false
+  },
+  {
+    "city": "Taltal",
+    "latitude": -25.40713,
+    "longitude": -70.48554,
+    "isPrimary": false
+  },
+  {
+    "city": "Teno",
+    "latitude": -34.87055,
+    "longitude": -71.16219,
+    "isPrimary": false
+  },
+  {
+    "city": "Teodoro Schmidt",
+    "latitude": -38.99442,
+    "longitude": -73.08927,
+    "isPrimary": false
+  },
+  {
+    "city": "Tierra Amarilla",
+    "latitude": -27.46633,
+    "longitude": -70.26255,
+    "isPrimary": false
+  },
+  {
+    "city": "Tiltil",
+    "latitude": -33.0831,
+    "longitude": -70.92924,
+    "isPrimary": false
+  },
+  {
+    "city": "Tirúa",
+    "latitude": -38.34179,
+    "longitude": -73.49149,
+    "isPrimary": false
+  },
+  {
+    "city": "Tocopilla",
+    "latitude": -22.09198,
+    "longitude": -70.19792,
+    "isPrimary": false
+  },
+  {
+    "city": "Tomé",
+    "latitude": -36.61756,
+    "longitude": -72.95593,
+    "isPrimary": false
+  },
+  {
+    "city": "Traiguén",
+    "latitude": -38.2496,
+    "longitude": -72.67027,
+    "isPrimary": false
+  },
+  {
+    "city": "Tucapel",
+    "latitude": -37.29079,
+    "longitude": -71.94929,
+    "isPrimary": false
+  },
+  {
+    "city": "Vallenar",
+    "latitude": -28.57617,
+    "longitude": -70.75938,
+    "isPrimary": false
+  },
+  {
+    "city": "Vallenar",
+    "latitude": -28.51576,
+    "longitude": -70.25551,
+    "isPrimary": false
+  },
+  {
+    "city": "Victoria",
+    "latitude": -38.23291,
+    "longitude": -72.33292,
+    "isPrimary": false
+  },
+  {
+    "city": "Vicuña",
+    "latitude": -30.03541,
+    "longitude": -70.71274,
+    "isPrimary": false
+  },
+  {
+    "city": "Vilcún",
+    "latitude": -38.66875,
+    "longitude": -72.22565,
+    "isPrimary": false
+  },
+  {
+    "city": "Villa Alegre",
+    "latitude": -35.67296,
+    "longitude": -71.7443,
+    "isPrimary": false
+  },
+  {
+    "city": "Villa Alemana",
+    "latitude": -33.04823,
+    "longitude": -71.3729,
+    "isPrimary": false
+  },
+  {
+    "city": "Villa Alhué",
+    "latitude": -34.03268,
+    "longitude": -71.10033,
+    "isPrimary": false
+  },
+  {
+    "city": "Villa Mercedes",
+    "latitude": -37.40421,
+    "longitude": -71.97949,
+    "isPrimary": false
+  },
+  {
+    "city": "Villa Presidente Frei",
+    "latitude": -33.46069,
+    "longitude": -70.58024,
+    "isPrimary": false
+  },
+  {
+    "city": "Villarrica",
+    "latitude": -39.28569,
+    "longitude": -72.2279,
+    "isPrimary": false
+  },
+  {
+    "city": "Yerbas Buenas",
+    "latitude": -35.74816,
+    "longitude": -71.5853,
+    "isPrimary": false
+  },
+  {
+    "city": "Yumbel",
+    "latitude": -37.0982,
+    "longitude": -72.56084,
+    "isPrimary": false
+  },
+  {
+    "city": "Yungay",
+    "latitude": -37.11977,
+    "longitude": -72.01984,
+    "isPrimary": false
+  }
+]

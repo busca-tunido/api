@@ -95,11 +95,11 @@ type CoastalCityConfig = {
 };
 
 const COASTAL_OFFSET_CONFIGS: Record<string, CoastalCityConfig> = {
-  valparaíso: {
+  valparaiso: {
     latRange: [-0.016, -0.003],
     lngRange: [0.004, 0.022],
   },
-  'viña del mar': {
+  'vina del mar': {
     latRange: [-0.012, 0.012],
     lngRange: [0.005, 0.025],
   },
@@ -117,19 +117,28 @@ const COASTAL_OFFSET_CONFIGS: Record<string, CoastalCityConfig> = {
   },
 };
 
+const cityNormalizationCache = new Map<string, CoastalCityConfig | undefined>();
+
+const getCoastalConfig = (cityName: string): CoastalCityConfig | undefined => {
+  if (cityNormalizationCache.has(cityName)) {
+    return cityNormalizationCache.get(cityName);
+  }
+  const normalized = cityName
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const config = COASTAL_OFFSET_CONFIGS[normalized];
+  cityNormalizationCache.set(cityName, config);
+  return config;
+};
+
 const randomInRange = (min: number, max: number): number => min + Math.random() * (max - min);
 
 export const generateSafePensionCoordinates = (
   cityObj: ValidatedCity,
   localUniversities: UniversityRecord[] = [],
 ): { latitude: number; longitude: number } => {
-  const normalizedCity = cityObj.city
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-
-  const coastalConfig =
-    COASTAL_OFFSET_CONFIGS[cityObj.city.toLowerCase()] ?? COASTAL_OFFSET_CONFIGS[normalizedCity];
+  const coastalConfig = getCoastalConfig(cityObj.city);
 
   const maxAttempts = 40;
 

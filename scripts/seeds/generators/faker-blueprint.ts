@@ -160,8 +160,49 @@ const calculateRoomPrice = (
   return Math.round(price / 5000) * 5000;
 };
 
-const createDeterministicObjectId = (seed: string): string =>
+export const createDeterministicObjectId = (seed: string): string =>
   crypto.createHash('md5').update(seed).digest('hex').substring(0, 24);
+
+const HOUSE_INDEX_POOLS: Record<TierKey, readonly number[]> = {
+  alta: Array.from({ length: CURATED_COUNTS.houses.high }, (_, idx) => idx + 1),
+  media: Array.from({ length: CURATED_COUNTS.houses.mid }, (_, idx) => idx + 1),
+  baja: Array.from({ length: CURATED_COUNTS.houses.budget }, (_, idx) => idx + 1),
+};
+
+const ROOM_INDEX_POOLS: Record<TierKey, readonly number[]> = {
+  alta: Array.from({ length: CURATED_COUNTS.rooms.high }, (_, idx) => idx + 1),
+  media: Array.from({ length: CURATED_COUNTS.rooms.mid }, (_, idx) => idx + 1),
+  baja: Array.from({ length: CURATED_COUNTS.rooms.budget }, (_, idx) => idx + 1),
+};
+
+export type PensionMediaSource = {
+  images: readonly { url: string }[];
+  rooms: readonly { images: readonly string[] }[];
+};
+
+export const MAX_REVIEW_IMAGES = 3;
+
+export const selectReviewImagesForPension = (
+  pension: PensionMediaSource,
+  seedIndex: number,
+): string[] => {
+  const mod = ((seedIndex % 20) + 20) % 20;
+  if (mod < 14) {
+    return [];
+  }
+
+  const roomPhotos = pension.rooms.flatMap((room) => room.images);
+  const pensionPhotos = pension.images.map((img) => img.url);
+  const uniquePool = Array.from(new Set([...roomPhotos, ...pensionPhotos])).filter(Boolean);
+
+  if (uniquePool.length === 0) {
+    return [];
+  }
+
+  const targetCount = mod < 17 ? 1 : mod < 19 ? 2 : MAX_REVIEW_IMAGES;
+  const desiredCount = Math.min(targetCount, uniquePool.length, MAX_REVIEW_IMAGES);
+  return faker.helpers.arrayElements(uniquePool, desiredCount);
+};
 
 export const generateBlueprintDataset = async (
   validCities: ValidatedCity[],
@@ -182,6 +223,7 @@ export const generateBlueprintDataset = async (
     role: 'LANDLORD' as Role,
     gender: 'MALE',
     universityId: null,
+    favoritePensionIds: [],
   };
   users.push(demoLandlord);
 
@@ -192,7 +234,7 @@ export const generateBlueprintDataset = async (
     const gender: 'MALE' | 'FEMALE' = isMale ? 'MALE' : 'FEMALE';
     const firstName = isMale ? faker.person.firstName('male') : faker.person.firstName('female');
     const lastName = faker.person.lastName();
-    const email = `arrendador.${faker.string.alphanumeric(6).toLowerCase()}@gmail.com`;
+    const email = `arrendador.${i}.${faker.string.alphanumeric(4).toLowerCase()}@gmail.com`;
     const phone = `+569${faker.string.numeric(8)}`;
 
     const user: DraftUser = {
@@ -206,6 +248,7 @@ export const generateBlueprintDataset = async (
       role: 'LANDLORD' as Role,
       gender,
       universityId: null,
+      favoritePensionIds: [],
     };
     users.push(user);
     landlordUsers.push(user);
@@ -229,6 +272,7 @@ export const generateBlueprintDataset = async (
     role: 'STUDENT' as Role,
     gender: 'FEMALE',
     universityId: uchileUni.id,
+    favoritePensionIds: [],
   };
   users.push(demoStudent);
   const studentUsers: DraftUser[] = [demoStudent];
@@ -240,7 +284,7 @@ export const generateBlueprintDataset = async (
     const lastName = faker.person.lastName();
     const uni = universityRecords[i % universityRecords.length];
     const domain = uni.emailDomains[0] || 'alumnos.cl';
-    const email = `estudiante.${faker.string.alphanumeric(6).toLowerCase()}@${domain}`;
+    const email = `estudiante.${i}.${faker.string.alphanumeric(4).toLowerCase()}@${domain}`;
 
     const user: DraftUser = {
       id: createDeterministicObjectId(`student-${i}`),
@@ -253,14 +297,23 @@ export const generateBlueprintDataset = async (
       role: 'STUDENT' as Role,
       gender,
       universityId: uni.id,
+      favoritePensionIds: [],
     };
     users.push(user);
     studentUsers.push(user);
   }
 
+  const cityLookup = new Map<string, ValidatedCity>();
+  for (const c of validCities) {
+    cityLookup.set(c.city.toLowerCase(), c);
+  }
+
   const pensionCityList: ValidatedCity[] = [];
+  const importantCityKeys = new Set(
+    Object.keys(IMPORTANT_CITY_TARGETS).map((k) => k.toLowerCase()),
+  );
   for (const [cityName, targetCount] of Object.entries(IMPORTANT_CITY_TARGETS)) {
-    const cityObj = validCities.find((c) => c.city.toLowerCase() === cityName.toLowerCase());
+    const cityObj = cityLookup.get(cityName.toLowerCase());
     if (cityObj) {
       for (let i = 0; i < targetCount; i++) {
         pensionCityList.push(cityObj);
@@ -268,16 +321,29 @@ export const generateBlueprintDataset = async (
     }
   }
 
-  const otherCities = validCities.filter(
-    (c) =>
-      !Object.keys(IMPORTANT_CITY_TARGETS).some((k) => k.toLowerCase() === c.city.toLowerCase()),
-  );
+  const otherCities = validCities.filter((c) => !importantCityKeys.has(c.city.toLowerCase()));
   const fallbackPool = otherCities.length > 0 ? otherCities : validCities;
   for (let i = 0; i < 16; i++) {
     if (fallbackPool.length > 0) {
       pensionCityList.push(fallbackPool[i % fallbackPool.length]);
     }
   }
+
+  const universitiesByCity = new Map<string, UniversityRecord[]>();
+  for (const uni of universityRecords) {
+    const key = uni.city.toLowerCase();
+    const list = universitiesByCity.get(key) ?? [];
+    list.push(uni);
+    universitiesByCity.set(key, list);
+  }
+
+  const amenityPools: Record<TierKey, readonly string[]> = {
+    baja: amenityRecords.filter((a) => a.category === 'ROOM_FEATURE').map((a) => a.slug),
+    media: amenityRecords
+      .filter((a) => a.category === 'ROOM_FEATURE' || a.category === 'COMMON_AREA')
+      .map((a) => a.slug),
+    alta: amenityRecords.map((a) => a.slug),
+  };
 
   const pensions: DraftPension[] = [];
 
@@ -291,35 +357,21 @@ export const generateBlueprintDataset = async (
     const street = faker.location.street();
     const neighborhoodList = CITY_NEIGHBORHOODS[city];
     const neighborhood = neighborhoodList ? faker.helpers.arrayElement(neighborhoodList) : city;
-    const slug = `pension-${faker.string.alphanumeric(8).toLowerCase()}-${i + 1}`;
+    const slug = `pension-${i + 1}-${faker.string.alphanumeric(6).toLowerCase()}`;
 
-    const localUniversities = universityRecords.filter(
-      (u) => u.city.toLowerCase() === city.toLowerCase(),
-    );
+    const localUniversities = universitiesByCity.get(city.toLowerCase()) ?? [];
     const { latitude, longitude } = generateSafePensionCoordinates(cityObj, localUniversities);
 
-    let selectedAmenities: string[] = [];
-    if (tier === 'baja') {
-      const basicSlugs = amenityRecords
-        .filter((a) => a.category === 'ROOM_FEATURE')
-        .map((a) => a.slug);
-      selectedAmenities = faker.helpers.arrayElements(basicSlugs, { min: 2, max: 4 });
-    } else if (tier === 'media') {
-      const mediaPool = amenityRecords
-        .filter((a) => ['ROOM_FEATURE', 'COMMON_AREA'].includes(a.category))
-        .map((a) => a.slug);
-      selectedAmenities = faker.helpers.arrayElements(mediaPool, { min: 4, max: 7 });
-    } else {
-      const altaPool = amenityRecords.map((a) => a.slug);
-      selectedAmenities = faker.helpers.arrayElements(altaPool, { min: 7, max: 12 });
-    }
+    const amenityBounds =
+      tier === 'baja'
+        ? { min: 2, max: 4 }
+        : tier === 'media'
+          ? { min: 4, max: 7 }
+          : { min: 7, max: 12 };
+    const selectedAmenities = faker.helpers.arrayElements(amenityPools[tier], amenityBounds);
 
-    const tierHouseMax = CURATED_COUNTS.houses[TIER_MAP[tier]];
     const numHouseImgs = faker.number.int({ min: 3, max: 5 });
-    const pickedHouseIndices = faker.helpers.arrayElements(
-      Array.from({ length: tierHouseMax }, (_, idx) => idx + 1),
-      numHouseImgs,
-    );
+    const pickedHouseIndices = faker.helpers.arrayElements(HOUSE_INDEX_POOLS[tier], numHouseImgs);
 
     const images: DraftPensionImage[] = pickedHouseIndices.map((imgIdx, idx) => {
       const imgUrl = getHouseImageUrl(tier, imgIdx);
@@ -333,7 +385,6 @@ export const generateBlueprintDataset = async (
       };
     });
 
-    const tierRoomMax = CURATED_COUNTS.rooms[TIER_MAP[tier]];
     const numRooms = faker.number.int({ min: 2, max: 4 });
     const rooms: DraftRoom[] = [];
 
@@ -347,10 +398,10 @@ export const generateBlueprintDataset = async (
       const hasPrivateBath = roomType === 'STUDIO' ? true : Math.random() < 0.4;
       const roomPrice = calculateRoomPrice(basePrice, roomType, hasPrivateBath);
 
-      const pickedRoomIndices = faker.helpers.arrayElements(
-        Array.from({ length: tierRoomMax }, (_, idx) => idx + 1),
-        { min: 1, max: 2 },
-      );
+      const pickedRoomIndices = faker.helpers.arrayElements(ROOM_INDEX_POOLS[tier], {
+        min: 1,
+        max: 2,
+      });
       const roomPhotoUrls = pickedRoomIndices.map((idx) => getRoomImageUrl(tier, idx));
 
       rooms.push({
@@ -457,12 +508,24 @@ export const generateBlueprintDataset = async (
       images,
       nearbyUniversities,
       landlordId: landlord.id,
+      ratingAverage: 0,
+      ratingCount: 0,
+      communityScore: 0,
     };
 
     pensions.push(pension);
   }
 
+  const pensionIds = pensions.map((p) => p.id);
+  for (const student of studentUsers) {
+    const isDemo = student.email === DEMO_USERS.student.email;
+    const favCount = isDemo ? 3 : (student.id.charCodeAt(0) % 3) + 1;
+    student.favoritePensionIds = pensionIds.slice(0, Math.min(favCount, pensionIds.length));
+  }
+
   const reviews: DraftReview[] = [];
+  const priorWeight = 3;
+  const priorMean = 3.5;
 
   for (const pension of pensions) {
     const reviewCount =
@@ -473,12 +536,14 @@ export const generateBlueprintDataset = async (
           : faker.number.int({ min: 0, max: 2 });
 
     const reviewers = faker.helpers.arrayElements(studentUsers, reviewCount);
+    let ratingSum = 0;
 
     for (let revIdx = 0; revIdx < reviewers.length; revIdx++) {
       const reviewer = reviewers[revIdx];
       const baseTarget = pension.tier === 'alta' ? 5 : pension.tier === 'media' ? 4 : 3;
       const delta = faker.helpers.arrayElement([0, 0, -1, 0, 1]);
       const overallRating = Math.max(1, Math.min(5, baseTarget + delta));
+      ratingSum += overallRating;
 
       const review: DraftReview = {
         id: createDeterministicObjectId(`review-${pension.id}-${revIdx}`),
@@ -490,6 +555,7 @@ export const generateBlueprintDataset = async (
         quietnessRating: Math.max(1, overallRating - 1),
         wifiRating: overallRating,
         comment: generateReviewComment(overallRating, reviews.length),
+        images: selectReviewImagesForPension(pension, reviews.length),
         stayDurationCategory: 'ONE_SEMESTER' as StayDurationCategory,
         isResidentVerified: Math.random() < 0.7,
         authorGender: reviewer.gender,
@@ -497,6 +563,16 @@ export const generateBlueprintDataset = async (
       };
 
       reviews.push(review);
+    }
+
+    if (reviewers.length > 0) {
+      const avg = Number((ratingSum / reviewers.length).toFixed(2));
+      const bayesianRating =
+        (reviewers.length / (reviewers.length + priorWeight)) * avg +
+        (priorWeight / (reviewers.length + priorWeight)) * priorMean;
+      pension.ratingAverage = avg;
+      pension.ratingCount = reviewers.length;
+      pension.communityScore = Math.round((bayesianRating / 5.0) * 1000) / 10;
     }
   }
 
