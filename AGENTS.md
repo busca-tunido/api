@@ -1,43 +1,27 @@
 # Context & Architectural Guidelines for AI Coding Assistants
 
-This document provides essential architectural context, domain patterns, and development guidelines for AI coding assistants contributing to **BuscaTuNido API**.
+This document provides general project context, domain rules, and development workflows for AI coding assistants contributing to **BuscaTuNido API**.
 
 ---
 
 ## 1. Project Overview & Architecture
 
-BuscaTuNido API is a modular backend service written in TypeScript using [NestJS](https://nestjs.com/) and [Prisma ORM](https://www.prisma.io/) on top of [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database).
+BuscaTuNido API is a modular backend REST service built with TypeScript (Pure ESM), [NestJS](https://nestjs.com/) (Fastify adapter), and [Prisma ORM](https://www.prisma.io/) on top of [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database).
 
-### Core Components Structure (Provisional Baseline):
+### High-Level Structure:
 
-> [!NOTE]
-> Specific folder, module, and file hierarchies listed below are initial architectural baselines and will be iteratively finalized as application specifications evolve.
+- `src/main.ts`: Application bootstrap, middleware, OpenAPI/Swagger setup, and global pipes, filters, and interceptors.
+- `src/app.module.ts`: Root module wiring configuration, database access, and feature modules.
+- `src/prisma/`: Database connectivity and lifecycle (`PrismaModule`, `PrismaService`).
+- `src/common/`: Cross-cutting concerns (decorators, shared DTOs, exception filters, interceptors, error codes, and helpers).
+- `src/<feature>/`: Domain feature modules placed directly under `src/`.
+- `prisma/schema.prisma`: Database models, enums, indices, and embedded document structures.
+- `scripts/seeds/`: Modular database seeding scripts and datasets (invoked via `prisma/seed.ts`).
 
-- `src/main.ts`: Application bootstrap, Swagger OpenAPI specification configuration, and global validation pipe binding.
-- `src/app.module.ts`: Root module orchestrating configuration and feature modules.
-- `src/config/`: Configuration service and environment variable validation.
-- `src/prisma/`: `PrismaService` handling database connectivity and lifecycle events.
-- `src/common/`: Cross-cutting concerns:
-  - `filters/`: Unified exception filters (`HttpExceptionFilter`).
-  - `guards/`: Route protection (`JwtAuthGuard`, `RolesGuard`).
-  - `interceptors/`: Response transformation and logging interceptors.
-- `src/modules/`: Feature modules:
-  - `auth/`: Authentication, password hashing, and JWT token issuance.
-  - `users/`: Student, landlord, and administrator profiles.
-  - `pensions/`: Pension CRUD, search filtering, and distance/geospatial calculations.
-  - `reviews/`: Community reviews, ratings, and verification voting.
-  - `comparison/`: Multi-pension comparison data aggregation.
-  - `reports/`: Community flag reports and moderation pipeline.
-- `prisma/schema.prisma`: Database models, indices, and embedded MongoDB document structures.
-- `tasks/[task-name].md`: Active task specification being executed.
-- `tasks/completed/[index]_[task-name].md`: Historical record of finished task specifications with chronological index.
+### Database Management:
 
-### Database Management with MongoDB Atlas:
-
-The backend connects directly to MongoDB Atlas M0 clusters (`DATABASE_URL`) with environment-isolated databases (`buscatunido_dev` for local development and `buscatunido_test` for Vitest):
-
-- `pnpm db:seed`: Seeds MongoDB with amenities, universities, and listings (`prisma db seed` via `scripts/seeds/main.ts`).
-- `pnpm db:view`: Launches Prisma Studio for visual inspection (`prisma studio`).
+- `pnpm run db:seed`: Seeds MongoDB with initial catalog, universities, users, and listings.
+- `pnpm run db:view`: Launches Prisma Studio for visual inspection.
 
 ---
 
@@ -45,242 +29,105 @@ The backend connects directly to MongoDB Atlas M0 clusters (`DATABASE_URL`) with
 
 1. **No Code Comments**:
    - Comments inside code are strictly prohibited unless explicitly requested by the user. Write descriptive symbol names and explicit types instead.
-1. **No Direct Config File Edits for Dependencies**:
+2. **Pure ESM Relative Imports (`.js` Extension Required)**:
+   - Because the project runs as Pure ESM with `nodenext` module resolution, all relative TypeScript imports inside `src/` and `scripts/` must include the `.js` extension.
+3. **No Direct Config File Edits for Dependencies**:
    - Never modify `package.json` or lockfiles manually to install or update dependencies. Use terminal CLI commands (`pnpm add <pkg>`, `pnpm add -D <pkg>`).
-1. **DTO & Payload Validation**:
+4. **DTO & Payload Validation**:
    - Every incoming request must use a DTO decorated with `class-validator` and `class-transformer` rules.
-   - All controller endpoints and DTO properties must have OpenAPI `@ApiProperty` / `@ApiOperation` decorators for Swagger generation.
-1. **Strict Typing (Types over Interfaces)**:
+   - All controller endpoints and DTO properties must have OpenAPI decorators for Swagger generation.
+5. **Strict Typing (Types over Interfaces)**:
    - Use TypeScript `type` aliases exclusively; `interface` declarations are strictly forbidden.
    - Explicit return types are required on all controller methods, service methods, and helpers. `any` is strictly prohibited (prefer `unknown` or generics).
-1. **Conventional Commits (Concise, Single-Line Only)**:
-   - All git commit messages must strictly follow the Conventional Commits specification (e.g., `feat`, `fix`, `chore`, `refactor`, `test`, `docs`).
+6. **Conventional Commits (Concise, Single-Line Only)**:
+   - All git commit messages must strictly follow the Conventional Commits specification (`feat`, `fix`, `chore`, `refactor`, `test`, `docs`).
    - Commit messages must be concise, single-line only, and omit any extended body description.
-1. **Feature Branching & Integration to Main**:
-   - Every significant change, new feature, or non-trivial bug fix must be grouped and developed within a dedicated branch (e.g., `feat/<name>`, `fix/<name>`).
-   - Upon completion, testing, and verification, integrate (merge) the branch cleanly into `main` and delete the feature branch. Direct uncoordinated work on `main` is prohibited for major tasks.
-1. **Strictly for Registered & Authenticated Users (No Guests Allowed)**:
-   - The platform does not permit unauthenticated/guest interactions or guest contributions.
-   - All community actions (publishing reviews, submitting edit proposals, saving favorites, filing reports, uploading photos) strictly require authenticated session JWT tokens (`JwtAuthGuard`).
-   - Anonymous or guest modes are completely prohibited by design.
-1. **Brand Naming Convention**:
+7. **Feature Branching & Integration to Main**:
+   - Every significant change, new feature, or non-trivial bug fix must be developed within a dedicated branch (e.g., `feat/<name>`, `fix/<name>`), tested, verified, and merged cleanly into `main`. Direct uncoordinated work on `main` is prohibited for major tasks.
+8. **Public Read Exploration vs. Authenticated Interactions (No Guest Accounts)**:
+   - Public read-only endpoints (browsing listings, viewing details, universities, and reading reviews) may be accessed without authentication.
+   - All interactive, write, or private account actions (publishing reviews, voting, submitting proposals, saving favorites, tracking stays, filing reports, uploading files, landlord management, and moderation) strictly require authenticated session JWT tokens (`JwtAuthGuard`).
+   - Creating anonymous/guest user accounts or issuing synthetic guest tokens is strictly prohibited by design.
+9. **Brand Naming Convention**:
    - The brand name must always be formatted as a single PascalCase token: `BuscaTuNido` (never separated as `Busca Tu Nido`).
-1. **Strict Prohibition of Hardcoded Values & Seed-First Rule**:
-   - Hardcoded values, dummy/mock data, synthetic fallbacks (e.g., fallback images, fake room titles, hardcoded prices, synthetic date arithmetic), and hardcoded heuristic dictionaries (e.g., hardcoded university regexes, hardcoded amenity slugs) are strictly prohibited unless explicitly requested by the user.
-   - If initial, sample, or testing data is required for features or verification, it must be created in the corresponding seed file (`prisma/seed.ts`, `prisma/seed-utils.ts`) or managed via Prisma database migrations.
-   - Endpoints and services must always query and return real database records, compute geospatial distances with real coordinates, or return clean null/empty states.
-1. **100% OpenAPI Completeness & Schema Contract Rule**:
-   - The backend API and OpenAPI specifications must maintain 100% completeness and 1:1 synchronization at all times.
-   - Every controller endpoint, HTTP method, route parameter, query argument, request body, and response payload must have exhaustive OpenAPI documentation via `@ApiOperation`, `@ApiParam`, `@ApiQuery`, `@ApiBody`, and `@ApiEnvelopeResponse` (or formal Response DTOs).
-   - Anonymous inline schemas, untyped responses (`any` or `unknown`), and undocumented status codes are strictly prohibited.
-   - All enums used in DTOs must specify `enumName` to ensure canonical named schema generation under `components['schemas']`.
-   - Any modification or addition of controller endpoints, parameters, or DTO properties must be immediately followed by running `just openapi` to regenerate the contract and preserve 100% schema parity with the frontend.
+10. **Strict Prohibition of Hardcoded Values & Seed-First Rule**:
+    - Hardcoded values, dummy/mock data, synthetic fallbacks, and hardcoded heuristic dictionaries are strictly prohibited in application logic unless explicitly requested by the user.
+    - Sample or testing data must live in `scripts/seeds/` or dedicated test fixtures. Endpoints and services must always query real database records, compute real values, or return clean null/empty states.
+11. **100% OpenAPI Completeness & Schema Contract Rule**:
+    - The backend API and OpenAPI specification must remain 100% complete and synchronized at all times.
+    - Every endpoint, parameter, request body, and response payload must be exhaustively documented with OpenAPI decorators and formal DTOs (no anonymous inline schemas, untyped responses, or undocumented status codes).
+    - All enums used in DTOs must specify `enumName` for canonical named schemas.
+    - Any endpoint or DTO change must be followed by regenerating the OpenAPI contract (`pnpm run openapi:export` or `just openapi` from the monorepo root).
 
 ---
 
 ## 3. Execution Workflow
 
 ```bash
-# PHASE 1: CONTRACT PREPARATION (Conditional: Schema / Migrations)
-# When: ONLY if modifying 'prisma/schema.prisma' or adding DB models.
-# Why: Generates Prisma Client types so IDE and TypeScript recognize models before writing logic.
+# PHASE 1: CONTRACT PREPARATION (Only if modifying prisma/schema.prisma)
 pnpm exec prisma generate
 
-# PHASE 2: IMPLEMENT (Pure Logic & DTOs)
-# When: Write controllers, services, repositories and DTOs with validation decorators.
-# Rule: Do NOT call compilers, linters or test runners during implementation.
+# PHASE 2: IMPLEMENT (Pure Logic, Controllers, Services & DTOs)
+# Do NOT run compilers, linters or test runners mid-implementation.
 
-# PHASE 3: SANITIZE & FORMAT (Biome Autofix ~2s - Fail-Fast #1)
-# When: Immediately after implementation.
-# Why: Normalizes code in-place (organizes imports, strips dead imports, formats).
-#      Catches syntax errors in 2s. Leaves the file in its FINAL immutable state on disk.
+# PHASE 3: SANITIZE & FORMAT (Biome Autofix)
 pnpm run check
 
-# PHASE 4: TYPECHECK (Incremental Static Verification ~5s - Fail-Fast #2)
-# When: Once files on disk are clean and formatted.
-# Why: Runs ONCE on the definitive formatted code. Eliminates any need to re-verify types.
+# PHASE 4: TYPECHECK (Static Verification)
 pnpm exec tsc --noEmit -p tsconfig.build.json
 
-# PHASE 5: TEST (Vitest Unit Suite ~10s - Fail-Fast #3)
-# When: Only after syntax and static types are 100% green.
-# Why: Avoids launching the heavy test harness on code that doesn't even compile.
-pnpm vitest run
+# PHASE 5: TEST (Vitest Unit & E2E Suites)
+pnpm run test
+pnpm run test:e2e
 
-# PHASE 6: CONTRACT SYNC & EXPORT (OpenAPI Gateway)
-# When: If routes, query params, DTOs or endpoints were created/modified.
-# Why: Runs after logic and tests are proven. Exports openapi.json and generates types for Web.
-just openapi
+# PHASE 6: CONTRACT SYNC & EXPORT (If routes or DTOs changed)
+pnpm run build && pnpm run openapi:export
 
 # PHASE 7: COMMIT (Targeted Conventional Staging)
-# When: All previous gates passed cleanly.
 git add <target-files>
 git commit -m "feat(module): descriptive single-line message"
 ```
 
 > [!IMPORTANT]
 > **Always Use Global `pnpm run <script>` (Do Not Target Individual Files)**:
-> Due to Biome's extreme execution speed (processing the entire project in tens of milliseconds), agents must always execute the predefined global scripts (`pnpm run check`, `pnpm run review`, `pnpm run format`, `pnpm run lint`) targeting the whole repository (`.`) rather than targeting individual files. Running against specific files provides no measurable performance advantage and risks leaving formatting or lint inconsistencies across the project.
-
----
-
-## 4. Task-Driven Lifecycle (`tasks/[task-name].md` Workflow)
-
-### Execution Cycle:
-
-1. **Task Breakdown by Purpose & Topology**:
-   - Read the user request(s) and decompose them into structured `tasks/[task-name].md` files (omitting any index prefix while active in `tasks/`).
-   - Act as a **Directed Acyclic Graph (DAG) compiler**, assigning each task an explicit `Execution Profile` (Wave, Mode, Role, Dependencies, Collision Risk).
-2. **Review & Clarification Gate**:
-   - Once all task specifications are generated, notify the user to review the DAG and execution waves in `tasks/`.
-   - Ask clarifying questions if any requirement or boundary is ambiguous, and STOP so the user can review and approve the plan.
-3. **Parallel Decomposition & Dependency Rules for the Planner Agent**:
-   When breaking down user requirements into task specifications, the planner agent must evaluate concurrency using the **Disjoint File Sets Rule**:
-   - **Orthogonality Check (Collision Matrix)**:
-     - Compare `Target Files` between all proposed tasks.
-     - **Parallelizable (Disjoint)**: If $Files(Task\_A) \cap Files(Task\_B) = \emptyset$, both tasks must be assigned to the same `Wave` with `Execution Mode: PARALLEL`.
-     - **Sequential (Intersection)**: If two tasks modify the same domain file or internal logic, the dependent task must be assigned to `Wave N+1` with `Execution Mode: SEQUENTIAL` and list its prerequisite in `depends_on`.
-   - **Handling Critical Shared Hubs (`prisma/schema.prisma`, `src/app.module.ts`, lockfiles)**:
-     - Global database schemas and root modules are high-risk collision points.
-     - **Contract-First / Wave 0 Rule**: If multiple tasks require schema changes, the planner must create a **Preparatory Task (Wave 0)** to apply Prisma schema modifications, execute migrations/pushes, and generate client types before launching parallel service tasks.
-     - Workers must NOT edit `src/app.module.ts` during parallel worker tasks; module registration is deferred to the `Integrator Agent` in the Wave Sync Gate.
-   - **Wave Structure (DAG Execution)**:
-     - Organize work into chronological waves:
-       - `Wave 0 (Setup / Contracts)`: Prisma schemas, seeders, shared DTOs, global configuration (Sequential).
-       - `Wave 1 (Workers)`: Feature modules, services, controllers in parallel branches/worktrees (Isolated).
-       - `Wave 1 - Sync Gate`: Merge, resolve `src/app.module.ts` registration, run integrated compilation checks (Sequential).
-
-> [!IMPORTANT]
-> **Task Naming & Lifecycle Convention (Strict Rule)**:
-> - **Active tasks MUST NOT use numeric prefixes**: When defining or working on tasks in `tasks/`, name them descriptively using kebab-case without any numbers (e.g., `tasks/some-feature.md`). Numbering tasks in advance is forbidden because execution order and wave completion can vary.
-> - **Sequential numbering is strictly reserved for `tasks/completed/`**: A three-digit sequential index (`001-`, `002-`, etc.) is assigned **only** when a task is fully implemented, verified, merged, and moved into `tasks/completed/` to preserve an immutable, chronological archive.
-
-**Lifecycle Example**:
-
-1. While the task is active / in progress:
-```text
-tasks/
-├── completed/
-│   ├── 001-some-old-task.md
-│   └── 002-implement-x-feature.md
-└── some-task.md                    # Active task (no numeric prefix)
-```
-
-2. Once `some-task.md` is fully implemented and verified:
-```text
-tasks/
-├── completed/
-│   ├── 001-some-old-task.md
-│   ├── 002-implement-x-feature.md
-│   └── 003-some-task.md             # Archived with next sequential index
-```
-
-4. **Agent Role Assignment: Worker Agent vs. Integrator Agent**:
-
-| Rol de Agente                      | Ámbito de Trabajo                                                      | Reglas de Asignación                                                                                                                                                                                                                               |
-| ---------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Worker Agent (N instancias)**    | Ramas/Worktrees independientes (`worktree-task-A`, `worktree-task-B`). | Se le asigna **1 sola tarea paralela**. Solo puede editar sus `Exclusive Target Files`. Verifica con `pnpm run check && pnpm run review`. No ejecuta builds pesados (`nest build`). Al terminar, realiza su commit convencional y se detiene.              |
-| **Integrator Agent (1 instancia)** | Rama base de integración (`main` o `staging`).                         | Se asigna a tareas con etiqueta `Assigned Role: Integrator Agent`. No programa lógica de negocio nueva. Realiza merges/rebases, modifica archivos compartidos (`Shared / Integration Points`) como `app.module.ts` y valida la compilación global. |
-
-5. **Wave Sync Gate (`task-sync-wave-N.md`)**:
-   For every batch, the planner agent must automatically include a closing integration task named `task-sync-wave-N.md`. This task:
-   - Unlocks strictly when all checklists for tasks in `Wave N` are marked completed (`- [x]`).
-   - Is formally assigned to the **Integrator Agent**.
-   - Follows the integration checklist:
-     1. Merge or rebase worker branches/worktrees into the base branch.
-     2. Update shared integration hubs (e.g., register new feature modules in `src/app.module.ts`).
-     3. Run global repository verification (`pnpm run check && pnpm run review`, `pnpm exec tsc --noEmit -p tsconfig.build.json`, and `pnpm run test`).
-     4. Resolve any interoperability or type conflicts as the sole authorized agent.
-     5. Teardown temporary worktrees (`git worktree remove`).
-
-6. **Archive as Documentation**:
-   - Upon user approval and successful Wave integration, move/rename completed `tasks/[task-name].md` into `tasks/completed/[index]_[task-name].md` (e.g., `tasks/completed/001_initialize-nestjs-api.md`), assigning its chronological three-digit index only upon completion to preserve an immutable audit trail.
-
-### Standard `[task-name].md` Template:
-
-```markdown
-# Task: [Descriptive Title]
-
-## Execution Profile
-
-- **Wave / Batch**: Wave 1 | Wave 2 | Wave 3
-- **Execution Mode**: `PARALLEL` | `SEQUENTIAL`
-- **Assigned Role**: `Worker Agent` | `Integrator Agent`
-- **Dependencies (`depends_on`)**: None | `[task-name-a.md, task-name-b.md]`
-- **Collision Risk**: `LOW (Isolated files)` | `HIGH (Shared core files)`
-
-## Target Files
-
-- **Exclusive**:
-  - `src/modules/uploads/uploads.service.ts`
-  - `src/modules/uploads/uploads.controller.ts`
-- **Shared / Integration Points**:
-  - `src/app.module.ts` (Requiere Merge Gate)
-  - `prisma/schema.prisma` (Bloqueante si hay cambios DDL concurrentes)
-
-## Objective
-
-[1-2 sentences describing backend goal and boundary]
-
-## Technical Specifications
-
-[Key technical details, DTO schemas, endpoints, business rules]
-
-## Checklist
-
-- [ ] [Step 1]
-- [ ] [Step 2]
-
-## Verification
-
-- Code Quality (Biome): `pnpm run check && pnpm run review`
-- Typecheck: `pnpm exec tsc --noEmit -p tsconfig.build.json`
-- Tests: `pnpm run test`
-```
+> Always execute the predefined global Biome scripts (`pnpm run check`, `pnpm run review`, `pnpm run format`, `pnpm run lint`) targeting the whole repository (`.`) rather than individual files to avoid formatting or lint inconsistencies.
 
 <!-- BEGIN:nestjs-agent-rules -->
 
 ---
 
-## 5. NestJS & Prisma Architectural Guidelines
+## 4. NestJS & Prisma Architectural Guidelines
 
 ### Core Framework Conventions:
 
 1. **Dependency Injection & Providers**:
    - Always inject services and repositories via constructor parameter properties: `constructor(private readonly prisma: PrismaService) {}`.
    - Providers must always be decorated with `@Injectable()`.
-   - Never instantiate services manually with `new Service()`; rely on the NestJS Inversion of Control (IoC) container.
+   - Never instantiate services manually with `new Service()`; rely on the NestJS IoC container.
 
 2. **Modular Encapsulation**:
-   - Every domain entity must reside in its own feature module under `src/modules/<feature>/` (e.g., `auth`, `pensions`, `reviews`, `users`).
-   - Modules must explicitly declare `controllers`, `providers`, and `exports`. If another module requires a service, export that service from its module and import the owning module in the consuming module's `imports` array.
-   - Keep module imports circular-dependency free. Use `forwardRef()` only as a last resort when bidirectional relationships are unavoidable.
+   - Every domain entity must reside in its own feature module directly under `src/<feature>/`.
+   - Modules must explicitly declare `controllers`, `providers`, and `exports`. Keep module imports circular-dependency free.
 
 3. **Request Lifecycle & Layering**:
-   - **Controllers**: Strictly handle HTTP routing, request binding, validation pipe triggers, Swagger metadata, and delegation to services. Never place business logic, complex data transformations, or direct Prisma database calls inside controllers.
-   - **Services**: Encapsulate all business logic, authorization verification, data mutation, and orchestration.
-   - **DTOs (Data Transfer Objects)**:
-     - Mandatory for every request payload (`@Body()`), query parameter set (`@Query()`), and route parameter (`@Param()`).
-     - Every DTO property must have both runtime validation decorators (`class-validator`) and OpenAPI documentation decorators (`@ApiProperty()`, `@ApiPropertyOptional()`).
-     - Use `@Type(() => Number)` or `@Transform()` for incoming query string and route parameter coercion.
+   - **Controllers**: Strictly handle HTTP routing, request binding, validation, Swagger metadata, and delegation to services. Never place business logic or direct Prisma calls inside controllers.
+   - **Services**: Encapsulate all business logic, authorization checks, data mutation, and orchestration.
+   - **DTOs**: Mandatory for every `@Body()`, `@Query()`, and `@Param()`, combining `class-validator` / `class-transformer` rules with OpenAPI decorators.
 
 4. **Database Access with Prisma ORM**:
-   - Always inject and utilize `PrismaService` (`src/prisma/prisma.service.ts`) for database queries.
-   - Multi-step relational operations must be wrapped in atomic transactions using `this.prisma.$transaction(async (tx) => { ... })`.
-   - Handle Prisma runtime exceptions gracefully:
-     - `P2002` (Unique constraint violation) -> Throw `ConflictException` with a user-friendly message.
-     - `P2025` (Record not found) -> Throw `NotFoundException`.
+   - Always inject and utilize `PrismaService` for database queries.
+   - Wrap multi-step relational operations in atomic transactions (`this.prisma.$transaction(...)`).
+   - Map Prisma errors cleanly (`P2002` -> `ConflictException`, `P2025` -> `NotFoundException`).
 
 5. **Authentication, Authorization & Guards**:
-   - Route protection must be applied declaratively with `@UseGuards(JwtAuthGuard)`.
-   - Role-based access control must use the `@Roles(...)` metadata decorator combined with `@UseGuards(JwtAuthGuard, RolesGuard)`.
-   - Extract the authenticated user safely using the custom `@CurrentUser()` parameter decorator rather than accessing `req.user` directly.
+   - Apply route protection declaratively with `@UseGuards(JwtAuthGuard)` (or `OptionalJwtAuthGuard` when enrichment is optional).
+   - Combine `@Roles(...)` with `@UseGuards(JwtAuthGuard, RolesGuard)` for RBAC.
+   - Extract the authenticated user using `@CurrentUser()`.
 
 6. **Error Handling & HTTP Statuses**:
-   - Never return raw database error objects or stack traces to the client.
-   - Throw semantic NestJS HTTP exceptions: `BadRequestException`, `UnauthorizedException`, `ForbiddenException`, `NotFoundException`, `ConflictException`, or `InternalServerErrorException`.
+   - Never leak raw database error objects or stack traces to clients; throw semantic NestJS HTTP exceptions.
 
 7. **Testing Standards**:
-   - Unit tests use [Vitest](https://vitest.dev/) with `@nestjs/testing` (`Test.createTestingModule`).
-   - Mock external dependencies and `PrismaService` when testing domain services in isolation.
+   - Unit tests use [Vitest](https://vitest.dev/) with `@nestjs/testing`, mocking external dependencies and `PrismaService` when testing domain services in isolation.
 
 <!-- END:nestjs-agent-rules -->
