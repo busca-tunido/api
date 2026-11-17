@@ -28,6 +28,7 @@ import {
   formatPensionItem,
   MEAL_AMENITY_SLUGS,
   mapImagesInput,
+  matchesRatingTier,
   normalizeAmenitiesAndInternet,
 } from './utils/pension-helpers.js';
 
@@ -91,7 +92,12 @@ export class PensionsService {
       where.amenities = { hasSome: [...MEAL_AMENITY_SLUGS] };
     }
 
-    if (filter.roomType || filter.hasPrivateBathroom !== undefined || filter.minBeds) {
+    if (
+      filter.roomType ||
+      filter.hasPrivateBathroom !== undefined ||
+      filter.minBeds ||
+      filter.onlyAvailable
+    ) {
       where.rooms = {
         some: {
           deletedAt: null,
@@ -137,6 +143,8 @@ export class PensionsService {
     const page = Math.max(1, filter.page || 1);
     const limit = Math.max(1, Math.min(50, filter.limit || 12));
     const skip = (page - 1) * limit;
+    const view = filter.view ?? 'full';
+    const imageLimit = view === 'map' ? 1 : 3;
     const where = this.buildWhere(filter);
     const hasBounds = this.hasBounds(filter);
     const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
@@ -188,6 +196,10 @@ export class PensionsService {
         }
 
         if (hasBounds || distanceKm <= radiusKm) {
+          if (filter.ratingTier && !matchesRatingTier(pension, filter.ratingTier)) {
+            continue;
+          }
+
           const totalAvailableBeds = (pension.rooms || []).reduce(
             (acc, r) => acc + (r.availableBeds || 0),
             0,
@@ -229,7 +241,7 @@ export class PensionsService {
       });
 
       const pageItems = inRadiusCandidates.slice(skip, skip + limit).map((c) => ({
-        ...formatPensionItem(c.pension, 3),
+        ...formatPensionItem(c.pension, imageLimit, view),
         distanceKm: c.distanceKm,
         relevanceScore: c.relevanceScore,
       }));
@@ -256,6 +268,43 @@ export class PensionsService {
     else if (filter.sortBy === 'price_asc') orderBy = { baseMonthlyPrice: 'asc' };
     else if (filter.sortBy === 'price_desc') orderBy = { baseMonthlyPrice: 'desc' };
 
+    if (filter.ratingTier) {
+      const targetTier = filter.ratingTier;
+      const [allCandidates, cityGroups] = await Promise.all([
+        this.prisma.pension.findMany({
+          where,
+          orderBy,
+          include: { _count: { select: { reviews: true } } },
+        }),
+        this.prisma.pension.groupBy({
+          by: ['city'],
+          where: { deletedAt: null, isActive: true },
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 10,
+        }),
+      ]);
+
+      const filteredCandidates = allCandidates.filter((raw) =>
+        matchesRatingTier(raw as unknown as PensionDocRaw, targetTier),
+      );
+      const items = filteredCandidates
+        .slice(skip, skip + limit)
+        .map((item) => formatPensionItem(item as unknown as PensionDocRaw, imageLimit, view));
+      const nearbyCityCounts = cityGroups.map((g) => ({
+        city: g.city,
+        count: g._count.id,
+      }));
+
+      return buildPaginatedPensions(
+        items,
+        page,
+        limit,
+        filteredCandidates.length,
+        nearbyCityCounts,
+      );
+    }
+
     const [rawItems, total, cityGroups] = await Promise.all([
       this.prisma.pension.findMany({
         where,
@@ -274,7 +323,9 @@ export class PensionsService {
       }),
     ]);
 
-    const items = rawItems.map((item) => formatPensionItem(item as unknown as PensionDocRaw, 3));
+    const items = rawItems.map((item) =>
+      formatPensionItem(item as unknown as PensionDocRaw, imageLimit, view),
+    );
     const nearbyCityCounts = cityGroups.map((g) => ({
       city: g.city,
       count: g._count.id,
@@ -376,22 +427,29 @@ export class PensionsService {
 
     return pensions.map((p) => {
       const doc = p as unknown as PensionDocRaw;
+      const activeRooms = (doc.rooms || []).filter((r) => !r.deletedAt);
+      const pendingProposalsCount = doc._count?.proposals ?? 0;
+      const availableRoomsCount = activeRooms.filter(
+        (r) => r.isAvailable && r.isActive !== false,
+      ).length;
       return {
         ...doc,
-        rooms: (doc.rooms || [])
-          .filter((r) => !r.deletedAt)
-          .map((r) => ({
-            id: r.id,
-            roomNumber: r.roomNumber ?? null,
-            title: r.title,
-            type: r.type,
-            monthlyPrice: r.monthlyPrice,
-            deposit: r.deposit ?? null,
-            hasPrivateBathroom: r.hasPrivateBathroom,
-            totalBeds: r.totalBeds,
-            availableBeds: r.availableBeds,
-            isAvailable: r.isAvailable,
-          })),
+        pendingProposalsCount,
+        availableRoomsCount,
+        rooms: activeRooms.map((r) => ({
+          id: r.id,
+          roomNumber: r.roomNumber ?? null,
+          title: r.title,
+          type: r.type,
+          monthlyPrice: r.monthlyPrice,
+          deposit: r.deposit ?? null,
+          hasPrivateBathroom: r.hasPrivateBathroom,
+          totalBeds: r.totalBeds,
+          availableBeds: r.availableBeds,
+          isAvailable: r.isAvailable,
+          isActive: r.isActive ?? true,
+          images: r.images ?? [],
+        })),
       };
     });
   }

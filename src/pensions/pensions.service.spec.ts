@@ -589,4 +589,103 @@ describe('PensionsService', () => {
       );
     });
   });
+
+  describe('projection views and server-side tier/availability filters', () => {
+    it('should return lightweight payload with 1 image when view=map', async () => {
+      mockPrisma.pension.findMany.mockResolvedValue([
+        {
+          id: 'p-map-1',
+          slug: 'pension-map',
+          title: 'Pensión Mapa',
+          description: 'Descripción muy extensa que no se necesita en mapa',
+          city: 'Santiago',
+          neighborhood: 'Centro',
+          latitude: -33.45,
+          longitude: -70.66,
+          baseMonthlyPrice: 200000,
+          ratingAverage: 4.6,
+          ratingCount: 5,
+          verificationStatus: 'OFFICIALLY_VERIFIED',
+          internetIncluded: true,
+          amenities: ['wifi-alta-velocidad'],
+          images: [
+            {
+              id: 'img-1',
+              url: 'https://cdn.example.com/1.webp',
+              thumbnailUrl: 't1',
+              sortOrder: 0,
+            },
+            {
+              id: 'img-2',
+              url: 'https://cdn.example.com/2.webp',
+              thumbnailUrl: 't2',
+              sortOrder: 1,
+            },
+          ],
+          rooms: [
+            { id: 'r1', title: 'Hab', monthlyPrice: 200000, isAvailable: true, deletedAt: null },
+          ],
+          nearbyUniversities: [
+            { universityId: 'u1', name: 'UChile', shortName: 'UCH', distanceMeters: 400 },
+          ],
+          _count: { reviews: 5 },
+        },
+      ]);
+      mockPrisma.pension.count.mockResolvedValue(1);
+      mockPrisma.pension.groupBy.mockResolvedValue([]);
+
+      const result = await service.findAll({ page: 1, limit: 12, view: 'map' });
+      const item = result.items[0] as Record<string, unknown>;
+
+      expect(item.description).toBe('');
+      expect(item.images).toHaveLength(1);
+      expect(item.rooms).toEqual([]);
+      expect(item.nearbyUniversities).toEqual([]);
+      expect(item.nearestUniversity).toEqual({
+        name: 'UChile',
+        shortName: 'UCH',
+        distanceMeters: 400,
+      });
+      expect(item.availableRoomsCount).toBe(1);
+    });
+
+    it('should filter accurately by ratingTier on server and preserve total count', async () => {
+      mockPrisma.pension.findMany.mockResolvedValue([
+        {
+          id: 'p-high',
+          title: 'Top',
+          ratingAverage: 4.8,
+          ratingCount: 10,
+          verificationStatus: 'OFFICIALLY_VERIFIED',
+          internetIncluded: true,
+          amenities: ['sala-estudio-cowork'],
+          nearbyUniversities: [
+            { universityId: 'u1', name: 'UCh', shortName: 'UCH', distanceMeters: 500 },
+          ],
+          images: [],
+          rooms: [],
+          _count: { reviews: 10 },
+        },
+        {
+          id: 'p-unrev',
+          title: 'Nueva',
+          ratingAverage: 0,
+          ratingCount: 0,
+          verificationStatus: 'UNVERIFIED',
+          internetIncluded: true,
+          amenities: [],
+          nearbyUniversities: [],
+          images: [],
+          rooms: [],
+          _count: { reviews: 0 },
+        },
+      ]);
+      mockPrisma.pension.groupBy.mockResolvedValue([]);
+
+      const result = await service.findAll({ page: 1, limit: 12, ratingTier: 'high' });
+      expect(result.total).toBe(1);
+      expect(result.items).toHaveLength(1);
+      expect((result.items[0] as { id: string }).id).toBe('p-high');
+    });
+  });
 });

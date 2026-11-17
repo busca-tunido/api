@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ProposalStatus, Role } from '@prisma/client';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -11,6 +11,7 @@ import {
   ApiStandardErrors,
 } from '../common/decorators/api-envelope-response.decorator.js';
 import { CreateProposalDto } from './dto/create-proposal.dto.js';
+import { FilterProposalsDto } from './dto/filter-proposals.dto.js';
 import { PaginatedProposalsResponseDto, ProposalResponseDto } from './dto/proposal-response.dto.js';
 import { ReviewProposalDto } from './dto/review-proposal.dto.js';
 import { ProposalsService } from './proposals.service.js';
@@ -39,7 +40,8 @@ export class ProposalsController {
   }
 
   @Get('pensions/:id/proposals')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.LANDLORD)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get proposal history for a specific pension' })
   @ApiParam({ name: 'id', type: String, description: 'ID de la pensión' })
@@ -48,9 +50,13 @@ export class ProposalsController {
     isArray: true,
     description: 'List of proposals',
   })
-  @ApiStandardErrors([401, 500])
-  async findByPension(@Param('id') pensionId: string): Promise<unknown[]> {
-    return this.proposalsService.findByPension(pensionId);
+  @ApiStandardErrors([401, 403, 404, 500])
+  async findByPension(
+    @Param('id') pensionId: string,
+    @Query() filter: FilterProposalsDto,
+    @CurrentUser() user: SanitizedUser,
+  ): Promise<unknown[]> {
+    return this.proposalsService.findByPension(pensionId, user, filter.status);
   }
 
   @Get('moderation/proposals')
@@ -58,22 +64,13 @@ export class ProposalsController {
   @Roles(Role.MODERATOR, Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List proposals for moderation review (Moderator or Admin only)' })
-  @ApiQuery({ name: 'status', enum: ProposalStatus, enumName: 'ProposalStatus', required: false })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiEnvelopeResponse(PaginatedProposalsResponseDto, {
     status: 200,
     description: 'Paginated proposals for moderation',
   })
   @ApiStandardErrors([401, 403, 500])
-  async findModerationProposals(
-    @Query('status') status?: ProposalStatus,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ): Promise<unknown> {
-    const pageNum = page ? Number.parseInt(page, 10) : 1;
-    const limitNum = limit ? Number.parseInt(limit, 10) : 20;
-    return this.proposalsService.findModerationProposals(status, pageNum, limitNum);
+  async findModerationProposals(@Query() filter: FilterProposalsDto): Promise<unknown> {
+    return this.proposalsService.findModerationProposals(filter.status, filter.page, filter.limit);
   }
 
   @Get('moderation/proposals/:id')

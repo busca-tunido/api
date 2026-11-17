@@ -14,6 +14,17 @@ type EmbeddedPensionImageRaw = {
 export class FavoritesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findIdsByUser(userId: string): Promise<{ pensionIds: string[] }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { favoritePensionIds: true },
+    });
+
+    return {
+      pensionIds: user?.favoritePensionIds || [],
+    };
+  }
+
   async findAllByUser(userId: string): Promise<unknown[]> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

@@ -9,6 +9,7 @@ import {
 } from '../common/decorators/api-envelope-response.decorator.js';
 import {
   FavoriteAddedResponseDto,
+  FavoriteIdsResponseDto,
   FavoriteItemResponseDto,
   FavoriteRemovedResponseDto,
 } from './dto/favorite-response.dto.js';
@@ -20,6 +21,17 @@ import { FavoritesService } from './favorites.service.js';
 @ApiBearerAuth()
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
+
+  @Get('ids')
+  @ApiOperation({ summary: 'List favorite pension IDs for the current user' })
+  @ApiEnvelopeResponse(FavoriteIdsResponseDto, {
+    status: 200,
+    description: 'List of favorite pension IDs',
+  })
+  @ApiStandardErrors([401, 500])
+  async findIds(@CurrentUser() user: SanitizedUser): Promise<FavoriteIdsResponseDto> {
+    return this.favoritesService.findIdsByUser(user.id);
+  }
 
   @Get()
   @ApiOperation({ summary: 'List all favorite pensions for the current user' })

@@ -74,16 +74,35 @@ describe('ReviewsService', () => {
   });
 
   describe('findByPension', () => {
-    it('should return list of reviews with helpfulCount', async () => {
+    it('should return list of reviews with helpfulCount, userVoted, and summary', async () => {
       mockPrisma.review.count.mockResolvedValue(1);
       mockPrisma.review.findMany.mockResolvedValue([
-        { id: 'rev-1', overallRating: 5, helpfulUserIds: ['user-a'] },
+        {
+          id: 'rev-1',
+          overallRating: 5,
+          cleanlinessRating: 5,
+          landlordRating: 4,
+          quietnessRating: 5,
+          wifiRating: 4,
+          images: ['https://cdn.example.com/r1.webp'],
+          helpfulUserIds: ['student-1'],
+        },
       ]);
 
-      const result = await service.findByPension('pension-1');
+      const result = await service.findByPension('pension-1', undefined, 'student-1');
       expect(result.items).toHaveLength(1);
-      expect((result.items[0] as { helpfulCount: number }).helpfulCount).toBe(1);
+      expect((result.items[0] as { helpfulCount: number; userVoted?: boolean }).helpfulCount).toBe(
+        1,
+      );
+      expect((result.items[0] as { userVoted?: boolean }).userVoted).toBe(true);
       expect(result.pagination.total).toBe(1);
+      expect(result.summary).toEqual({
+        totalReviews: 1,
+        averageRating: 5,
+        withPhotosCount: 1,
+        starDistribution: { 5: 1, 4: 0, 3: 0, 2: 0, 1: 0 },
+        categoryAverages: { cleanliness: 5, landlord: 4, quietness: 5, wifi: 4 },
+      });
     });
   });
 

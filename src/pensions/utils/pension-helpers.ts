@@ -81,16 +81,77 @@ export const calculatePriceBins = (
   return bins;
 };
 
+export type PensionViewModeValue = 'full' | 'card' | 'map';
+export type PensionRatingTierValue = 'high' | 'medium' | 'low' | 'unreviewed';
+
+export const classifyPensionRatingTier = (pension: PensionDocRaw): PensionRatingTierValue => {
+  const count =
+    typeof pension.ratingCount === 'number' ? pension.ratingCount : (pension._count?.reviews ?? 0);
+  const rating = typeof pension.ratingAverage === 'number' ? Number(pension.ratingAverage) : 0;
+
+  if (count === 0 || rating === 0) {
+    return 'unreviewed';
+  }
+
+  const confidenceInertia = 3;
+  const priorMean = 3.5;
+  const rAdj =
+    (count / (count + confidenceInertia)) * rating +
+    (confidenceInertia / (count + confidenceInertia)) * priorMean;
+
+  const isVerified =
+    pension.verificationStatus === 'OFFICIALLY_VERIFIED' ||
+    pension.verificationStatus === 'COMMUNITY_VERIFIED';
+  const hasWifi = typeof pension.internetIncluded === 'boolean' ? pension.internetIncluded : true;
+  const hasStudyRoom = (pension.amenities || []).some(
+    (item) =>
+      (typeof item === 'string' ? item : (item as { slug?: string })?.slug) ===
+      'sala-estudio-cowork',
+  );
+  const distance = pension.nearbyUniversities?.[0]?.distanceMeters;
+  const hasProximity = typeof distance === 'number' && distance > 0 && distance <= 1200;
+
+  const crs =
+    rAdj +
+    (isVerified ? 0.25 : 0) +
+    (hasWifi ? 0.1 : 0) +
+    (hasStudyRoom ? 0.15 : 0) +
+    (hasProximity ? 0.15 : 0);
+
+  if (count >= 3 && rating >= 4.2 && hasWifi && crs >= 4.25) {
+    return 'high';
+  }
+
+  if ((count >= 1 && count <= 2 && rating >= 4.0) || (rating >= 3.0 && crs >= 3.2)) {
+    return 'medium';
+  }
+
+  return 'low';
+};
+
+export const matchesRatingTier = (
+  pension: PensionDocRaw,
+  targetTier: PensionRatingTierValue,
+): boolean => {
+  const tier = classifyPensionRatingTier(pension);
+  if (targetTier === 'low') {
+    return tier === 'low' || tier === 'unreviewed';
+  }
+  return tier === targetTier;
+};
+
 export const formatPensionItem = (
   pension: PensionDocRaw,
   limitImages = 3,
+  view: PensionViewModeValue = 'full',
 ): Record<string, unknown> => {
+  const effectiveImageLimit = view === 'map' ? 1 : limitImages;
   const images = (pension.images || [])
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-    .slice(0, limitImages);
+    .slice(0, effectiveImageLimit);
 
-  const amenities = (pension.amenities || []).map((item: unknown) => {
+  const mappedAmenities = (pension.amenities || []).map((item: unknown) => {
     const slug = typeof item === 'string' ? item : ((item as { slug?: string })?.slug ?? '');
     const existingName =
       typeof item === 'object' && item !== null && 'name' in item
@@ -103,18 +164,24 @@ export const formatPensionItem = (
   });
 
   const activeRooms = (pension.rooms || []).filter((r) => !r.deletedAt);
-  const rooms = activeRooms
-    .slice()
-    .sort((a, b) => a.monthlyPrice - b.monthlyPrice)
-    .map((r) => ({
-      ...r,
-      name: r.title,
-      priceMonthlyClp: r.monthlyPrice,
-      isActive: r.isActive ?? true,
-      bathType: r.hasPrivateBathroom ? 'PRIVATE' : 'SHARED',
-    }));
+  const availableRoomsCount = activeRooms.filter(
+    (r) => r.isAvailable && r.isActive !== false,
+  ).length;
+  const rooms =
+    view === 'full'
+      ? activeRooms
+          .slice()
+          .sort((a, b) => a.monthlyPrice - b.monthlyPrice)
+          .map((r) => ({
+            ...r,
+            name: r.title,
+            priceMonthlyClp: r.monthlyPrice,
+            isActive: r.isActive ?? true,
+            bathType: r.hasPrivateBathroom ? 'PRIVATE' : 'SHARED',
+          }))
+      : [];
 
-  const nearbyUniversities = (pension.nearbyUniversities || []).map((u) => ({
+  const mappedUniversities = (pension.nearbyUniversities || []).map((u) => ({
     ...u,
     university: {
       id: u.universityId,
@@ -123,7 +190,7 @@ export const formatPensionItem = (
     },
   }));
 
-  const firstNearby = nearbyUniversities[0];
+  const firstNearby = mappedUniversities[0];
   const nearestUniversity = firstNearby
     ? {
         name: firstNearby.university.name,
@@ -132,25 +199,28 @@ export const formatPensionItem = (
       }
     : undefined;
 
-  const amenitySlugs = amenities.map((a) => a.slug).filter(Boolean);
+  const amenitySlugs = mappedAmenities.map((a) => a.slug).filter(Boolean);
   const reviewsCount = pension._count?.reviews ?? pension.ratingCount ?? 0;
 
   return {
     ...pension,
+    description: view === 'full' ? pension.description : '',
     isActive: Boolean(pension.isActive ?? true),
     ratingAverage: Number(pension.ratingAverage ?? 0),
     averageRating: Number(pension.ratingAverage ?? 0),
     ratingCount: Number(pension.ratingCount ?? reviewsCount),
     reviewsCount,
     images,
-    amenities,
+    amenities: view === 'map' ? [] : mappedAmenities,
     amenitySlugs,
     nearestUniversity,
     rooms,
-    nearbyUniversities,
+    nearbyUniversities: view === 'full' ? mappedUniversities : [],
+    availableRoomsCount,
     _count: {
       rooms: activeRooms.length,
       reviews: reviewsCount,
+      ...(pension._count?.proposals !== undefined ? { proposals: pension._count.proposals } : {}),
     },
   };
 };
