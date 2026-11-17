@@ -163,6 +163,35 @@ const calculateRoomPrice = (
 const createDeterministicObjectId = (seed: string): string =>
   crypto.createHash('md5').update(seed).digest('hex').substring(0, 24);
 
+export type PensionMediaSource = {
+  images: readonly { url: string }[];
+  rooms: readonly { images: readonly string[] }[];
+};
+
+export const MAX_REVIEW_IMAGES = 3;
+
+export const selectReviewImagesForPension = (
+  pension: PensionMediaSource,
+  seedIndex: number,
+): string[] => {
+  const mod = ((seedIndex % 20) + 20) % 20;
+  if (mod < 14) {
+    return [];
+  }
+
+  const roomPhotos = pension.rooms.flatMap((room) => room.images);
+  const pensionPhotos = pension.images.map((img) => img.url);
+  const uniquePool = Array.from(new Set([...roomPhotos, ...pensionPhotos])).filter(Boolean);
+
+  if (uniquePool.length === 0) {
+    return [];
+  }
+
+  const targetCount = mod < 17 ? 1 : mod < 19 ? 2 : MAX_REVIEW_IMAGES;
+  const desiredCount = Math.min(targetCount, uniquePool.length, MAX_REVIEW_IMAGES);
+  return faker.helpers.arrayElements(uniquePool, desiredCount);
+};
+
 export const generateBlueprintDataset = async (
   validCities: ValidatedCity[],
   universityRecords: UniversityRecord[],
@@ -490,6 +519,7 @@ export const generateBlueprintDataset = async (
         quietnessRating: Math.max(1, overallRating - 1),
         wifiRating: overallRating,
         comment: generateReviewComment(overallRating, reviews.length),
+        images: selectReviewImagesForPension(pension, reviews.length),
         stayDurationCategory: 'ONE_SEMESTER' as StayDurationCategory,
         isResidentVerified: Math.random() < 0.7,
         authorGender: reviewer.gender,

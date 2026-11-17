@@ -240,6 +240,7 @@ export const persistDatasetToMongo = async (dataset: BlueprintDataset): Promise<
         quietnessRating: review.quietnessRating,
         wifiRating: review.wifiRating,
         comment: review.comment,
+        images: review.images,
         stayDurationCategory: review.stayDurationCategory,
         isResidentVerified: review.isResidentVerified,
         helpfulUserIds,

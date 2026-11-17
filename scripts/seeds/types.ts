@@ -101,6 +101,7 @@ export type DraftReview = {
   quietnessRating: number;
   wifiRating: number;
   comment: string;
+  images: string[];
   stayDurationCategory: StayDurationCategory;
   isResidentVerified: boolean;
   authorGender: 'MALE' | 'FEMALE';
