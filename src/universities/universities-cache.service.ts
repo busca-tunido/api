@@ -1,46 +1,42 @@
 import { Injectable, type OnModuleInit } from '@nestjs/common';
+import {
+  calculateHaversineDistanceKm,
+  calculateTransitMinutes,
+  calculateWalkingMinutes,
+} from '../common/utils/geo.util.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
-export interface CachedUniversity {
+export type CachedUniversity = {
   id: string;
   name: string;
   shortName: string | null;
   city: string;
   latitude: number;
   longitude: number;
-}
+};
 
-export interface NearbyUniversityResult {
+export type NearbyUniversityResult = {
   universityId: string;
   name: string;
   shortName: string | null;
   distanceMeters: number;
   walkingMinutes: number | null;
   transitMinutes: number | null;
-}
+};
 
-const calculateHaversineDistanceKm = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number => {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+export type CachedUniversityDomainMatch = {
+  id: string;
+  name: string;
+  shortName: string | null;
+  city: string;
+  address: string;
 };
 
 @Injectable()
 export class UniversitiesCacheService implements OnModuleInit {
   private cache: CachedUniversity[] = [];
+  private domainIndex = new Map<string, CachedUniversityDomainMatch>();
+  private initialized = false;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -56,15 +52,63 @@ export class UniversitiesCacheService implements OnModuleInit {
         name: true,
         shortName: true,
         city: true,
+        address: true,
+        emailDomains: true,
         latitude: true,
         longitude: true,
       },
     });
 
-    this.cache = list.filter(
-      (u): u is CachedUniversity =>
-        typeof u.latitude === 'number' && typeof u.longitude === 'number',
-    );
+    const nextCache: CachedUniversity[] = [];
+    const nextDomainIndex = new Map<string, CachedUniversityDomainMatch>();
+
+    for (const u of list) {
+      if (typeof u.latitude === 'number' && typeof u.longitude === 'number') {
+        nextCache.push({
+          id: u.id,
+          name: u.name,
+          shortName: u.shortName,
+          city: u.city,
+          latitude: u.latitude,
+          longitude: u.longitude,
+        });
+      }
+
+      if (Array.isArray(u.emailDomains)) {
+        const domainMatch: CachedUniversityDomainMatch = {
+          id: u.id,
+          name: u.name,
+          shortName: u.shortName,
+          city: u.city,
+          address: u.address,
+        };
+        for (const rawDomain of u.emailDomains) {
+          const domain = rawDomain.toLowerCase().trim();
+          if (domain && !nextDomainIndex.has(domain)) {
+            nextDomainIndex.set(domain, domainMatch);
+          }
+        }
+      }
+    }
+
+    this.cache = nextCache;
+    this.domainIndex = nextDomainIndex;
+    this.initialized = true;
+  }
+
+  findByEmailDomains(candidateDomains: string[]): CachedUniversityDomainMatch | null | undefined {
+    if (!this.initialized) {
+      return undefined;
+    }
+
+    for (const candidate of candidateDomains) {
+      const match = this.domainIndex.get(candidate);
+      if (match) {
+        return match;
+      }
+    }
+
+    return null;
   }
 
   getAll(): CachedUniversity[] {
@@ -106,8 +150,8 @@ export class UniversitiesCacheService implements OnModuleInit {
           name: uni.name,
           shortName: uni.shortName,
           distanceMeters,
-          walkingMinutes: Math.round(distanceMeters / 80),
-          transitMinutes: Math.round(distanceMeters / 250 + 4),
+          walkingMinutes: calculateWalkingMinutes(distanceMeters),
+          transitMinutes: calculateTransitMinutes(distanceMeters),
         };
       })
       .sort((a, b) => a.distanceMeters - b.distanceMeters);

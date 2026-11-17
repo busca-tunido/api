@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { isValidObjectId } from '../common/utils/string.util.js';
 
 export const SOFT_DELETE_MODELS = new Set<string>([
   'User',
@@ -102,7 +103,7 @@ export const createSoftDeleteExtension = (clientProvider: () => unknown) => {
             typeof args.where === 'object' &&
             'id' in args.where &&
             typeof (args.where as Record<string, unknown>).id === 'string' &&
-            !/^[0-9a-fA-F]{24}$/.test((args.where as Record<string, unknown>).id as string)
+            !isValidObjectId((args.where as Record<string, unknown>).id)
           ) {
             return null;
           }

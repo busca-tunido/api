@@ -14,13 +14,48 @@ export class AuthRateLimitService {
   private readonly MAX_FREE_ATTEMPTS = 5;
   private readonly MAX_CAPTCHA_ATTEMPTS = 10;
   private readonly COOLING_PERIOD_MS = 2 * 60 * 1000;
+  private readonly LOGIN_ATTEMPT_TTL_MS = 15 * 60 * 1000;
   private readonly CHECK_EMAIL_LIMIT = 30;
   private readonly CHECK_EMAIL_WINDOW_MS = 60 * 1000;
+  private readonly MAX_TRACKED_KEYS = 10000;
 
   getCompositeKey(ip: string, email: string): string {
     const cleanIp = ip || 'unknown-ip';
     const cleanEmail = (email || '').toLowerCase().trim();
     return `${cleanIp}:${cleanEmail}`;
+  }
+
+  private pruneLoginAttempts(now: number): void {
+    if (this.loginAttempts.size < this.MAX_TRACKED_KEYS) {
+      return;
+    }
+    for (const [k, v] of this.loginAttempts) {
+      if (now - v.lastAttemptAt > this.LOGIN_ATTEMPT_TTL_MS) {
+        this.loginAttempts.delete(k);
+      }
+    }
+    while (this.loginAttempts.size >= this.MAX_TRACKED_KEYS) {
+      const oldestKey = this.loginAttempts.keys().next().value;
+      if (oldestKey === undefined) break;
+      this.loginAttempts.delete(oldestKey);
+    }
+  }
+
+  private pruneCheckEmailAttempts(now: number): void {
+    if (this.checkEmailAttempts.size < this.MAX_TRACKED_KEYS) {
+      return;
+    }
+    for (const [k, timestamps] of this.checkEmailAttempts) {
+      const latest = timestamps[timestamps.length - 1] ?? 0;
+      if (now - latest >= this.CHECK_EMAIL_WINDOW_MS) {
+        this.checkEmailAttempts.delete(k);
+      }
+    }
+    while (this.checkEmailAttempts.size >= this.MAX_TRACKED_KEYS) {
+      const oldestKey = this.checkEmailAttempts.keys().next().value;
+      if (oldestKey === undefined) break;
+      this.checkEmailAttempts.delete(oldestKey);
+    }
   }
 
   async assertLoginAllowed(ip: string, email: string, turnstileToken?: string): Promise<void> {
@@ -32,6 +67,10 @@ export class AuthRateLimitService {
     }
 
     const now = Date.now();
+    if (now - entry.lastAttemptAt > this.LOGIN_ATTEMPT_TTL_MS) {
+      this.loginAttempts.delete(key);
+      return;
+    }
 
     if (entry.count >= this.MAX_CAPTCHA_ATTEMPTS) {
       const elapsed = now - entry.lastAttemptAt;
@@ -70,12 +109,13 @@ export class AuthRateLimitService {
     const entry = this.loginAttempts.get(key);
     const now = Date.now();
 
-    if (entry) {
+    if (entry && now - entry.lastAttemptAt <= this.LOGIN_ATTEMPT_TTL_MS) {
       entry.count += 1;
       entry.lastAttemptAt = now;
       return entry.count;
     }
 
+    this.pruneLoginAttempts(now);
     this.loginAttempts.set(key, {
       count: 1,
       lastAttemptAt: now,
@@ -104,6 +144,7 @@ export class AuthRateLimitService {
       );
     }
 
+    this.pruneCheckEmailAttempts(now);
     validTimestamps.push(now);
     this.checkEmailAttempts.set(cleanIp, validTimestamps);
   }

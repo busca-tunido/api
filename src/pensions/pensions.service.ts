@@ -2,6 +2,8 @@ import { ForbiddenException, Injectable, NotFoundException, Optional } from '@ne
 import type { Prisma } from '@prisma/client';
 import { ProposalStatus, Role } from '@prisma/client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
+import { calculateBoundingBox, calculateHaversineDistanceKm } from '../common/utils/geo.util.js';
+import { isValidObjectId, slugify } from '../common/utils/string.util.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UniversitiesCacheService } from '../universities/universities-cache.service.js';
 import { AMENITY_CATALOG_ITEMS } from './constants/amenities-catalog.js';
@@ -10,198 +12,27 @@ import type { CreatePensionDto } from './dto/create-pension.dto.js';
 import type { FilterPensionsDto } from './dto/filter-pensions.dto.js';
 import type { PensionAmenityCatalogItemDto } from './dto/pension-response.dto.js';
 import type { UpdatePensionDto } from './dto/update-pension.dto.js';
+import type {
+  CitySummaryItem,
+  EmbeddedNearbyUniversityRaw,
+  PaginatedPensions,
+  PensionDocRaw,
+  PriceHistogram,
+  PriceHistogramBin,
+} from './types/pension-raw.types.js';
+import {
+  buildNearbyUniversityEntry,
+  buildPaginatedPensions,
+  calculatePriceBins,
+  calculateRelevanceScore,
+  formatPensionItem,
+  MEAL_AMENITY_SLUGS,
+  mapImagesInput,
+  normalizeAmenitiesAndInternet,
+} from './utils/pension-helpers.js';
 
-export type PaginatedPensions<T> = {
-  items: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasMore: boolean;
-  };
-  nearbyCityCounts: Array<{
-    city: string;
-    count: number;
-    distanceKm?: number;
-  }>;
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type PriceHistogramBin = {
-  min: number;
-  max: number;
-  count: number;
-};
-
-export type PriceHistogram = {
-  minPrice: number | null;
-  maxPrice: number | null;
-  currency: string;
-  totalListings: number;
-  bins: PriceHistogramBin[];
-};
-
-export type CitySummaryItem = {
-  id: string;
-  name: string;
-  pensionsCount: number;
-  latitude: number;
-  longitude: number;
-  imageUrl?: string | null;
-};
-
-export const calculateHaversineDistanceKm = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number => {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c * 10) / 10;
-};
-
-export const calculateRelevanceScore = (
-  distanceKm: number,
-  radiusKm: number,
-  ratingAverage: number,
-  ratingCount: number,
-  verificationStatus: string,
-  availableBeds: number,
-  hasEssentialUtilities: boolean,
-): number => {
-  const proximityScore = Math.max(0, 100 * (1 - distanceKm / radiusKm));
-  const ratingScore = (ratingAverage / 5.0) * 70 + Math.min(30, ratingCount * 3);
-  const verifScore =
-    verificationStatus === 'OFFICIALLY_VERIFIED'
-      ? 100
-      : verificationStatus === 'COMMUNITY_VERIFIED'
-        ? 75
-        : 30;
-  const availScore = (availableBeds > 0 ? 50 : 0) + (hasEssentialUtilities ? 50 : 0);
-
-  const total = 0.4 * proximityScore + 0.25 * ratingScore + 0.2 * verifScore + 0.15 * availScore;
-
-  return Math.round(total * 10) / 10;
-};
-
-const slugify = (text: string): string => {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '');
-};
-
-const formatAmenityName = (slug: string): string => {
-  return slug
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
-
-interface EmbeddedPensionImageRaw {
-  id: string;
-  url: string;
-  thumbnailUrl: string;
-  caption?: string | null;
-  isFeatured?: boolean;
-  sortOrder?: number;
-  createdAt?: Date;
-}
-
-interface EmbeddedRoomRaw {
-  id: string;
-  roomNumber?: string | null;
-  title: string;
-  description?: string | null;
-  type: string;
-  monthlyPrice: number;
-  deposit?: number | null;
-  hasPrivateBathroom: boolean;
-  totalBeds: number;
-  availableBeds: number;
-  isAvailable: boolean;
-  isActive?: boolean;
-  images: string[];
-  createdAt?: Date;
-  updatedAt?: Date;
-  deletedAt?: Date | null;
-}
-
-interface EmbeddedNearbyUniversityRaw {
-  universityId: string;
-  name: string;
-  shortName?: string | null;
-  distanceMeters: number;
-  walkingMinutes?: number | null;
-  transitMinutes?: number | null;
-}
-
-interface PensionDocRaw {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  address: string;
-  city: string;
-  neighborhood: string;
-  latitude: number;
-  longitude: number;
-  baseMonthlyPrice: number;
-  deposit?: number | null;
-  currency: string;
-  waterIncluded: boolean;
-  electricityIncluded: boolean;
-  gasIncluded: boolean;
-  internetIncluded: boolean;
-  curfewTime?: string | null;
-  guestsAllowed: boolean;
-  smokingAllowed: boolean;
-  petsAllowed: boolean;
-  genderPreference: string;
-  quietHoursStart?: string | null;
-  quietHoursEnd?: string | null;
-  verificationStatus: string;
-  ratingAverage: number;
-  ratingCount: number;
-  communityScore: number;
-  isActive: boolean;
-  landlordId?: string | null;
-  submittedById?: string | null;
-  amenities?: string[];
-  rooms?: EmbeddedRoomRaw[];
-  images?: EmbeddedPensionImageRaw[];
-  nearbyUniversities?: EmbeddedNearbyUniversityRaw[];
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date | null;
-  landlord?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    phone: string | null;
-    email: string;
-    avatarUrl: string | null;
-  } | null;
-  _count?: {
-    reviews?: number;
-    proposals?: number;
-  };
-}
+export type { CitySummaryItem, PaginatedPensions, PriceHistogram, PriceHistogramBin };
+export { calculateHaversineDistanceKm, calculateRelevanceScore };
 
 @Injectable()
 export class PensionsService {
@@ -210,79 +41,13 @@ export class PensionsService {
     @Optional() private readonly universitiesCache?: UniversitiesCacheService,
   ) {}
 
-  private formatPensionItem(
-    pension: PensionDocRaw,
-    limitImages: number = 3,
-  ): Record<string, unknown> {
-    const images = (pension.images || [])
-      .slice()
-      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-      .slice(0, limitImages);
-
-    const amenities = (pension.amenities || []).map((item: unknown) => {
-      const slug = typeof item === 'string' ? item : ((item as { slug?: string })?.slug ?? '');
-      const existingName =
-        typeof item === 'object' && item !== null && 'name' in item
-          ? String((item as { name: unknown }).name)
-          : null;
-      return {
-        slug,
-        name: existingName || (slug ? formatAmenityName(slug) : ''),
-      };
-    });
-
-    const rooms = (pension.rooms || [])
-      .filter((r) => !r.deletedAt)
-      .sort((a, b) => a.monthlyPrice - b.monthlyPrice)
-      .map((r) => ({
-        ...r,
-        name: r.title,
-        priceMonthlyClp: r.monthlyPrice,
-        isActive: r.isActive ?? true,
-        bathType: r.hasPrivateBathroom ? 'PRIVATE' : 'SHARED',
-      }));
-
-    const nearbyUniversities = (pension.nearbyUniversities || []).map((u) => ({
-      ...u,
-      university: {
-        id: u.universityId,
-        name: u.name,
-        shortName: u.shortName ?? null,
-      },
-    }));
-
-    const firstNearby = nearbyUniversities[0];
-    const nearestUniversity = firstNearby
-      ? {
-          name: firstNearby.university.name,
-          shortName: firstNearby.university.shortName ?? null,
-          distanceMeters: firstNearby.distanceMeters,
-        }
-      : undefined;
-
-    const amenitySlugs = amenities.map((a) => a.slug).filter(Boolean);
-
-    const totalRoomsCount = (pension.rooms || []).filter((r) => !r.deletedAt).length;
-    const reviewsCount = pension._count?.reviews ?? pension.ratingCount ?? 0;
-
-    return {
-      ...pension,
-      isActive: Boolean(pension.isActive ?? true),
-      ratingAverage: Number(pension.ratingAverage ?? 0),
-      averageRating: Number(pension.ratingAverage ?? 0),
-      ratingCount: Number(pension.ratingCount ?? reviewsCount),
-      reviewsCount,
-      images,
-      amenities,
-      amenitySlugs,
-      nearestUniversity,
-      rooms,
-      nearbyUniversities,
-      _count: {
-        rooms: totalRoomsCount,
-        reviews: reviewsCount,
-      },
-    };
+  private hasBounds(filter: FilterPensionsDto): boolean {
+    return (
+      filter.minLat !== undefined &&
+      filter.maxLat !== undefined &&
+      filter.minLng !== undefined &&
+      filter.maxLng !== undefined
+    );
   }
 
   private buildWhere(filter: FilterPensionsDto): Prisma.PensionWhereInput {
@@ -300,13 +65,10 @@ export class PensionsService {
     }
 
     if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
-      where.baseMonthlyPrice = {};
-      if (filter.minPrice !== undefined) {
-        where.baseMonthlyPrice.gte = filter.minPrice;
-      }
-      if (filter.maxPrice !== undefined) {
-        where.baseMonthlyPrice.lte = filter.maxPrice;
-      }
+      where.baseMonthlyPrice = {
+        ...(filter.minPrice !== undefined ? { gte: filter.minPrice } : {}),
+        ...(filter.maxPrice !== undefined ? { lte: filter.maxPrice } : {}),
+      };
     }
 
     if (filter.genderPreference) {
@@ -314,27 +76,19 @@ export class PensionsService {
     }
 
     if (filter.universityId) {
-      where.nearbyUniversities = {
-        some: { universityId: filter.universityId },
-      };
+      where.nearbyUniversities = { some: { universityId: filter.universityId } };
     }
 
-    if (filter.amenities && filter.amenities.length > 0) {
-      where.amenities = {
-        hasEvery: filter.amenities,
-      };
-    }
-
-    if (filter.includesMeals) {
-      where.amenities = {
-        hasSome: [
-          'comida-incluida',
-          'pension-completa',
-          'media-pension',
-          'desayuno-incluido',
-          'alimentacion-incluida',
-        ],
-      };
+    const hasAmenities = Boolean(filter.amenities && filter.amenities.length > 0);
+    if (hasAmenities && filter.includesMeals) {
+      where.AND = [
+        { amenities: { hasEvery: filter.amenities } },
+        { amenities: { hasSome: [...MEAL_AMENITY_SLUGS] } },
+      ];
+    } else if (hasAmenities) {
+      where.amenities = { hasEvery: filter.amenities };
+    } else if (filter.includesMeals) {
+      where.amenities = { hasSome: [...MEAL_AMENITY_SLUGS] };
     }
 
     if (filter.roomType || filter.hasPrivateBathroom !== undefined || filter.minBeds) {
@@ -371,13 +125,7 @@ export class PensionsService {
       ];
     }
 
-    const hasBounds =
-      filter.minLat !== undefined &&
-      filter.maxLat !== undefined &&
-      filter.minLng !== undefined &&
-      filter.maxLng !== undefined;
-
-    if (hasBounds) {
+    if (this.hasBounds(filter)) {
       where.latitude = { gte: filter.minLat, lte: filter.maxLat };
       where.longitude = { gte: filter.minLng, lte: filter.maxLng };
     }
@@ -385,82 +133,41 @@ export class PensionsService {
     return where;
   }
 
-  private calculateBins(
-    prices: number[],
-    minPrice: number,
-    maxPrice: number,
-    binCount: number = 28,
-  ): PriceHistogramBin[] {
-    if (prices.length === 0) {
-      return [];
-    }
-
-    if (minPrice === maxPrice) {
-      return Array.from({ length: binCount }, (_, i) => ({
-        min: minPrice,
-        max: maxPrice,
-        count: i === 0 ? prices.length : 0,
-      }));
-    }
-
-    const step = (maxPrice - minPrice) / binCount;
-    const bins: PriceHistogramBin[] = Array.from({ length: binCount }, (_, i) => {
-      const min = Math.round(minPrice + i * step);
-      const max = i === binCount - 1 ? maxPrice : Math.round(minPrice + (i + 1) * step);
-      return { min, max, count: 0 };
-    });
-
-    for (const price of prices) {
-      const rawIndex = Math.floor((price - minPrice) / step);
-      const index = Math.min(Math.max(0, rawIndex), binCount - 1);
-      bins[index].count += 1;
-    }
-
-    return bins;
-  }
-
   async findAll(filter: FilterPensionsDto): Promise<PaginatedPensions<unknown>> {
     const page = Math.max(1, filter.page || 1);
     const limit = Math.max(1, Math.min(50, filter.limit || 12));
     const skip = (page - 1) * limit;
-
     const where = this.buildWhere(filter);
-
-    const hasBounds =
-      filter.minLat !== undefined &&
-      filter.maxLat !== undefined &&
-      filter.minLng !== undefined &&
-      filter.maxLng !== undefined;
-
+    const hasBounds = this.hasBounds(filter);
     const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
 
     if (hasGeo) {
       const userLat = filter.latitude as number;
       const userLng = filter.longitude as number;
       const radiusKm = Math.max(1, Math.min(100, filter.radiusKm || 30));
+      const cityRadiusKm = Math.max(radiusKm, 60);
+
+      if (!hasBounds) {
+        const bbox = calculateBoundingBox(userLat, userLng, cityRadiusKm);
+        where.latitude = { gte: bbox.minLat, lte: bbox.maxLat };
+        where.longitude = { gte: bbox.minLng, lte: bbox.maxLng };
+      }
 
       const rawCandidates = await this.prisma.pension.findMany({
         where,
-        include: {
-          _count: {
-            select: {
-              reviews: true,
-            },
-          },
-        },
+        include: { _count: { select: { reviews: true } } },
       });
 
       const cityCountsMap = new Map<string, { count: number; minDistance: number }>();
-
-      type ScoredPension = Record<string, unknown> & {
+      type CandidateEntry = {
+        pension: PensionDocRaw;
         distanceKm: number;
         relevanceScore: number;
       };
+      const inRadiusCandidates: CandidateEntry[] = [];
 
-      const inRadiusItems: ScoredPension[] = [];
-
-      for (const p of rawCandidates) {
-        const pension = p as unknown as PensionDocRaw;
+      for (const raw of rawCandidates) {
+        const pension = raw as unknown as PensionDocRaw;
         const distanceKm = calculateHaversineDistanceKm(
           userLat,
           userLng,
@@ -468,8 +175,8 @@ export class PensionsService {
           pension.longitude,
         );
 
-        if (distanceKm <= Math.max(radiusKm, 60)) {
-          const currentCity = cityCountsMap.get(pension.city) || {
+        if (distanceKm <= cityRadiusKm) {
+          const currentCity = cityCountsMap.get(pension.city) ?? {
             count: 0,
             minDistance: distanceKm,
           };
@@ -502,27 +209,30 @@ export class PensionsService {
             hasUtilities,
           );
 
-          inRadiusItems.push({
-            ...this.formatPensionItem(pension, 3),
-            distanceKm,
-            relevanceScore,
-          });
+          inRadiusCandidates.push({ pension, distanceKm, relevanceScore });
         }
       }
 
       const sortBy = filter.sortBy || 'relevance';
-      inRadiusItems.sort((a, b) => {
+      inRadiusCandidates.sort((a, b) => {
         if (sortBy === 'distance') return a.distanceKm - b.distanceKm;
-        if (sortBy === 'rating') return Number(b.ratingAverage) - Number(a.ratingAverage);
-        if (sortBy === 'price_asc') return Number(a.baseMonthlyPrice) - Number(b.baseMonthlyPrice);
-        if (sortBy === 'price_desc') return Number(b.baseMonthlyPrice) - Number(a.baseMonthlyPrice);
+        if (sortBy === 'rating') {
+          return Number(b.pension.ratingAverage) - Number(a.pension.ratingAverage);
+        }
+        if (sortBy === 'price_asc') {
+          return Number(a.pension.baseMonthlyPrice) - Number(b.pension.baseMonthlyPrice);
+        }
+        if (sortBy === 'price_desc') {
+          return Number(b.pension.baseMonthlyPrice) - Number(a.pension.baseMonthlyPrice);
+        }
         return b.relevanceScore - a.relevanceScore;
       });
 
-      const total = inRadiusItems.length;
-      const totalPages = Math.ceil(total / limit) || 1;
-      const items = inRadiusItems.slice(skip, skip + limit);
-      const hasMore = skip + limit < total;
+      const pageItems = inRadiusCandidates.slice(skip, skip + limit).map((c) => ({
+        ...formatPensionItem(c.pension, 3),
+        distanceKm: c.distanceKm,
+        relevanceScore: c.relevanceScore,
+      }));
 
       const nearbyCityCounts = Array.from(cityCountsMap.entries())
         .map(([city, data]) => ({
@@ -532,31 +242,19 @@ export class PensionsService {
         }))
         .sort((a, b) => b.count - a.count);
 
-      return {
-        items,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-          hasMore,
-        },
-        nearbyCityCounts,
-        total,
+      return buildPaginatedPensions(
+        pageItems,
         page,
         limit,
-        totalPages,
-      };
+        inRadiusCandidates.length,
+        nearbyCityCounts,
+      );
     }
 
     let orderBy: Prisma.PensionOrderByWithRelationInput = { createdAt: 'desc' };
-    if (filter.sortBy === 'rating') {
-      orderBy = { ratingAverage: 'desc' };
-    } else if (filter.sortBy === 'price_asc') {
-      orderBy = { baseMonthlyPrice: 'asc' };
-    } else if (filter.sortBy === 'price_desc') {
-      orderBy = { baseMonthlyPrice: 'desc' };
-    }
+    if (filter.sortBy === 'rating') orderBy = { ratingAverage: 'desc' };
+    else if (filter.sortBy === 'price_asc') orderBy = { baseMonthlyPrice: 'asc' };
+    else if (filter.sortBy === 'price_desc') orderBy = { baseMonthlyPrice: 'desc' };
 
     const [rawItems, total, cityGroups] = await Promise.all([
       this.prisma.pension.findMany({
@@ -564,13 +262,7 @@ export class PensionsService {
         skip,
         take: limit,
         orderBy,
-        include: {
-          _count: {
-            select: {
-              reviews: true,
-            },
-          },
-        },
+        include: { _count: { select: { reviews: true } } },
       }),
       this.prisma.pension.count({ where }),
       this.prisma.pension.groupBy({
@@ -582,136 +274,95 @@ export class PensionsService {
       }),
     ]);
 
-    const items = rawItems.map((item) =>
-      this.formatPensionItem(item as unknown as PensionDocRaw, 3),
-    );
-
-    const totalPages = Math.ceil(total / limit) || 1;
-    const hasMore = skip + limit < total;
+    const items = rawItems.map((item) => formatPensionItem(item as unknown as PensionDocRaw, 3));
     const nearbyCityCounts = cityGroups.map((g) => ({
       city: g.city,
       count: g._count.id,
     }));
 
-    return {
-      items,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasMore,
-      },
-      nearbyCityCounts,
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+    return buildPaginatedPensions(items, page, limit, total, nearbyCityCounts);
   }
 
   async getPriceHistogram(filter: FilterPensionsDto): Promise<PriceHistogram> {
     const where = this.buildWhere(filter);
     const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
+    const hasBounds = this.hasBounds(filter);
 
     if (hasGeo) {
       const userLat = filter.latitude as number;
       const userLng = filter.longitude as number;
       const radiusKm = Math.max(1, Math.min(100, filter.radiusKm || 30));
-      const hasBounds =
-        filter.minLat !== undefined &&
-        filter.maxLat !== undefined &&
-        filter.minLng !== undefined &&
-        filter.maxLng !== undefined;
+
+      if (!hasBounds) {
+        const bbox = calculateBoundingBox(userLat, userLng, radiusKm);
+        where.latitude = { gte: bbox.minLat, lte: bbox.maxLat };
+        where.longitude = { gte: bbox.minLng, lte: bbox.maxLng };
+      }
 
       const candidates = await this.prisma.pension.findMany({
         where,
-        select: {
-          latitude: true,
-          longitude: true,
-          baseMonthlyPrice: true,
-        },
+        select: { latitude: true, longitude: true, baseMonthlyPrice: true },
       });
 
       const prices: number[] = [];
+      let minPrice = Infinity;
+      let maxPrice = -Infinity;
+
       for (const p of candidates) {
         const distanceKm = calculateHaversineDistanceKm(userLat, userLng, p.latitude, p.longitude);
         if (hasBounds || distanceKm <= radiusKm) {
-          prices.push(Number(p.baseMonthlyPrice));
+          const price = Number(p.baseMonthlyPrice);
+          prices.push(price);
+          if (price < minPrice) minPrice = price;
+          if (price > maxPrice) maxPrice = price;
         }
       }
 
       if (prices.length === 0) {
-        return {
-          minPrice: null,
-          maxPrice: null,
-          currency: 'CLP',
-          totalListings: 0,
-          bins: [],
-        };
+        return { minPrice: null, maxPrice: null, currency: 'CLP', totalListings: 0, bins: [] };
       }
-
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-      const bins = this.calculateBins(prices, minPrice, maxPrice, 28);
 
       return {
         minPrice,
         maxPrice,
         currency: 'CLP',
         totalListings: prices.length,
-        bins,
+        bins: calculatePriceBins(prices, minPrice, maxPrice, 28),
       };
     }
-
-    const aggregate = await this.prisma.pension.aggregate({
-      where,
-      _min: { baseMonthlyPrice: true },
-      _max: { baseMonthlyPrice: true },
-      _count: { id: true },
-    });
-
-    const totalListings = aggregate._count.id;
-    if (
-      totalListings === 0 ||
-      aggregate._min.baseMonthlyPrice === null ||
-      aggregate._max.baseMonthlyPrice === null
-    ) {
-      return {
-        minPrice: null,
-        maxPrice: null,
-        currency: 'CLP',
-        totalListings: 0,
-        bins: [],
-      };
-    }
-
-    const minPrice = Number(aggregate._min.baseMonthlyPrice);
-    const maxPrice = Number(aggregate._max.baseMonthlyPrice);
 
     const listings = await this.prisma.pension.findMany({
       where,
       select: { baseMonthlyPrice: true },
     });
 
-    const prices = listings.map((l) => Number(l.baseMonthlyPrice));
-    const bins = this.calculateBins(prices, minPrice, maxPrice, 28);
+    if (listings.length === 0) {
+      return { minPrice: null, maxPrice: null, currency: 'CLP', totalListings: 0, bins: [] };
+    }
+
+    const prices: number[] = [];
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
+
+    for (const listing of listings) {
+      const price = Number(listing.baseMonthlyPrice);
+      prices.push(price);
+      if (price < minPrice) minPrice = price;
+      if (price > maxPrice) maxPrice = price;
+    }
 
     return {
       minPrice,
       maxPrice,
       currency: 'CLP',
-      totalListings,
-      bins,
+      totalListings: prices.length,
+      bins: calculatePriceBins(prices, minPrice, maxPrice, 28),
     };
   }
 
   async findMine(userId: string): Promise<unknown> {
     const pensions = await this.prisma.pension.findMany({
-      where: {
-        landlordId: userId,
-        deletedAt: null,
-      },
+      where: { landlordId: userId, deletedAt: null },
       include: {
         _count: {
           select: {
@@ -746,9 +397,10 @@ export class PensionsService {
   }
 
   async findBySlugOrId(idOrSlug: string, _user?: SanitizedUser | null): Promise<unknown> {
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrSlug);
     const pension = await this.prisma.pension.findFirst({
-      where: isObjectId ? { OR: [{ id: idOrSlug }, { slug: idOrSlug }] } : { slug: idOrSlug },
+      where: isValidObjectId(idOrSlug)
+        ? { OR: [{ id: idOrSlug }, { slug: idOrSlug }] }
+        : { slug: idOrSlug },
       include: {
         landlord: {
           select: {
@@ -767,7 +419,7 @@ export class PensionsService {
       throw new NotFoundException(`Pension '${idOrSlug}' not found`);
     }
 
-    return this.formatPensionItem(pension as unknown as PensionDocRaw, 100);
+    return formatPensionItem(pension as unknown as PensionDocRaw, 100);
   }
 
   async getAmenitiesCatalog(): Promise<PensionAmenityCatalogItemDto[]> {
@@ -785,135 +437,87 @@ export class PensionsService {
           iconKey: a.iconKey ?? null,
         }));
       }
-    } catch {
-      // Fallback to static catalog if table unseeded
-    }
+    } catch {}
 
     return [...AMENITY_CATALOG_ITEMS];
   }
 
-  async create(dto: CreatePensionDto, landlord: SanitizedUser): Promise<unknown> {
-    const rawSlug = slugify(dto.title);
-    const uniqueSuffix = Math.random().toString(36).substring(2, 7);
-    const slug = `${rawSlug}-${uniqueSuffix}`;
-
-    const { amenitySlugs, nearbyUniversityId, distanceMeters, images, ...pensionData } = dto;
-
-    let finalInternetIncluded = pensionData.internetIncluded ?? true;
-    const finalAmenities = (amenitySlugs ? [...amenitySlugs] : []).filter(
-      (slug) => slug !== 'luz-incluida' && slug !== 'gas-incluido',
-    );
-
-    if (finalAmenities.includes('wifi-alta-velocidad')) {
-      finalInternetIncluded = true;
-    } else if (finalInternetIncluded) {
-      finalAmenities.push('wifi-alta-velocidad');
-    }
-
-    let computedDistanceMeters = distanceMeters;
-    let computedWalkingMinutes: number | null =
-      typeof distanceMeters === 'number' ? Math.round(distanceMeters / 80) : null;
-    let nearbyUniversitiesData: EmbeddedNearbyUniversityRaw[] = [];
-
-    if (nearbyUniversityId) {
+  private async resolveNearbyUniversities(
+    nearbyUniversityId: string | undefined,
+    latitude: number | undefined,
+    longitude: number | undefined,
+    city: string | undefined,
+    distanceMeters: number | undefined,
+  ): Promise<EmbeddedNearbyUniversityRaw[] | undefined> {
+    if (nearbyUniversityId !== undefined) {
       const uni = await this.prisma.university.findUnique({
         where: { id: nearbyUniversityId },
         select: { id: true, name: true, shortName: true, latitude: true, longitude: true },
       });
-
-      if (uni) {
-        if (
-          computedDistanceMeters === undefined &&
-          typeof uni.latitude === 'number' &&
-          typeof uni.longitude === 'number' &&
-          typeof dto.latitude === 'number' &&
-          typeof dto.longitude === 'number'
-        ) {
-          const distanceKm = calculateHaversineDistanceKm(
-            dto.latitude,
-            dto.longitude,
-            uni.latitude,
-            uni.longitude,
-          );
-          computedDistanceMeters = Math.round(distanceKm * 1000);
-          computedWalkingMinutes = Math.round(computedDistanceMeters / 80);
-        }
-
-        nearbyUniversitiesData = [
-          {
-            universityId: uni.id,
-            name: uni.name,
-            shortName: uni.shortName ?? null,
-            distanceMeters: computedDistanceMeters ?? 0,
-            walkingMinutes: computedWalkingMinutes,
-            transitMinutes:
-              typeof computedDistanceMeters === 'number'
-                ? Math.round(computedDistanceMeters / 250 + 4)
-                : null,
-          },
-        ];
+      if (!uni) {
+        return undefined;
       }
-    } else if (
-      this.universitiesCache &&
-      typeof dto.latitude === 'number' &&
-      typeof dto.longitude === 'number'
-    ) {
-      const nearbyList = this.universitiesCache.findNearby(dto.latitude, dto.longitude, {
-        city: dto.city,
-        maxDistanceMeters: 5000,
-        limit: 3,
-      });
-
-      nearbyUniversitiesData = nearbyList.map((u) => ({
-        universityId: u.universityId,
-        name: u.name,
-        shortName: u.shortName,
-        distanceMeters: u.distanceMeters,
-        walkingMinutes: u.walkingMinutes,
-        transitMinutes: u.transitMinutes,
-      }));
+      return [buildNearbyUniversityEntry(uni, latitude, longitude, distanceMeters)];
     }
+
+    if (this.universitiesCache && typeof latitude === 'number' && typeof longitude === 'number') {
+      return this.universitiesCache
+        .findNearby(latitude, longitude, { city, maxDistanceMeters: 5000, limit: 3 })
+        .map((u) => ({
+          universityId: u.universityId,
+          name: u.name,
+          shortName: u.shortName,
+          distanceMeters: u.distanceMeters,
+          walkingMinutes: u.walkingMinutes,
+          transitMinutes: u.transitMinutes,
+        }));
+    }
+
+    return undefined;
+  }
+
+  async create(dto: CreatePensionDto, landlord: SanitizedUser): Promise<unknown> {
+    const slug = `${slugify(dto.title)}-${Math.random().toString(36).substring(2, 7)}`;
+    const { amenitySlugs, nearbyUniversityId, distanceMeters, images, ...pensionData } = dto;
+    const { amenities, internetIncluded } = normalizeAmenitiesAndInternet(
+      amenitySlugs,
+      pensionData.internetIncluded,
+    );
+
+    const nearbyUniversitiesData =
+      (await this.resolveNearbyUniversities(
+        nearbyUniversityId,
+        dto.latitude,
+        dto.longitude,
+        dto.city,
+        distanceMeters,
+      )) ?? [];
 
     const location =
       typeof dto.latitude === 'number' && typeof dto.longitude === 'number'
-        ? {
-            type: 'Point',
-            coordinates: [dto.longitude, dto.latitude],
-          }
+        ? { type: 'Point', coordinates: [dto.longitude, dto.latitude] }
         : undefined;
-
-    const imagesData = (images || []).map((url, idx) => ({
-      id: crypto.randomUUID(),
-      url,
-      thumbnailUrl: url,
-      caption: null,
-      isFeatured: idx === 0,
-      sortOrder: idx,
-      createdAt: new Date(),
-    }));
 
     const created = await this.prisma.pension.create({
       data: {
         ...pensionData,
-        internetIncluded: finalInternetIncluded,
+        internetIncluded: internetIncluded ?? true,
         slug,
         landlordId: landlord.id,
         submittedById: landlord.id,
         location,
-        amenities: finalAmenities,
+        amenities: amenities ?? [],
         nearbyUniversities: nearbyUniversitiesData,
         rooms: [],
-        images: imagesData,
+        images: mapImagesInput(images ?? []),
       },
     });
 
-    return this.formatPensionItem(created as unknown as PensionDocRaw, 100);
+    return formatPensionItem(created as unknown as PensionDocRaw, 100);
   }
 
   async update(id: string, dto: UpdatePensionDto, user: SanitizedUser): Promise<unknown> {
-    const pension = await this.prisma.pension.findUnique({
-      where: { id },
-    });
+    const pension = await this.prisma.pension.findUnique({ where: { id } });
 
     if (!pension) {
       throw new NotFoundException(`Pension '${id}' not found`);
@@ -924,117 +528,42 @@ export class PensionsService {
     }
 
     const { amenitySlugs, nearbyUniversityId, distanceMeters, images, ...pensionData } = dto;
-    const updateData: Prisma.PensionUpdateInput = {
-      ...pensionData,
-    };
+    const updateData: Prisma.PensionUpdateInput = { ...pensionData };
 
     if (dto.latitude !== undefined && dto.longitude !== undefined) {
-      updateData.location = {
-        type: 'Point',
-        coordinates: [dto.longitude, dto.latitude],
-      };
+      updateData.location = { type: 'Point', coordinates: [dto.longitude, dto.latitude] };
     }
 
-    let updatedAmenities =
-      amenitySlugs !== undefined
-        ? amenitySlugs.filter((s) => s !== 'luz-incluida' && s !== 'gas-incluido')
-        : undefined;
-    let updatedInternetIncluded = pensionData.internetIncluded;
+    const { amenities, internetIncluded } = normalizeAmenitiesAndInternet(
+      amenitySlugs,
+      pensionData.internetIncluded,
+      pension.amenities || [],
+    );
 
-    if (updatedInternetIncluded === true) {
-      const base = updatedAmenities ?? [...(pension.amenities || [])];
-      if (!base.includes('wifi-alta-velocidad')) {
-        updatedAmenities = [...base, 'wifi-alta-velocidad'];
-      }
-    } else if (updatedInternetIncluded === false) {
-      const base = updatedAmenities ?? [...(pension.amenities || [])];
-      if (base.includes('wifi-alta-velocidad')) {
-        updatedAmenities = base.filter((slug) => slug !== 'wifi-alta-velocidad');
-      }
-    } else if (updatedAmenities !== undefined) {
-      if (updatedAmenities.includes('wifi-alta-velocidad')) {
-        updatedInternetIncluded = true;
-      } else {
-        updatedInternetIncluded = false;
-      }
+    if (amenities !== undefined) {
+      updateData.amenities = amenities;
     }
-
-    if (updatedAmenities !== undefined) {
-      updateData.amenities = updatedAmenities;
+    if (internetIncluded !== undefined) {
+      updateData.internetIncluded = internetIncluded;
     }
-    if (updatedInternetIncluded !== undefined) {
-      updateData.internetIncluded = updatedInternetIncluded;
-    }
-
     if (images !== undefined) {
-      updateData.images = images.map((url, idx) => ({
-        id: crypto.randomUUID(),
-        url,
-        thumbnailUrl: url,
-        caption: null,
-        isFeatured: idx === 0,
-        sortOrder: idx,
-        createdAt: new Date(),
-      }));
+      updateData.images = mapImagesInput(images);
     }
 
-    if (nearbyUniversityId !== undefined) {
-      const uni = await this.prisma.university.findUnique({
-        where: { id: nearbyUniversityId },
-        select: { id: true, name: true, shortName: true, latitude: true, longitude: true },
-      });
-
-      if (uni) {
-        let distMeters = distanceMeters;
-        const lat = dto.latitude ?? pension.latitude;
-        const lng = dto.longitude ?? pension.longitude;
-        if (
-          distMeters === undefined &&
-          typeof uni.latitude === 'number' &&
-          typeof uni.longitude === 'number' &&
-          typeof lat === 'number' &&
-          typeof lng === 'number'
-        ) {
-          distMeters = Math.round(
-            calculateHaversineDistanceKm(lat, lng, uni.latitude, uni.longitude) * 1000,
-          );
-        }
-
-        updateData.nearbyUniversities = [
-          {
-            universityId: uni.id,
-            name: uni.name,
-            shortName: uni.shortName ?? null,
-            distanceMeters: distMeters ?? 0,
-            walkingMinutes: typeof distMeters === 'number' ? Math.round(distMeters / 80) : null,
-            transitMinutes:
-              typeof distMeters === 'number' ? Math.round(distMeters / 250 + 4) : null,
-          },
-        ];
-      }
-    } else if (
-      (dto.latitude !== undefined || dto.longitude !== undefined) &&
-      this.universitiesCache
+    if (
+      nearbyUniversityId !== undefined ||
+      dto.latitude !== undefined ||
+      dto.longitude !== undefined
     ) {
-      const lat = dto.latitude ?? pension.latitude;
-      const lng = dto.longitude ?? pension.longitude;
-      const city = dto.city ?? pension.city;
-
-      if (typeof lat === 'number' && typeof lng === 'number') {
-        const nearbyList = this.universitiesCache.findNearby(lat, lng, {
-          city,
-          maxDistanceMeters: 5000,
-          limit: 3,
-        });
-
-        updateData.nearbyUniversities = nearbyList.map((u) => ({
-          universityId: u.universityId,
-          name: u.name,
-          shortName: u.shortName,
-          distanceMeters: u.distanceMeters,
-          walkingMinutes: u.walkingMinutes,
-          transitMinutes: u.transitMinutes,
-        }));
+      const resolved = await this.resolveNearbyUniversities(
+        nearbyUniversityId,
+        dto.latitude ?? pension.latitude,
+        dto.longitude ?? pension.longitude,
+        dto.city ?? pension.city,
+        distanceMeters,
+      );
+      if (resolved !== undefined) {
+        updateData.nearbyUniversities = resolved;
       }
     }
 
@@ -1043,13 +572,11 @@ export class PensionsService {
       data: updateData,
     });
 
-    return this.formatPensionItem(updated as unknown as PensionDocRaw, 100);
+    return formatPensionItem(updated as unknown as PensionDocRaw, 100);
   }
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
-    const pension = await this.prisma.pension.findUnique({
-      where: { id },
-    });
+    const pension = await this.prisma.pension.findUnique({ where: { id } });
 
     if (!pension) {
       throw new NotFoundException(`Pension '${id}' not found`);
@@ -1068,38 +595,24 @@ export class PensionsService {
   }
 
   async getCitiesSummary(): Promise<CitySummaryItem[]> {
-    const [pensionGroups, pensions, universities] = await Promise.all([
+    const cachedUnis = this.universitiesCache?.getAll();
+
+    const [pensionGroups, pensions, dbUniversities] = await Promise.all([
       this.prisma.pension.groupBy({
         by: ['city'],
-        where: {
-          deletedAt: null,
-          isActive: true,
-        },
-        _count: {
-          id: true,
-        },
+        where: { deletedAt: null, isActive: true },
+        _count: { id: true },
       }),
       this.prisma.pension.findMany({
-        where: {
-          deletedAt: null,
-          isActive: true,
-        },
-        select: {
-          city: true,
-          latitude: true,
-          longitude: true,
-        },
+        where: { deletedAt: null, isActive: true },
+        select: { city: true, latitude: true, longitude: true },
       }),
-      this.prisma.university.findMany({
-        where: {
-          deletedAt: null,
-        },
-        select: {
-          city: true,
-          latitude: true,
-          longitude: true,
-        },
-      }),
+      cachedUnis && cachedUnis.length > 0
+        ? Promise.resolve(cachedUnis)
+        : this.prisma.university.findMany({
+            where: { deletedAt: null },
+            select: { city: true, latitude: true, longitude: true },
+          }),
     ]);
 
     const countMap = new Map<string, number>();
@@ -1114,7 +627,7 @@ export class PensionsService {
       { name: string; latitude: number; longitude: number; imageUrl?: string | null }
     >();
 
-    for (const uni of universities) {
+    for (const uni of dbUniversities) {
       if (uni.city) {
         const trimmed = uni.city.trim();
         const key = trimmed.toLowerCase();
@@ -1131,8 +644,7 @@ export class PensionsService {
     for (const pension of pensions) {
       if (pension.city) {
         const trimmed = pension.city.trim();
-        const key = trimmed.toLowerCase();
-        cityDataMap.set(key, {
+        cityDataMap.set(trimmed.toLowerCase(), {
           name: trimmed,
           latitude: pension.latitude,
           longitude: pension.longitude,
@@ -1140,23 +652,13 @@ export class PensionsService {
       }
     }
 
-    const slugify = (name: string): string => {
-      return name
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
-    };
-
     const result: CitySummaryItem[] = [];
     for (const [key, data] of cityDataMap.entries()) {
-      const pensionsCount = countMap.get(key) ?? 0;
       const center = findCityCenter(data.name);
       const item: CitySummaryItem = {
         id: slugify(data.name),
         name: data.name,
-        pensionsCount,
+        pensionsCount: countMap.get(key) ?? 0,
         latitude: center?.latitude ?? data.latitude,
         longitude: center?.longitude ?? data.longitude,
       };

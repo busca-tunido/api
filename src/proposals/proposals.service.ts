@@ -10,6 +10,19 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateProposalDto } from './dto/create-proposal.dto.js';
 import type { ReviewProposalDto } from './dto/review-proposal.dto.js';
 
+const PROPOSAL_SUBMITTER_SELECT = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+} satisfies Prisma.UserSelect;
+
+const PROPOSAL_NAME_SELECT = {
+  id: true,
+  firstName: true,
+  lastName: true,
+} satisfies Prisma.UserSelect;
+
 @Injectable()
 export class ProposalsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -32,14 +45,7 @@ export class ProposalsService {
         submissionNotes: dto.submissionNotes,
       },
       include: {
-        submittedBy: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
+        submittedBy: { select: PROPOSAL_SUBMITTER_SELECT },
       },
     });
   }
@@ -49,20 +55,8 @@ export class ProposalsService {
       where: { pensionId },
       orderBy: { createdAt: 'desc' },
       include: {
-        submittedBy: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        reviewedBy: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
+        submittedBy: { select: PROPOSAL_NAME_SELECT },
+        reviewedBy: { select: PROPOSAL_NAME_SELECT },
       },
     });
   }
@@ -91,21 +85,8 @@ export class ProposalsService {
               city: true,
             },
           },
-          submittedBy: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-          reviewedBy: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
+          submittedBy: { select: PROPOSAL_SUBMITTER_SELECT },
+          reviewedBy: { select: PROPOSAL_NAME_SELECT },
         },
       }),
     ]);
@@ -124,21 +105,8 @@ export class ProposalsService {
       where: { id },
       include: {
         pension: true,
-        submittedBy: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-        reviewedBy: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
+        submittedBy: { select: PROPOSAL_SUBMITTER_SELECT },
+        reviewedBy: { select: PROPOSAL_NAME_SELECT },
       },
     });
 

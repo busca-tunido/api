@@ -15,12 +15,78 @@ export type UniversityDomainMatch = {
   address: string;
 };
 
+const UNIVERSITY_PUBLIC_SELECT = {
+  id: true,
+  name: true,
+  shortName: true,
+  emailDomains: true,
+  city: true,
+  address: true,
+  latitude: true,
+  longitude: true,
+  campuses: true,
+  createdAt: true,
+  updatedAt: true,
+  _count: {
+    select: {
+      students: true,
+    },
+  },
+} satisfies Prisma.UniversitySelect;
+
+const NEARBY_COUNTS_TTL_MS = 60_000;
+
 @Injectable()
 export class UniversitiesService {
+  private nearbyCountsCache: { map: Map<string, number>; expiresAt: number } | null = null;
+
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly cache?: UniversitiesCacheService,
   ) {}
+
+  private async ensureExists(id: string): Promise<void> {
+    const existing = await this.prisma.university.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`University '${id}' not found`);
+    }
+  }
+
+  private async getNearbyPensionCountMap(): Promise<Map<string, number>> {
+    const now = Date.now();
+    if (this.nearbyCountsCache && now < this.nearbyCountsCache.expiresAt) {
+      return this.nearbyCountsCache.map;
+    }
+
+    const activePensions = await this.prisma.pension.findMany({
+      where: { deletedAt: null, isActive: true },
+      select: {
+        nearbyUniversities: true,
+      },
+    });
+
+    const countMap = new Map<string, number>();
+    for (const pension of activePensions ?? []) {
+      if (Array.isArray(pension?.nearbyUniversities)) {
+        for (const nu of pension.nearbyUniversities) {
+          if (nu?.universityId) {
+            countMap.set(nu.universityId, (countMap.get(nu.universityId) ?? 0) + 1);
+          }
+        }
+      }
+    }
+
+    this.nearbyCountsCache = {
+      map: countMap,
+      expiresAt: now + NEARBY_COUNTS_TTL_MS,
+    };
+
+    return countMap;
+  }
 
   async findByEmailDomain(email: string): Promise<UniversityDomainMatch | null> {
     const parts = email.toLowerCase().trim().split('@');
@@ -33,6 +99,11 @@ export class UniversitiesService {
     const domainSegments = fullDomain.split('.');
     for (let i = 1; i < domainSegments.length - 1; i++) {
       candidateDomains.push(domainSegments.slice(i).join('.'));
+    }
+
+    const cachedMatch = this.cache?.findByEmailDomains?.(candidateDomains);
+    if (cachedMatch !== undefined) {
+      return cachedMatch;
     }
 
     return this.prisma.university.findFirst({
@@ -53,53 +124,17 @@ export class UniversitiesService {
   async findAll(city?: string): Promise<UniversityResponseDto[]> {
     const where: Prisma.UniversityWhereInput = {
       deletedAt: null,
+      ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
     };
 
-    if (city) {
-      where.city = { contains: city, mode: 'insensitive' };
-    }
-
-    const [universities, activePensions] = await Promise.all([
+    const [universities, countMap] = await Promise.all([
       this.prisma.university.findMany({
         where,
         orderBy: { name: 'asc' },
-        select: {
-          id: true,
-          name: true,
-          shortName: true,
-          emailDomains: true,
-          city: true,
-          address: true,
-          latitude: true,
-          longitude: true,
-          campuses: true,
-          createdAt: true,
-          updatedAt: true,
-          _count: {
-            select: {
-              students: true,
-            },
-          },
-        },
+        select: UNIVERSITY_PUBLIC_SELECT,
       }),
-      this.prisma.pension.findMany({
-        where: { deletedAt: null, isActive: true },
-        select: {
-          nearbyUniversities: true,
-        },
-      }),
+      this.getNearbyPensionCountMap(),
     ]);
-
-    const countMap = new Map<string, number>();
-    for (const pension of activePensions ?? []) {
-      if (Array.isArray(pension?.nearbyUniversities)) {
-        for (const nu of pension.nearbyUniversities) {
-          if (nu?.universityId) {
-            countMap.set(nu.universityId, (countMap.get(nu.universityId) ?? 0) + 1);
-          }
-        }
-      }
-    }
 
     return universities.map((u) => ({
       id: u.id,
@@ -127,11 +162,8 @@ export class UniversitiesService {
   async findCampusAreas(city?: string): Promise<CampusAreaResponseDto[]> {
     const where: Prisma.UniversityWhereInput = {
       deletedAt: null,
+      ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
     };
-
-    if (city) {
-      where.city = { contains: city, mode: 'insensitive' };
-    }
 
     const universities = await this.prisma.university.findMany({
       where,
@@ -168,41 +200,26 @@ export class UniversitiesService {
   async findById(id: string): Promise<unknown> {
     const university = await this.prisma.university.findUnique({
       where: { id },
-      select: {
-        id: true,
-        name: true,
-        shortName: true,
-        emailDomains: true,
-        city: true,
-        address: true,
-        latitude: true,
-        longitude: true,
-        campuses: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            students: true,
-          },
-        },
-      },
+      select: UNIVERSITY_PUBLIC_SELECT,
     });
 
     if (!university) {
       throw new NotFoundException(`University '${id}' not found`);
     }
 
+    const nearbyFilter: Prisma.PensionWhereInput = {
+      deletedAt: null,
+      isActive: true,
+      nearbyUniversities: {
+        some: {
+          universityId: id,
+        },
+      },
+    };
+
     const [nearbyPensions, nearbyPensionsCount] = await Promise.all([
       this.prisma.pension.findMany({
-        where: {
-          deletedAt: null,
-          isActive: true,
-          nearbyUniversities: {
-            some: {
-              universityId: id,
-            },
-          },
-        },
+        where: nearbyFilter,
         take: 10,
         select: {
           id: true,
@@ -214,15 +231,7 @@ export class UniversitiesService {
         },
       }),
       this.prisma.pension.count({
-        where: {
-          deletedAt: null,
-          isActive: true,
-          nearbyUniversities: {
-            some: {
-              universityId: id,
-            },
-          },
-        },
+        where: nearbyFilter,
       }),
     ]);
 
@@ -245,40 +254,31 @@ export class UniversitiesService {
     const created = await this.prisma.university.create({
       data: dto,
     });
+    this.nearbyCountsCache = null;
     await this.cache?.refresh();
     return created;
   }
 
   async update(id: string, dto: UpdateUniversityDto): Promise<unknown> {
-    const existing = await this.prisma.university.findUnique({
-      where: { id },
-    });
-
-    if (!existing) {
-      throw new NotFoundException(`University '${id}' not found`);
-    }
+    await this.ensureExists(id);
 
     const updated = await this.prisma.university.update({
       where: { id },
       data: dto,
     });
+    this.nearbyCountsCache = null;
     await this.cache?.refresh();
     return updated;
   }
 
   async delete(id: string): Promise<{ id: string; deleted: boolean }> {
-    const existing = await this.prisma.university.findUnique({
-      where: { id },
-    });
-
-    if (!existing) {
-      throw new NotFoundException(`University '${id}' not found`);
-    }
+    await this.ensureExists(id);
 
     await this.prisma.university.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
+    this.nearbyCountsCache = null;
     await this.cache?.refresh();
 
     return { id, deleted: true };

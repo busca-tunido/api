@@ -11,7 +11,7 @@ import type { CreateReviewDto } from './dto/create-review.dto.js';
 import { FilterReviewsDto } from './dto/filter-reviews.dto.js';
 import type { UpdateReviewDto } from './dto/update-review.dto.js';
 
-export interface PaginatedReviews<T = unknown> {
+export type PaginatedReviews<T = unknown> = {
   items: T[];
   pagination: {
     page: number;
@@ -25,18 +25,18 @@ export interface PaginatedReviews<T = unknown> {
   limit: number;
   totalPages: number;
   hasMore: boolean;
-}
+};
 
-interface EmbeddedPensionImageRaw {
+type EmbeddedPensionImageRaw = {
   id: string;
   url: string;
   thumbnailUrl: string;
   caption?: string | null;
   isFeatured?: boolean;
   sortOrder?: number;
-}
+};
 
-interface EmbeddedRoomRaw {
+type EmbeddedRoomRaw = {
   id: string;
   roomNumber?: string | null;
   title: string;
@@ -48,9 +48,9 @@ interface EmbeddedRoomRaw {
   availableBeds: number;
   isAvailable: boolean;
   images: string[];
-}
+};
 
-interface PensionStayRaw {
+type PensionStayRaw = {
   id: string;
   slug?: string;
   title: string;
@@ -58,11 +58,102 @@ interface PensionStayRaw {
   baseMonthlyPrice: number;
   images?: EmbeddedPensionImageRaw[];
   rooms?: EmbeddedRoomRaw[];
+};
+
+type ReviewUserPayload = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  university: {
+    shortName: string | null;
+    name: string;
+  } | null;
+};
+
+type ReviewAliasedInput = {
+  overallRating: number;
+  isResidentVerified: boolean;
+  landlordRating: number | null;
+  quietnessRating: number | null;
+  helpfulUserIds?: string[] | null;
+  user?: ReviewUserPayload | null;
+};
+
+const REVIEW_USER_SELECT = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  avatarUrl: true,
+  university: {
+    select: {
+      shortName: true,
+      name: true,
+    },
+  },
+} satisfies Prisma.UserSelect;
+
+const REVIEW_SORT_MAP: Record<string, Prisma.ReviewOrderByWithRelationInput> = {
+  oldest: { createdAt: 'asc' },
+  rating_desc: { overallRating: 'desc' },
+  rating_asc: { overallRating: 'asc' },
+};
+
+function buildReviewAliases<T extends ReviewAliasedInput>(review: T) {
+  return {
+    ...review,
+    rating: review.overallRating,
+    overallRating: review.overallRating,
+    isVerifiedStay: review.isResidentVerified,
+    isResidentVerified: review.isResidentVerified,
+    ownerRating: review.landlordRating,
+    landlordRating: review.landlordRating,
+    locationRating: review.quietnessRating,
+    quietnessRating: review.quietnessRating,
+    helpfulCount: review.helpfulUserIds?.length || 0,
+  };
+}
+
+function formatMutatedReview<T extends ReviewAliasedInput>(review: T) {
+  return {
+    ...buildReviewAliases(review),
+    isAnonymous: false,
+    author: review.user
+      ? {
+          id: review.user.id,
+          firstName: review.user.firstName,
+          lastName: review.user.lastName,
+          avatarUrl: review.user.avatarUrl,
+          universityName: review.user.university?.name ?? null,
+        }
+      : null,
+  };
 }
 
 @Injectable()
 export class ReviewsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async findOwnedReviewOrThrow(
+    id: string,
+    user: SanitizedUser,
+    actionVerb: 'edit' | 'delete',
+  ): Promise<{ id: string; userId: string; pensionId: string }> {
+    const review = await this.prisma.review.findUnique({
+      where: { id },
+      select: { id: true, userId: true, pensionId: true },
+    });
+
+    if (!review) {
+      throw new NotFoundException(`Review '${id}' not found`);
+    }
+
+    if (user.role !== Role.ADMIN && review.userId !== user.id) {
+      throw new ForbiddenException(`You can only ${actionVerb} your own reviews`);
+    }
+
+    return review;
+  }
 
   async findByPension(
     pensionId: string,
@@ -79,14 +170,7 @@ export class ReviewsService {
       ...(filter.rating ? { overallRating: filter.rating } : {}),
     };
 
-    let orderBy: Prisma.ReviewOrderByWithRelationInput = { createdAt: 'desc' };
-    if (filter.sortBy === 'oldest') {
-      orderBy = { createdAt: 'asc' };
-    } else if (filter.sortBy === 'rating_desc') {
-      orderBy = { overallRating: 'desc' };
-    } else if (filter.sortBy === 'rating_asc') {
-      orderBy = { overallRating: 'asc' };
-    }
+    const orderBy = REVIEW_SORT_MAP[filter.sortBy ?? ''] ?? { createdAt: 'desc' };
 
     const [total, items] = await Promise.all([
       this.prisma.review.count({ where }),
@@ -96,40 +180,15 @@ export class ReviewsService {
         take: limit,
         orderBy,
         include: {
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              avatarUrl: true,
-              university: {
-                select: {
-                  shortName: true,
-                  name: true,
-                },
-              },
-            },
-          },
+          user: { select: REVIEW_USER_SELECT },
         },
       }),
     ]);
 
-    const mappedItems = items.map((review) => {
-      const helpfulVotes = review.helpfulUserIds || [];
-      return {
-        ...review,
-        rating: review.overallRating,
-        overallRating: review.overallRating,
-        isVerifiedStay: review.isResidentVerified,
-        isResidentVerified: review.isResidentVerified,
-        ownerRating: review.landlordRating,
-        landlordRating: review.landlordRating,
-        locationRating: review.quietnessRating,
-        quietnessRating: review.quietnessRating,
-        helpfulCount: helpfulVotes.length,
-        stayDuration: review.stayDurationCategory ?? null,
-      };
-    });
+    const mappedItems = items.map((review) => ({
+      ...buildReviewAliases(review),
+      stayDuration: review.stayDurationCategory ?? null,
+    }));
 
     const totalPages = Math.ceil(total / limit) || 1;
     const hasMore = skip + limit < total;
@@ -159,21 +218,18 @@ export class ReviewsService {
       },
       orderBy: { createdAt: 'desc' },
       include: {
-        pension: true,
-        user: {
+        pension: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            university: {
-              select: {
-                shortName: true,
-                name: true,
-              },
-            },
+            slug: true,
+            title: true,
+            city: true,
+            baseMonthlyPrice: true,
+            images: true,
+            rooms: true,
           },
         },
+        user: { select: REVIEW_USER_SELECT },
       },
     });
 
@@ -249,21 +305,23 @@ export class ReviewsService {
   }
 
   async create(pensionId: string, dto: CreateReviewDto, user: SanitizedUser): Promise<unknown> {
-    const pension = await this.prisma.pension.findUnique({
-      where: { id: pensionId },
-      select: { id: true },
-    });
+    const [pension, existing] = await Promise.all([
+      this.prisma.pension.findUnique({
+        where: { id: pensionId },
+        select: { id: true },
+      }),
+      this.prisma.review.findFirst({
+        where: {
+          pensionId,
+          userId: user.id,
+        },
+        select: { id: true },
+      }),
+    ]);
 
     if (!pension) {
       throw new NotFoundException(`Pension '${pensionId}' not found`);
     }
-
-    const existing = await this.prisma.review.findFirst({
-      where: {
-        pensionId: pension.id,
-        userId: user.id,
-      },
-    });
 
     if (existing) {
       throw new ConflictException('Ya has publicado una reseña para esta pensión');
@@ -278,121 +336,33 @@ export class ReviewsService {
         helpfulUserIds: [],
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            university: {
-              select: {
-                shortName: true,
-                name: true,
-              },
-            },
-          },
-        },
+        user: { select: REVIEW_USER_SELECT },
       },
     });
 
     await this.recalculatePensionRating(pension.id);
 
-    return {
-      ...review,
-      rating: review.overallRating,
-      overallRating: review.overallRating,
-      isVerifiedStay: review.isResidentVerified,
-      isResidentVerified: review.isResidentVerified,
-      ownerRating: review.landlordRating,
-      landlordRating: review.landlordRating,
-      locationRating: review.quietnessRating,
-      quietnessRating: review.quietnessRating,
-      helpfulCount: review.helpfulUserIds?.length || 0,
-      isAnonymous: false,
-      author: review.user
-        ? {
-            id: review.user.id,
-            firstName: review.user.firstName,
-            lastName: review.user.lastName,
-            avatarUrl: review.user.avatarUrl,
-            universityName: review.user.university?.name ?? null,
-          }
-        : null,
-    };
+    return formatMutatedReview(review);
   }
 
   async update(id: string, dto: UpdateReviewDto, user: SanitizedUser): Promise<unknown> {
-    const review = await this.prisma.review.findUnique({
-      where: { id },
-    });
-
-    if (!review) {
-      throw new NotFoundException(`Review '${id}' not found`);
-    }
-
-    if (user.role !== Role.ADMIN && review.userId !== user.id) {
-      throw new ForbiddenException('You can only edit your own reviews');
-    }
+    const review = await this.findOwnedReviewOrThrow(id, user, 'edit');
 
     const updated = await this.prisma.review.update({
       where: { id },
       data: dto,
       include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            university: {
-              select: {
-                shortName: true,
-                name: true,
-              },
-            },
-          },
-        },
+        user: { select: REVIEW_USER_SELECT },
       },
     });
 
     await this.recalculatePensionRating(review.pensionId);
 
-    return {
-      ...updated,
-      rating: updated.overallRating,
-      overallRating: updated.overallRating,
-      isVerifiedStay: updated.isResidentVerified,
-      isResidentVerified: updated.isResidentVerified,
-      ownerRating: updated.landlordRating,
-      landlordRating: updated.landlordRating,
-      locationRating: updated.quietnessRating,
-      quietnessRating: updated.quietnessRating,
-      helpfulCount: updated.helpfulUserIds?.length || 0,
-      isAnonymous: false,
-      author: updated.user
-        ? {
-            id: updated.user.id,
-            firstName: updated.user.firstName,
-            lastName: updated.user.lastName,
-            avatarUrl: updated.user.avatarUrl,
-            universityName: updated.user.university?.name ?? null,
-          }
-        : null,
-    };
+    return formatMutatedReview(updated);
   }
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {
-    const review = await this.prisma.review.findUnique({
-      where: { id },
-    });
-
-    if (!review) {
-      throw new NotFoundException(`Review '${id}' not found`);
-    }
-
-    if (user.role !== Role.ADMIN && review.userId !== user.id) {
-      throw new ForbiddenException('You can only delete your own reviews');
-    }
+    const review = await this.findOwnedReviewOrThrow(id, user, 'delete');
 
     await this.prisma.review.update({
       where: { id },
@@ -405,25 +375,22 @@ export class ReviewsService {
   }
 
   async recalculatePensionRating(pensionId: string): Promise<void> {
-    const reviews = await this.prisma.review.findMany({
+    const aggregation = await this.prisma.review.aggregate({
       where: {
         pensionId,
         isHidden: false,
         deletedAt: null,
       },
-      select: { overallRating: true },
+      _avg: { overallRating: true },
+      _count: { id: true },
     });
 
-    const count = reviews.length;
+    const count = aggregation._count.id;
     let average = 0;
     let communityScore = 0;
 
     if (count > 0) {
-      const sum = reviews.reduce(
-        (acc: number, r: { overallRating: number }) => acc + r.overallRating,
-        0,
-      );
-      average = Number((sum / count).toFixed(2));
+      average = Number((aggregation._avg.overallRating ?? 0).toFixed(2));
 
       const priorWeight = 3;
       const priorMean = 3.5;
