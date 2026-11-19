@@ -1,4 +1,4 @@
-import { S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import sharp from 'sharp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -46,7 +46,7 @@ describe('UploadsService', () => {
   });
 
   describe('processImage - Neon S3 storage mode', () => {
-    it('should upload to S3 and return absolute public URLs with v1 path', async () => {
+    it('should upload to S3 with immutable cache-control and return absolute public URLs with v1 path', async () => {
       const storageConfig: UploadsStorageConfig = {
         endpoint: 'https://br-sample.storage.c-2.us-east-2.aws.neon.tech',
         accessKeyId: 'test-key',
@@ -74,6 +74,13 @@ describe('UploadsService', () => {
       const result = await s3Service.processImage(samplePng, 'photo.png');
 
       expect(sendSpy).toHaveBeenCalledTimes(2);
+      const firstCommand = sendSpy.mock.calls[0]?.[0] as PutObjectCommand;
+      const secondCommand = sendSpy.mock.calls[1]?.[0] as PutObjectCommand;
+      expect(firstCommand).toBeInstanceOf(PutObjectCommand);
+      expect(firstCommand.input.CacheControl).toBe('public, max-age=31536000, immutable');
+      expect(secondCommand).toBeInstanceOf(PutObjectCommand);
+      expect(secondCommand.input.CacheControl).toBe('public, max-age=31536000, immutable');
+
       expect(result.format).toBe('webp');
       expect(result.url).toMatch(
         /^https:\/\/br-sample\.storage\.c-2\.us-east-2\.aws\.neon\.tech\/uploads\/v1\/(local|staging|production)\/pensions\/[a-f0-9-]+\.webp$/,

@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { resolvePensionThumbnailUrl } from '../pensions/utils/pension-helpers.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 type EmbeddedPensionImageRaw = {
@@ -64,7 +65,11 @@ export class FavoritesService {
           (a: EmbeddedPensionImageRaw, b: EmbeddedPensionImageRaw) =>
             (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
         )
-        .slice(0, 1);
+        .slice(0, 1)
+        .map((img: EmbeddedPensionImageRaw) => ({
+          ...img,
+          thumbnailUrl: resolvePensionThumbnailUrl(img.url, img.thumbnailUrl),
+        }));
 
       return {
         userId,

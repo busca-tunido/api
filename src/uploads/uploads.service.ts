@@ -30,6 +30,7 @@ export type UploadsStorageConfig = {
 const SUPPORTED_FORMATS = new Set(['jpeg', 'jpg', 'png', 'webp', 'avif', 'heif', 'gif', 'tiff']);
 
 const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
 @Injectable()
 export class UploadsService {
@@ -137,6 +138,7 @@ export class UploadsService {
               Key: primaryKey,
               Body: primaryProcessed.data,
               ContentType: 'image/webp',
+              CacheControl: IMMUTABLE_CACHE_CONTROL,
             }),
           ),
           this.s3Client.send(
@@ -145,6 +147,7 @@ export class UploadsService {
               Key: thumbnailKey,
               Body: thumbProcessed,
               ContentType: 'image/webp',
+              CacheControl: IMMUTABLE_CACHE_CONTROL,
             }),
           ),
         ]);

@@ -1,3 +1,4 @@
+import fastifyCompress from '@fastify/compress';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyRateLimit from '@fastify/rate-limit';
@@ -18,6 +19,11 @@ async function bootstrap(): Promise<void> {
     plugin: unknown,
     opts?: unknown,
   ) => Promise<unknown>;
+
+  await registerPlugin(fastifyCompress, {
+    encodings: ['br', 'gzip'],
+    threshold: 1024,
+  });
 
   await registerPlugin(fastifyHelmet, {
     contentSecurityPolicy: false,

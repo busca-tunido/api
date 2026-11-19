@@ -15,6 +15,22 @@ import type {
 
 const INCLUDED_UTILITY_SLUGS = new Set(['luz-incluida', 'gas-incluido']);
 const WIFI_SLUG = 'wifi-alta-velocidad';
+const UPLOADED_PENSION_IMAGE_URL_REGEX =
+  /(\/v1\/(?:local|staging|production)\/pensions\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.webp$/i;
+
+export const resolvePensionThumbnailUrl = (
+  url: string,
+  currentThumbnailUrl?: string | null,
+): string => {
+  const trimmedCurrent = currentThumbnailUrl?.trim();
+  if (trimmedCurrent && trimmedCurrent !== url) {
+    return trimmedCurrent;
+  }
+  if (UPLOADED_PENSION_IMAGE_URL_REGEX.test(url)) {
+    return url.replace(UPLOADED_PENSION_IMAGE_URL_REGEX, '$1-thumb.webp');
+  }
+  return trimmedCurrent || url;
+};
 
 export const MEAL_AMENITY_SLUGS: readonly string[] = [
   'comida-incluida',
@@ -149,7 +165,11 @@ export const formatPensionItem = (
   const images = (pension.images || [])
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-    .slice(0, effectiveImageLimit);
+    .slice(0, effectiveImageLimit)
+    .map((img) => ({
+      ...img,
+      thumbnailUrl: resolvePensionThumbnailUrl(img.url, img.thumbnailUrl),
+    }));
 
   const mappedAmenities = (pension.amenities || []).map((item: unknown) => {
     const slug = typeof item === 'string' ? item : ((item as { slug?: string })?.slug ?? '');
@@ -290,7 +310,7 @@ export const mapImagesInput = (images: readonly string[]): EmbeddedPensionImageR
   return images.map((url, idx) => ({
     id: crypto.randomUUID(),
     url,
-    thumbnailUrl: url,
+    thumbnailUrl: resolvePensionThumbnailUrl(url),
     caption: null,
     isFeatured: idx === 0,
     sortOrder: idx,
