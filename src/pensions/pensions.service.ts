@@ -101,6 +101,7 @@ export class PensionsService {
       where.rooms = {
         some: {
           deletedAt: null,
+          isActive: true,
           isAvailable: true,
           ...(filter.roomType ? { type: filter.roomType } : {}),
           ...(filter.hasPrivateBathroom !== undefined
@@ -109,6 +110,38 @@ export class PensionsService {
           ...(filter.minBeds ? { availableBeds: { gte: filter.minBeds } } : {}),
         },
       };
+    }
+
+    if (filter.internetIncluded !== undefined) {
+      where.internetIncluded = filter.internetIncluded;
+    }
+
+    if (filter.petsAllowed !== undefined) {
+      where.petsAllowed = filter.petsAllowed;
+    }
+
+    if (filter.guestsAllowed !== undefined) {
+      where.guestsAllowed = filter.guestsAllowed;
+    }
+
+    if (filter.smokingAllowed !== undefined) {
+      where.smokingAllowed = filter.smokingAllowed;
+    }
+
+    if (filter.waterIncluded !== undefined) {
+      where.waterIncluded = filter.waterIncluded;
+    }
+
+    if (filter.electricityIncluded !== undefined) {
+      where.electricityIncluded = filter.electricityIncluded;
+    }
+
+    if (filter.gasIncluded !== undefined) {
+      where.gasIncluded = filter.gasIncluded;
+    }
+
+    if (filter.noCurfew === true) {
+      where.curfewTime = null;
     }
 
     if (filter.search) {
@@ -163,7 +196,7 @@ export class PensionsService {
 
       const rawCandidates = await this.prisma.pension.findMany({
         where,
-        include: { _count: { select: { reviews: true } } },
+        include: { _count: { select: { reviews: { where: { deletedAt: null } } } } },
       });
 
       const cityCountsMap = new Map<string, { count: number; minDistance: number }>();
@@ -274,7 +307,7 @@ export class PensionsService {
         this.prisma.pension.findMany({
           where,
           orderBy,
-          include: { _count: { select: { reviews: true } } },
+          include: { _count: { select: { reviews: { where: { deletedAt: null } } } } },
         }),
         this.prisma.pension.groupBy({
           by: ['city'],
@@ -311,7 +344,7 @@ export class PensionsService {
         skip,
         take: limit,
         orderBy,
-        include: { _count: { select: { reviews: true } } },
+        include: { _count: { select: { reviews: { where: { deletedAt: null } } } } },
       }),
       this.prisma.pension.count({ where }),
       this.prisma.pension.groupBy({
@@ -335,9 +368,22 @@ export class PensionsService {
   }
 
   async getPriceHistogram(filter: FilterPensionsDto): Promise<PriceHistogram> {
-    const where = this.buildWhere(filter);
+    const where: Prisma.PensionWhereInput = {
+      deletedAt: null,
+      isActive: true,
+    };
+
+    if (filter.city) {
+      where.city = { contains: filter.city, mode: 'insensitive' };
+    }
+
     const hasGeo = filter.latitude !== undefined && filter.longitude !== undefined;
     const hasBounds = this.hasBounds(filter);
+
+    if (hasBounds) {
+      where.latitude = { gte: filter.minLat, lte: filter.maxLat };
+      where.longitude = { gte: filter.minLng, lte: filter.maxLng };
+    }
 
     if (hasGeo) {
       const userLat = filter.latitude as number;

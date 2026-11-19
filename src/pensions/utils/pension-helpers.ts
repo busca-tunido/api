@@ -164,9 +164,18 @@ export const formatPensionItem = (
   });
 
   const activeRooms = (pension.rooms || []).filter((r) => !r.deletedAt);
-  const availableRoomsCount = activeRooms.filter(
-    (r) => r.isAvailable && r.isActive !== false,
-  ).length;
+  const availableRooms = activeRooms.filter((r) => r.isAvailable && r.isActive !== false);
+  const availableRoomsCount = availableRooms.length;
+  const availableRoomTypes = Array.from(
+    new Set(
+      availableRooms
+        .map((r) => (r as { type?: string }).type)
+        .filter((t): t is string => Boolean(t)),
+    ),
+  );
+  const hasPrivateBathroomRoom = availableRooms.some((r) =>
+    Boolean((r as { hasPrivateBathroom?: boolean }).hasPrivateBathroom),
+  );
   const rooms =
     view === 'full'
       ? activeRooms
@@ -201,6 +210,11 @@ export const formatPensionItem = (
 
   const amenitySlugs = mappedAmenities.map((a) => a.slug).filter(Boolean);
   const reviewsCount = pension._count?.reviews ?? pension.ratingCount ?? 0;
+  const ratingTier = classifyPensionRatingTier({
+    ...pension,
+    ratingCount: reviewsCount,
+  });
+  const reliability = reviewsCount === 0 ? 'unreviewed' : reviewsCount >= 5 ? 'high' : 'low';
 
   return {
     ...pension,
@@ -217,6 +231,10 @@ export const formatPensionItem = (
     rooms,
     nearbyUniversities: view === 'full' ? mappedUniversities : [],
     availableRoomsCount,
+    availableRoomTypes,
+    hasPrivateBathroomRoom,
+    ratingTier,
+    reliability,
     _count: {
       rooms: activeRooms.length,
       reviews: reviewsCount,

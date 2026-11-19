@@ -687,5 +687,119 @@ describe('PensionsService', () => {
       expect(result.items).toHaveLength(1);
       expect((result.items[0] as { id: string }).id).toBe('p-high');
     });
+
+    it('should require isActive: true on rooms, filter deletedAt: null on _count.reviews, and apply amenity/rule filters', async () => {
+      mockPrisma.pension.findMany.mockResolvedValue([
+        {
+          id: 'p-1',
+          slug: 'p-1',
+          title: 'Pensión Reglas',
+          city: 'Santiago',
+          ratingAverage: 4.5,
+          ratingCount: 3,
+          verificationStatus: 'OFFICIALLY_VERIFIED',
+          internetIncluded: true,
+          amenities: ['cocina-equipada'],
+          images: [],
+          rooms: [
+            {
+              id: 'r1',
+              title: 'Pieza 1',
+              type: 'SINGLE',
+              monthlyPrice: 200000,
+              hasPrivateBathroom: true,
+              isAvailable: true,
+              isActive: true,
+              deletedAt: null,
+            },
+            {
+              id: 'r2',
+              title: 'Pieza Pausada',
+              type: 'STUDIO',
+              monthlyPrice: 300000,
+              hasPrivateBathroom: false,
+              isAvailable: true,
+              isActive: false,
+              deletedAt: null,
+            },
+          ],
+          nearbyUniversities: [],
+          _count: { reviews: 3 },
+        },
+      ]);
+      mockPrisma.pension.count.mockResolvedValue(1);
+      mockPrisma.pension.groupBy.mockResolvedValue([]);
+
+      const result = await service.findAll({
+        page: 1,
+        limit: 12,
+        view: 'card',
+        onlyAvailable: true,
+        internetIncluded: true,
+        petsAllowed: true,
+        guestsAllowed: true,
+        noCurfew: true,
+      });
+
+      expect(mockPrisma.pension.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            internetIncluded: true,
+            petsAllowed: true,
+            guestsAllowed: true,
+            curfewTime: null,
+            rooms: {
+              some: {
+                deletedAt: null,
+                isActive: true,
+                isAvailable: true,
+              },
+            },
+          }),
+          include: {
+            _count: {
+              select: {
+                reviews: { where: { deletedAt: null } },
+              },
+            },
+          },
+        }),
+      );
+
+      const item = result.items[0] as Record<string, unknown>;
+      expect(item.availableRoomTypes).toEqual(['SINGLE']);
+      expect(item.hasPrivateBathroomRoom).toBe(true);
+      expect(item.ratingTier).toBe('high');
+      expect(item.reliability).toBe('low');
+    });
+
+    it('should keep getPriceHistogram unaffected by non-location filters', async () => {
+      mockPrisma.pension.findMany.mockResolvedValue([
+        { baseMonthlyPrice: 120000 },
+        { baseMonthlyPrice: 350000 },
+      ]);
+
+      const result = await service.getPriceHistogram({
+        city: 'Santiago',
+        roomType: 'STUDIO',
+        maxPrice: 150000,
+        ratingTier: 'high',
+        petsAllowed: true,
+        page: 1,
+        limit: 12,
+      });
+
+      expect(mockPrisma.pension.findMany).toHaveBeenCalledWith({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          city: { contains: 'Santiago', mode: 'insensitive' },
+        },
+        select: { baseMonthlyPrice: true },
+      });
+      expect(result.minPrice).toBe(120000);
+      expect(result.maxPrice).toBe(350000);
+      expect(result.totalListings).toBe(2);
+    });
   });
 });

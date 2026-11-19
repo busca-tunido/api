@@ -220,4 +220,76 @@ export class FilterPensionsDto {
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   onlyAvailable?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions with WiFi / Internet included',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  internetIncluded?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions that allow pets',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  petsAllowed?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions that allow guests',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  guestsAllowed?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions that allow smoking',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  smokingAllowed?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions without a curfew time restriction',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  noCurfew?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions with water utility included',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  waterIncluded?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions with electricity utility included',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  electricityIncluded?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter pensions with gas utility included',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  gasIncluded?: boolean;
 }

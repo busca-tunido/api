@@ -2,6 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GenderPreference, RoomType, VerificationStatus } from '@prisma/client';
 import { PaginationMetaDto } from '../../common/dto/pagination.dto.js';
 import { BathType } from '../../rooms/dto/room-response.dto.js';
+import { PensionRatingTierFilter } from './filter-pensions.dto.js';
+
+export enum PensionReliabilityTier {
+  HIGH = 'high',
+  LOW = 'low',
+  UNREVIEWED = 'unreviewed',
+}
 
 export class PensionImageResponseDto {
   @ApiProperty({ type: String, example: 'img-123' })
@@ -267,6 +274,26 @@ export class PensionItemResponseDto {
 
   @ApiPropertyOptional({ type: Number, example: 3 })
   availableRoomsCount?: number;
+
+  @ApiPropertyOptional({ enum: RoomType, enumName: 'RoomType', isArray: true })
+  availableRoomTypes?: RoomType[];
+
+  @ApiPropertyOptional({ type: Boolean, example: true })
+  hasPrivateBathroomRoom?: boolean;
+
+  @ApiPropertyOptional({
+    enum: PensionRatingTierFilter,
+    enumName: 'PensionRatingTierFilter',
+    example: PensionRatingTierFilter.HIGH,
+  })
+  ratingTier?: PensionRatingTierFilter | 'high' | 'medium' | 'low' | 'unreviewed';
+
+  @ApiPropertyOptional({
+    enum: PensionReliabilityTier,
+    enumName: 'PensionReliabilityTier',
+    example: PensionReliabilityTier.HIGH,
+  })
+  reliability?: PensionReliabilityTier | 'high' | 'low' | 'unreviewed';
 
   @ApiPropertyOptional({ type: Number, example: 1 })
   pendingProposalsCount?: number;
