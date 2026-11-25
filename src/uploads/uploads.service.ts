@@ -1,13 +1,24 @@
 import { randomUUID } from 'node:crypto';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Optional,
 } from '@nestjs/common';
 import sharp, { type Metadata } from 'sharp';
 import { env } from '../env.js';
+import { OBJECT_STORAGE_PORT, type ObjectStoragePort } from '../storage/object-storage.port.js';
+import { S3StorageAdapter, type S3StorageConfig } from '../storage/s3-storage.adapter.js';
+import {
+  MAX_PRESIGN_PRIMARY_BYTES,
+  MAX_PRESIGN_THUMBNAIL_BYTES,
+  type PresignUploadRequestDto,
+  type PresignUploadResponseDto,
+} from './dto/presign-upload.dto.js';
+import type { VerifyUploadRequestDto } from './dto/verify-upload.dto.js';
+
+sharp.concurrency(1);
 
 export type ProcessedImageResult = {
   url: string;
@@ -18,70 +29,168 @@ export type ProcessedImageResult = {
   size: number;
 };
 
-export type UploadsStorageConfig = {
-  readonly endpoint?: string | null;
-  readonly region?: string;
-  readonly accessKeyId?: string;
-  readonly secretAccessKey?: string;
-  readonly bucketName?: string;
-  readonly publicBaseUrl?: string | null;
-};
+export type UploadsStorageConfig = S3StorageConfig;
 
 const SUPPORTED_FORMATS = new Set(['jpeg', 'jpg', 'png', 'webp', 'avif', 'heif', 'gif', 'tiff']);
 
 const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
-const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+export const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+const PRESIGN_EXPIRES_SECONDS = 120;
+const WEBP_HEADER_BYTE_LENGTH = 12;
+
+export const isValidWebpMagicBytes = (bytes: Uint8Array | null): boolean => {
+  if (!bytes || bytes.byteLength < WEBP_HEADER_BYTE_LENGTH) {
+    return false;
+  }
+  return (
+    bytes[0] === 0x52 && // R
+    bytes[1] === 0x49 && // I
+    bytes[2] === 0x46 && // F
+    bytes[3] === 0x46 && // F
+    bytes[8] === 0x57 && // W
+    bytes[9] === 0x45 && // E
+    bytes[10] === 0x42 && // B
+    bytes[11] === 0x50 // P
+  );
+};
+
+const isObjectStoragePort = (value: unknown): value is ObjectStoragePort => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'uploadObject' in value &&
+    'createPresignedPutUrl' in value &&
+    'readObjectHeaderBytes' in value
+  );
+};
 
 @Injectable()
 export class UploadsService {
-  private readonly s3Client: S3Client | null = null;
-  private readonly bucketName: string;
-  private readonly publicBaseUrl: string | null = null;
+  private readonly storage: ObjectStoragePort;
 
-  constructor(@Optional() storageConfig?: UploadsStorageConfig) {
-    const endpoint =
-      storageConfig !== undefined
-        ? (storageConfig.endpoint ?? undefined)
-        : env.PUBLIC_AWS_ENDPOINT_URL_S3 || env.AWS_ENDPOINT_URL_S3;
-
-    if (endpoint) {
-      const region = storageConfig?.region ?? env.PUBLIC_AWS_REGION;
-
-      const accessKeyId = storageConfig?.accessKeyId ?? env.AWS_ACCESS_KEY_ID;
-
-      const secretAccessKey = storageConfig?.secretAccessKey ?? env.AWS_SECRET_ACCESS_KEY;
-
-      const credentials =
-        accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : undefined;
-
-      this.s3Client = new S3Client({
-        endpoint,
-        region,
-        credentials,
-        forcePathStyle: true,
-      });
-
-      this.bucketName = storageConfig?.bucketName ?? env.PUBLIC_STORAGE_BUCKET;
-
-      const customPublicUrl =
-        storageConfig !== undefined
-          ? (storageConfig.publicBaseUrl ?? undefined)
-          : env.PUBLIC_NEON_STORAGE_BASE_URL || env.NEON_STORAGE_PUBLIC_BASE_URL;
-
-      const cleanEndpoint = endpoint.replace(/\/+$/, '');
-      this.publicBaseUrl = customPublicUrl
-        ? customPublicUrl.replace(/\/+$/, '')
-        : `${cleanEndpoint}/${this.bucketName}`;
+  constructor(
+    @Optional()
+    @Inject(OBJECT_STORAGE_PORT)
+    storageOrConfig?: ObjectStoragePort | UploadsStorageConfig,
+  ) {
+    if (isObjectStoragePort(storageOrConfig)) {
+      this.storage = storageOrConfig;
     } else {
-      this.bucketName = env.PUBLIC_STORAGE_BUCKET;
+      this.storage = new S3StorageAdapter(storageOrConfig);
     }
   }
 
+  private getFolderPrefix(): string {
+    return env.NODE_ENV === 'production'
+      ? 'v1/production'
+      : env.NODE_ENV === 'test'
+        ? 'v1/staging'
+        : 'v1/local';
+  }
+
+  private buildObjectKeys(fileId: string): { primaryKey: string; thumbnailKey: string } {
+    const folderPrefix = this.getFolderPrefix();
+    return {
+      primaryKey: `${folderPrefix}/pensions/${fileId}.webp`,
+      thumbnailKey: `${folderPrefix}/pensions/${fileId}-thumb.webp`,
+    };
+  }
+
   isRemoteStorageEnabled(): boolean {
-    return this.s3Client !== null;
+    return this.storage.isConfigured();
   }
 
   async ensureUploadDir(): Promise<void> {}
+
+  async createPresignedUpload(dto: PresignUploadRequestDto): Promise<PresignUploadResponseDto> {
+    if (!this.storage.isConfigured()) {
+      throw new InternalServerErrorException('Remote storage client is not configured');
+    }
+
+    if (dto.contentType !== 'image/webp') {
+      throw new BadRequestException('Solo se permite image/webp para subida directa prefirmada');
+    }
+
+    if (dto.primarySizeBytes <= 0 || dto.primarySizeBytes > MAX_PRESIGN_PRIMARY_BYTES) {
+      throw new BadRequestException('La imagen principal WebP no puede superar los 2 MB');
+    }
+
+    if (dto.thumbnailSizeBytes <= 0 || dto.thumbnailSizeBytes > MAX_PRESIGN_THUMBNAIL_BYTES) {
+      throw new BadRequestException('La miniatura WebP no puede superar los 300 KB');
+    }
+
+    const fileId = randomUUID();
+    const { primaryKey, thumbnailKey } = this.buildObjectKeys(fileId);
+
+    const [primary, thumbnail] = await Promise.all([
+      this.storage.createPresignedPutUrl({
+        key: primaryKey,
+        contentType: 'image/webp',
+        contentLength: dto.primarySizeBytes,
+        cacheControl: IMMUTABLE_CACHE_CONTROL,
+        expiresInSeconds: PRESIGN_EXPIRES_SECONDS,
+      }),
+      this.storage.createPresignedPutUrl({
+        key: thumbnailKey,
+        contentType: 'image/webp',
+        contentLength: dto.thumbnailSizeBytes,
+        cacheControl: IMMUTABLE_CACHE_CONTROL,
+        expiresInSeconds: PRESIGN_EXPIRES_SECONDS,
+      }),
+    ]);
+
+    return {
+      fileId,
+      primary: {
+        key: primary.key,
+        uploadUrl: primary.uploadUrl,
+        publicUrl: primary.publicUrl,
+        headers: primary.headers,
+      },
+      thumbnail: {
+        key: thumbnail.key,
+        uploadUrl: thumbnail.uploadUrl,
+        publicUrl: thumbnail.publicUrl,
+        headers: thumbnail.headers,
+      },
+      expiresInSeconds: PRESIGN_EXPIRES_SECONDS,
+    };
+  }
+
+  async verifyUploadedImage(dto: VerifyUploadRequestDto): Promise<ProcessedImageResult> {
+    if (!this.storage.isConfigured()) {
+      throw new InternalServerErrorException('Remote storage client is not configured');
+    }
+
+    const { primaryKey, thumbnailKey } = this.buildObjectKeys(dto.fileId);
+
+    const [primaryHeader, thumbnailHeader] = await Promise.all([
+      this.storage.readObjectHeaderBytes(primaryKey, WEBP_HEADER_BYTE_LENGTH),
+      this.storage.readObjectHeaderBytes(thumbnailKey, WEBP_HEADER_BYTE_LENGTH),
+    ]);
+
+    const primaryValid = isValidWebpMagicBytes(primaryHeader);
+    const thumbnailValid = isValidWebpMagicBytes(thumbnailHeader);
+
+    if (!primaryValid || !thumbnailValid) {
+      await Promise.allSettled([
+        this.storage.deleteObject(primaryKey),
+        this.storage.deleteObject(thumbnailKey),
+      ]);
+      throw new BadRequestException(
+        'El archivo subido no es una imagen WebP válida o la subida quedó incompleta',
+      );
+    }
+
+    return {
+      url: this.storage.getPublicUrl(primaryKey),
+      thumbnailUrl: this.storage.getPublicUrl(thumbnailKey),
+      width: dto.width ?? 0,
+      height: dto.height ?? 0,
+      format: 'webp',
+      size: dto.size ?? 0,
+    };
+  }
 
   async processImage(buffer: Buffer, _originalFilename?: string): Promise<ProcessedImageResult> {
     if (!buffer || buffer.length === 0) {
@@ -105,9 +214,12 @@ export class UploadsService {
       );
     }
 
+    if (!this.storage.isConfigured()) {
+      throw new InternalServerErrorException('Remote storage client is not configured');
+    }
+
     const fileId = randomUUID();
-    const primaryFilename = `${fileId}.webp`;
-    const thumbnailFilename = `${fileId}-thumb.webp`;
+    const { primaryKey, thumbnailKey } = this.buildObjectKeys(fileId);
 
     const primaryProcessed = await sharp(buffer)
       .rotate()
@@ -120,52 +232,28 @@ export class UploadsService {
       .webp({ quality: 80 })
       .toBuffer();
 
-    const folderPrefix =
-      env.NODE_ENV === 'production'
-        ? 'v1/production'
-        : env.NODE_ENV === 'test'
-          ? 'v1/staging'
-          : 'v1/local';
-    const primaryKey = `${folderPrefix}/pensions/${primaryFilename}`;
-    const thumbnailKey = `${folderPrefix}/pensions/${thumbnailFilename}`;
+    const [primaryResult, thumbnailResult] = await Promise.all([
+      this.storage.uploadObject({
+        key: primaryKey,
+        body: primaryProcessed.data,
+        contentType: 'image/webp',
+        cacheControl: IMMUTABLE_CACHE_CONTROL,
+      }),
+      this.storage.uploadObject({
+        key: thumbnailKey,
+        body: thumbProcessed,
+        contentType: 'image/webp',
+        cacheControl: IMMUTABLE_CACHE_CONTROL,
+      }),
+    ]);
 
-    if (this.s3Client && this.publicBaseUrl) {
-      try {
-        await Promise.all([
-          this.s3Client.send(
-            new PutObjectCommand({
-              Bucket: this.bucketName,
-              Key: primaryKey,
-              Body: primaryProcessed.data,
-              ContentType: 'image/webp',
-              CacheControl: IMMUTABLE_CACHE_CONTROL,
-            }),
-          ),
-          this.s3Client.send(
-            new PutObjectCommand({
-              Bucket: this.bucketName,
-              Key: thumbnailKey,
-              Body: thumbProcessed,
-              ContentType: 'image/webp',
-              CacheControl: IMMUTABLE_CACHE_CONTROL,
-            }),
-          ),
-        ]);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Error uploading to storage';
-        throw new InternalServerErrorException(message);
-      }
-
-      return {
-        url: `${this.publicBaseUrl}/${primaryKey}`,
-        thumbnailUrl: `${this.publicBaseUrl}/${thumbnailKey}`,
-        width: primaryProcessed.info.width,
-        height: primaryProcessed.info.height,
-        format: 'webp',
-        size: primaryProcessed.info.size,
-      };
-    }
-
-    throw new InternalServerErrorException('Remote storage client is not configured');
+    return {
+      url: primaryResult.publicUrl,
+      thumbnailUrl: thumbnailResult.publicUrl,
+      width: primaryProcessed.info.width,
+      height: primaryProcessed.info.height,
+      format: 'webp',
+      size: primaryProcessed.info.size,
+    };
   }
 }

@@ -13,6 +13,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { IsSafeImageUrl } from '../../common/validators/safe-image-url.validator.js';
 
 export class CreateReviewDto {
   @ApiProperty({ example: 5, minimum: 1, maximum: 5 })
@@ -64,11 +65,12 @@ export class CreateReviewDto {
   @MaxLength(1000, { message: 'El comentario no puede superar los 1.000 caracteres' })
   comment!: string;
 
-  @ApiPropertyOptional({ example: ['https://example.com/review1.jpg'], maxItems: 3 })
+  @ApiPropertyOptional({ example: ['https://example.com/review1.webp'], maxItems: 3 })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(3, { message: 'Máximo 3 fotos permitidas por reseña' })
   @IsString({ each: true })
+  @IsSafeImageUrl({ each: true })
   images?: string[];
 
   @ApiPropertyOptional({

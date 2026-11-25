@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GenderPreference } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -14,6 +15,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { IsSafeImageUrl } from '../../common/validators/safe-image-url.validator.js';
 
 const TIME_24H_REGEX = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
@@ -182,11 +184,14 @@ export class CreatePensionDto {
 
   @ApiPropertyOptional({
     type: [String],
-    example: ['https://storage.buscatunido.cl/pensions/photo-1.webp'],
-    description: 'URLs de fotos de la pensión',
+    maxItems: 12,
+    example: ['https://media.buscatunido.cl/v1/production/pensions/photo-1.webp'],
+    description: 'URLs de fotos de la pensión (máximo 12)',
   })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(12, { message: 'Máximo 12 fotos permitidas por pensión' })
   @IsString({ each: true })
+  @IsSafeImageUrl({ each: true })
   images?: string[];
 }

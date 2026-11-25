@@ -65,7 +65,7 @@ const envSchema = z
     PUBLIC_AWS_ENDPOINT_URL_S3: z.string().trim().optional(),
     AWS_ACCESS_KEY_ID: z.string().trim().optional(),
     AWS_SECRET_ACCESS_KEY: z.string().trim().optional(),
-    PUBLIC_AWS_REGION: z.string().trim().default('us-east-2'),
+    PUBLIC_AWS_REGION: z.string().trim().default('auto'),
     PUBLIC_STORAGE_BUCKET: z.string().trim().default('uploads'),
     PUBLIC_NEON_STORAGE_BASE_URL: z.string().trim().optional(),
     TURNSTILE_SECRET_KEY: z.string().trim().default('1x0000000000000000000000000000000AA'),
@@ -141,6 +141,12 @@ export type EnvironmentConfig = {
   readonly PUBLIC_MODERATOR_EMAIL?: string;
   readonly PUBLIC_MODERATOR_FIRST_NAME?: string;
   readonly PUBLIC_MODERATOR_LAST_NAME?: string;
+  readonly S3_ENDPOINT?: string;
+  readonly S3_REGION: string;
+  readonly S3_BUCKET: string;
+  readonly S3_ACCESS_KEY_ID?: string;
+  readonly S3_SECRET_ACCESS_KEY?: string;
+  readonly PUBLIC_STORAGE_BASE_URL?: string;
   readonly PUBLIC_AWS_ENDPOINT_URL_S3?: string;
   readonly PUBLIC_AWS_REGION: string;
   readonly PUBLIC_STORAGE_BUCKET: string;
@@ -172,13 +178,18 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     PUBLIC_MODERATOR_EMAIL: config.PUBLIC_MODERATOR_EMAIL || config.MODERATOR_EMAIL,
     PUBLIC_MODERATOR_FIRST_NAME: config.PUBLIC_MODERATOR_FIRST_NAME || config.MODERATOR_FIRST_NAME,
     PUBLIC_MODERATOR_LAST_NAME: config.PUBLIC_MODERATOR_LAST_NAME || config.MODERATOR_LAST_NAME,
-    PUBLIC_AWS_ENDPOINT_URL_S3: config.PUBLIC_AWS_ENDPOINT_URL_S3 || config.AWS_ENDPOINT_URL_S3,
-    AWS_ACCESS_KEY_ID: config.AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY: config.AWS_SECRET_ACCESS_KEY,
-    PUBLIC_AWS_REGION: config.PUBLIC_AWS_REGION || config.AWS_REGION || undefined,
-    PUBLIC_STORAGE_BUCKET: config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET || undefined,
+    PUBLIC_AWS_ENDPOINT_URL_S3:
+      config.S3_ENDPOINT || config.PUBLIC_AWS_ENDPOINT_URL_S3 || config.AWS_ENDPOINT_URL_S3,
+    AWS_ACCESS_KEY_ID: config.S3_ACCESS_KEY_ID || config.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: config.S3_SECRET_ACCESS_KEY || config.AWS_SECRET_ACCESS_KEY,
+    PUBLIC_AWS_REGION:
+      config.S3_REGION || config.PUBLIC_AWS_REGION || config.AWS_REGION || undefined,
+    PUBLIC_STORAGE_BUCKET:
+      config.S3_BUCKET || config.PUBLIC_STORAGE_BUCKET || config.STORAGE_BUCKET || undefined,
     PUBLIC_NEON_STORAGE_BASE_URL:
-      config.PUBLIC_NEON_STORAGE_BASE_URL || config.NEON_STORAGE_PUBLIC_BASE_URL,
+      config.PUBLIC_STORAGE_BASE_URL ||
+      config.PUBLIC_NEON_STORAGE_BASE_URL ||
+      config.NEON_STORAGE_PUBLIC_BASE_URL,
     TURNSTILE_SECRET_KEY: config.TURNSTILE_SECRET_KEY,
   };
 
@@ -194,11 +205,11 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
   const port = data.PORT;
   const corsOrigin = data.PUBLIC_CORS_ORIGIN;
   const expiresIn = data.PUBLIC_JWT_EXPIRATION;
-  const awsEndpointUrlS3 = data.PUBLIC_AWS_ENDPOINT_URL_S3 || undefined;
-  const awsAccessKeyId = data.AWS_ACCESS_KEY_ID || undefined;
-  const awsSecretAccessKey = data.AWS_SECRET_ACCESS_KEY || undefined;
-  const awsRegion = data.PUBLIC_AWS_REGION;
-  const storageBucket = data.PUBLIC_STORAGE_BUCKET;
+  const s3Endpoint = data.PUBLIC_AWS_ENDPOINT_URL_S3 || undefined;
+  const s3AccessKeyId = data.AWS_ACCESS_KEY_ID || undefined;
+  const s3SecretAccessKey = data.AWS_SECRET_ACCESS_KEY || undefined;
+  const s3Region = data.PUBLIC_AWS_REGION;
+  const s3Bucket = data.PUBLIC_STORAGE_BUCKET;
   const publicBaseUrl = data.PUBLIC_NEON_STORAGE_BASE_URL || undefined;
 
   return Object.freeze({
@@ -215,14 +226,20 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     PUBLIC_MODERATOR_EMAIL: data.PUBLIC_MODERATOR_EMAIL || undefined,
     PUBLIC_MODERATOR_FIRST_NAME: data.PUBLIC_MODERATOR_FIRST_NAME || undefined,
     PUBLIC_MODERATOR_LAST_NAME: data.PUBLIC_MODERATOR_LAST_NAME || undefined,
-    PUBLIC_AWS_ENDPOINT_URL_S3: awsEndpointUrlS3,
-    AWS_ENDPOINT_URL_S3: awsEndpointUrlS3,
-    AWS_ACCESS_KEY_ID: awsAccessKeyId,
-    AWS_SECRET_ACCESS_KEY: awsSecretAccessKey,
-    PUBLIC_AWS_REGION: awsRegion,
-    AWS_REGION: awsRegion,
-    PUBLIC_STORAGE_BUCKET: storageBucket,
-    STORAGE_BUCKET: storageBucket,
+    S3_ENDPOINT: s3Endpoint,
+    S3_REGION: s3Region,
+    S3_BUCKET: s3Bucket,
+    S3_ACCESS_KEY_ID: s3AccessKeyId,
+    S3_SECRET_ACCESS_KEY: s3SecretAccessKey,
+    PUBLIC_STORAGE_BASE_URL: publicBaseUrl,
+    PUBLIC_AWS_ENDPOINT_URL_S3: s3Endpoint,
+    AWS_ENDPOINT_URL_S3: s3Endpoint,
+    AWS_ACCESS_KEY_ID: s3AccessKeyId,
+    AWS_SECRET_ACCESS_KEY: s3SecretAccessKey,
+    PUBLIC_AWS_REGION: s3Region,
+    AWS_REGION: s3Region,
+    PUBLIC_STORAGE_BUCKET: s3Bucket,
+    STORAGE_BUCKET: s3Bucket,
     PUBLIC_NEON_STORAGE_BASE_URL: publicBaseUrl,
     NEON_STORAGE_PUBLIC_BASE_URL: publicBaseUrl,
     TURNSTILE_SECRET_KEY: data.TURNSTILE_SECRET_KEY,

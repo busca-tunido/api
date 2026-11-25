@@ -84,6 +84,29 @@ describe('validateEnv', () => {
     );
   });
 
+  it('should accept vendor-neutral S3_* and PUBLIC_STORAGE_BASE_URL variables in production mode', () => {
+    const prodConfig = {
+      ...baseValidConfig,
+      NODE_ENV: 'production',
+      JWT_SECRET: 'super-secret-jwt-key-with-sufficient-length-32',
+      S3_ENDPOINT: 'https://account123.r2.cloudflarestorage.com',
+      S3_REGION: 'auto',
+      S3_BUCKET: 'buscatunido-media',
+      S3_ACCESS_KEY_ID: 'r2-key',
+      S3_SECRET_ACCESS_KEY: 'r2-secret',
+      PUBLIC_STORAGE_BASE_URL: 'https://media.buscatunido.cl',
+      TURNSTILE_SECRET_KEY: 'prod-turnstile-secret-key-live',
+    };
+    const validated = validateEnv(prodConfig);
+    expect(validated.S3_ENDPOINT).toBe('https://account123.r2.cloudflarestorage.com');
+    expect(validated.S3_REGION).toBe('auto');
+    expect(validated.S3_BUCKET).toBe('buscatunido-media');
+    expect(validated.PUBLIC_STORAGE_BASE_URL).toBe('https://media.buscatunido.cl');
+    expect(validated.PUBLIC_AWS_ENDPOINT_URL_S3).toBe(
+      'https://account123.r2.cloudflarestorage.com',
+    );
+  });
+
   it('should pass in production mode when all storage variables, Turnstile key and 32+ char secret are provided', () => {
     const prodConfig = {
       ...baseValidConfig,

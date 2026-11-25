@@ -14,6 +14,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { IsSafeImageUrl } from '../../common/validators/safe-image-url.validator.js';
 import { BathType } from './room-response.dto.js';
 
 export class CreateRoomDto {
@@ -95,10 +96,11 @@ export class CreateRoomDto {
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ example: ['https://example.com/room1.jpg'], maxItems: 5 })
+  @ApiPropertyOptional({ example: ['https://example.com/room1.webp'], maxItems: 5 })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(5, { message: 'Máximo 5 fotos permitidas por habitación' })
   @IsString({ each: true })
+  @IsSafeImageUrl({ each: true })
   images?: string[];
 }

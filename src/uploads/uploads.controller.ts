@@ -1,7 +1,11 @@
 import type { MultipartFile } from '@fastify/multipart';
 import {
   BadRequestException,
+  Body,
   Controller,
+  HttpCode,
+  HttpStatus,
+  Optional,
   PayloadTooLargeException,
   Post,
   Req,
@@ -14,11 +18,15 @@ import {
   ApiEnvelopeResponse,
   ApiStandardErrors,
 } from '../common/decorators/api-envelope-response.decorator.js';
+import { PresignUploadRequestDto, PresignUploadResponseDto } from './dto/presign-upload.dto.js';
 import { UploadImageResponseDto } from './dto/upload-image-response.dto.js';
+import { VerifyUploadRequestDto } from './dto/verify-upload.dto.js';
 import { type ProcessedImageResult, UploadsService } from './uploads.service.js';
+import { UploadsRateLimitService } from './uploads-rate-limit.service.js';
 
 type FastifyMultipartRequest = FastifyRequest & {
   file: () => Promise<MultipartFile | undefined>;
+  user?: { id?: string; sub?: string; email?: string };
 };
 
 @ApiTags('Uploads')
@@ -26,11 +34,44 @@ type FastifyMultipartRequest = FastifyRequest & {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UploadsController {
-  constructor(private readonly uploadsService: UploadsService) {}
+  constructor(
+    private readonly uploadsService: UploadsService,
+    @Optional() private readonly rateLimitService?: UploadsRateLimitService,
+  ) {}
+
+  @Post('presign')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Generate short-lived presigned PUT URLs for direct WebP upload (primary + thumbnail)',
+  })
+  @ApiEnvelopeResponse(PresignUploadResponseDto, {
+    status: 200,
+    description: 'Presigned PUT targets generated successfully',
+  })
+  @ApiStandardErrors([400, 401, 500])
+  async presignUpload(@Body() dto: PresignUploadRequestDto): Promise<PresignUploadResponseDto> {
+    return this.uploadsService.createPresignedUpload(dto);
+  }
+
+  @Post('verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify uploaded WebP magic bytes (RIFF/WEBP) in object storage after direct PUT',
+  })
+  @ApiEnvelopeResponse(UploadImageResponseDto, {
+    status: 200,
+    description: 'Uploaded WebP primary and thumbnail images verified successfully',
+  })
+  @ApiStandardErrors([400, 401, 500])
+  async verifyUpload(@Body() dto: VerifyUploadRequestDto): Promise<ProcessedImageResult> {
+    return this.uploadsService.verifyUploadedImage(dto);
+  }
 
   @Post('images')
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload and process image to WebP with responsive variants' })
+  @ApiOperation({
+    summary: 'Fallback multipart upload that converts images to WebP with thumbnail on server',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -48,9 +89,13 @@ export class UploadsController {
     status: 201,
     description: 'Image processed and converted to WebP successfully',
   })
-  @ApiStandardErrors([400, 401, 500])
+  @ApiStandardErrors([400, 401, 429, 500])
   async uploadImage(@Req() req: FastifyRequest): Promise<ProcessedImageResult> {
     const multipartReq = req as FastifyMultipartRequest;
+    const rateLimitKey =
+      multipartReq.user?.id ?? multipartReq.user?.sub ?? multipartReq.ip ?? 'anonymous';
+    this.rateLimitService?.assertFallbackUploadAllowed(rateLimitKey);
+
     let file: MultipartFile | undefined;
 
     try {
