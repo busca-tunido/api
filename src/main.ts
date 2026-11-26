@@ -71,9 +71,10 @@ async function bootstrap(): Promise<void> {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
-  if (env.NODE_ENV !== 'production') {
-    app.enableShutdownHooks();
+  // Enable graceful shutdown hooks in all environments (drains Fastify + disconnects Prisma on SIGTERM in Cloud Run/Docker)
+  app.enableShutdownHooks();
 
+  if (env.NODE_ENV !== 'production') {
     let isTerminating = false;
     const handleShutdown = async (): Promise<void> => {
       if (isTerminating) {

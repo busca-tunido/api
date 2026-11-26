@@ -1,0 +1,30 @@
+# Dependencies & build output
+node_modules
+dist
+coverage
+.tsbuildinfo
+
+# Git & editor files
+.git
+.gitignore
+.vscode
+.idea
+*.log
+
+# Secrets & local environment files (never bake into image layers)
+.env*
+
+# Tests, docs, scripts & tooling configs not needed at build/runtime
+test
+docs
+tasks
+scripts
+*.md
+**/*.spec.ts
+vitest.config.ts
+vitest.config.e2e.ts
+biome.json
+buscatunido.postman_collection.json
+Dockerfile*
+docker-compose*
+.dockerignore
