@@ -1,6 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import type { VerificationStatus } from '@prisma/client';
 import { resolvePensionThumbnailUrl } from '../pensions/utils/pension-helpers.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 
 type EmbeddedPensionImageRaw = {
   id: string;
@@ -11,31 +13,55 @@ type EmbeddedPensionImageRaw = {
   sortOrder?: number;
 };
 
+type FavoriteItemResult = {
+  userId: string;
+  pensionId: string;
+  createdAt: Date;
+  pension: {
+    id: string;
+    slug: string;
+    title: string;
+    city: string;
+    neighborhood: string;
+    baseMonthlyPrice: number;
+    ratingAverage: number;
+    ratingCount: number;
+    verificationStatus: VerificationStatus;
+    images: EmbeddedPensionImageRaw[];
+  };
+};
+
 @Injectable()
 export class FavoritesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly sqlPrisma: SqlPrismaService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findIdsByUser(userId: string): Promise<{ pensionIds: string[] }> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { favoritePensionIds: true },
+    const rows = await this.sqlPrisma.userFavorite.findMany({
+      where: { userId },
+      select: { pensionId: true },
+      orderBy: { createdAt: 'desc' },
     });
 
     return {
-      pensionIds: user?.favoritePensionIds || [],
+      pensionIds: rows.map((r) => r.pensionId),
     };
   }
 
-  async findAllByUser(userId: string): Promise<unknown[]> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { favoritePensionIds: true },
+  async findAllByUser(userId: string): Promise<FavoriteItemResult[]> {
+    const favoriteRows = await this.sqlPrisma.userFavorite.findMany({
+      where: { userId },
+      select: { pensionId: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
     });
 
-    const ids = user?.favoritePensionIds || [];
-    if (ids.length === 0) {
+    if (favoriteRows.length === 0) {
       return [];
     }
+
+    const ids = favoriteRows.map((row) => row.pensionId);
 
     const pensions = await this.prisma.pension.findMany({
       where: {
@@ -54,11 +80,18 @@ export class FavoritesService {
         ratingCount: true,
         verificationStatus: true,
         images: true,
-        createdAt: true,
       },
     });
 
-    return pensions.map((pension) => {
+    const pensionMap = new Map(pensions.map((pension) => [pension.id, pension]));
+    const results: FavoriteItemResult[] = [];
+
+    for (const row of favoriteRows) {
+      const pension = pensionMap.get(row.pensionId);
+      if (!pension) {
+        continue;
+      }
+
       const images = (pension.images || [])
         .slice()
         .sort(
@@ -71,10 +104,10 @@ export class FavoritesService {
           thumbnailUrl: resolvePensionThumbnailUrl(img.url, img.thumbnailUrl),
         }));
 
-      return {
+      results.push({
         userId,
         pensionId: pension.id,
-        createdAt: pension.createdAt,
+        createdAt: row.createdAt,
         pension: {
           id: pension.id,
           slug: pension.slug,
@@ -87,8 +120,10 @@ export class FavoritesService {
           verificationStatus: pension.verificationStatus,
           images,
         },
-      };
-    });
+      });
+    }
+
+    return results;
   }
 
   async addFavorite(userId: string, pensionId: string): Promise<{ added: boolean }> {
@@ -97,9 +132,9 @@ export class FavoritesService {
         where: { id: pensionId },
         select: { id: true },
       }),
-      this.prisma.user.findUnique({
+      this.sqlPrisma.user.findUnique({
         where: { id: userId },
-        select: { favoritePensionIds: true },
+        select: { id: true },
       }),
     ]);
 
@@ -111,15 +146,24 @@ export class FavoritesService {
       throw new NotFoundException(`User '${userId}' not found`);
     }
 
-    const currentFavorites = user.favoritePensionIds || [];
-    if (currentFavorites.includes(pension.id)) {
+    const existing = await this.sqlPrisma.userFavorite.findUnique({
+      where: {
+        userId_pensionId: {
+          userId,
+          pensionId: pension.id,
+        },
+      },
+      select: { userId: true },
+    });
+
+    if (existing) {
       throw new ConflictException('Pension is already saved in favorites');
     }
 
-    await this.prisma.user.update({
-      where: { id: userId },
+    await this.sqlPrisma.userFavorite.create({
       data: {
-        favoritePensionIds: { push: pension.id },
+        userId,
+        pensionId: pension.id,
       },
     });
 
@@ -127,25 +171,34 @@ export class FavoritesService {
   }
 
   async removeFavorite(userId: string, pensionId: string): Promise<{ removed: boolean }> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.sqlPrisma.user.findUnique({
       where: { id: userId },
-      select: { favoritePensionIds: true },
+      select: { id: true },
     });
 
     if (!user) {
       throw new NotFoundException(`User '${userId}' not found`);
     }
 
-    const currentFavorites = user.favoritePensionIds || [];
-    if (!currentFavorites.includes(pensionId)) {
+    const existing = await this.sqlPrisma.userFavorite.findUnique({
+      where: {
+        userId_pensionId: {
+          userId,
+          pensionId,
+        },
+      },
+      select: { userId: true },
+    });
+
+    if (!existing) {
       throw new NotFoundException('Favorite not found');
     }
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        favoritePensionIds: {
-          set: currentFavorites.filter((id) => id !== pensionId),
+    await this.sqlPrisma.userFavorite.delete({
+      where: {
+        userId_pensionId: {
+          userId,
+          pensionId,
         },
       },
     });

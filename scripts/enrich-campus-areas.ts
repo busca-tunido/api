@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PrismaClient } from '@prisma/client';
+import { type Prisma, PrismaClient } from '@prisma/sql-client';
 import { CITY_CENTERS } from '../src/pensions/constants/city-centers.js';
 import { chunkArray } from './seeds/seed-utils.js';
 
@@ -1854,7 +1854,16 @@ export async function enrichCampusAreas(
             data: {
               latitude: item.latitude,
               longitude: item.longitude,
-              campuses: item.campuses,
+              campuses: {
+                deleteMany: {},
+                create: item.campuses.map((campus) => ({
+                  name: campus.name,
+                  acronym: campus.acronym,
+                  centerLat: campus.centerLat,
+                  centerLng: campus.centerLng,
+                  polygon: campus.polygon as unknown as Prisma.InputJsonValue,
+                })),
+              },
             },
           }),
         ),

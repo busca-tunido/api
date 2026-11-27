@@ -1,6 +1,6 @@
 import { type ExecutionContext, ForbiddenException } from '@nestjs/common';
 import type { Reflector } from '@nestjs/core';
-import { Role } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RolesGuard } from './roles.guard.js';
 

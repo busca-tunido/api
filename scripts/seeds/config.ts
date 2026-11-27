@@ -108,7 +108,9 @@ export const CITY_NEIGHBORHOODS: Record<string, string[]> = {
 };
 
 export const STORAGE_BASE_URL = (
+  process.env.PUBLIC_STORAGE_BASE_URL ||
   process.env.PUBLIC_NEON_STORAGE_BASE_URL ||
+  process.env.NEON_STORAGE_PUBLIC_BASE_URL ||
   'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech/uploads'
 ).replace(/\/+$/, '');
 

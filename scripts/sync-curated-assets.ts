@@ -7,7 +7,7 @@ if (typeof process.loadEnvFile === 'function') {
   process.loadEnvFile();
 }
 
-interface AssetsManifest {
+type AssetsManifest = {
   hogares: {
     alta: string[];
     media: string[];
@@ -28,24 +28,26 @@ interface AssetsManifest {
       mujeres: string[];
     };
   };
-}
+};
 
-interface UploadTask {
+type UploadTask = {
   localPath: string;
   relativePath: string;
   s3Key: string;
-}
+};
 
-const SOURCE_DIR = 'C:\\Users\\tkdgi\\Downloads\\imagenes-tunido\\imágenes';
+const SOURCE_DIR = process.env.CURATED_ASSETS_SOURCE_DIR || '';
 const ENDPOINT =
+  process.env.S3_ENDPOINT ||
+  process.env.PUBLIC_AWS_ENDPOINT_URL_S3 ||
   process.env.AWS_ENDPOINT_URL_S3 ||
-  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech';
-const REGION = process.env.AWS_REGION || 'us-east-2';
-const BUCKET = process.env.PUBLIC_STORAGE_BUCKET || 'uploads';
-const ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || 'nak_live_5119d554e20e489985285a1b82735d4a';
+  '';
+const REGION =
+  process.env.S3_REGION || process.env.PUBLIC_AWS_REGION || process.env.AWS_REGION || 'auto';
+const BUCKET = process.env.S3_BUCKET || process.env.PUBLIC_STORAGE_BUCKET || 'uploads';
+const ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '';
 const SECRET_ACCESS_KEY =
-  process.env.AWS_SECRET_ACCESS_KEY ||
-  'nsk_live_54448ce989196e9fe59fba014565858d1157f0dfbab8d88bb56366550ca72350';
+  process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '';
 
 const s3 = new S3Client({
   endpoint: ENDPOINT,

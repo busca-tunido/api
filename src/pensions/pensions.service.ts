@@ -1,10 +1,11 @@
 import { ForbiddenException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
-import { ProposalStatus, Role } from '@prisma/client';
+import { ProposalStatus, Role } from '@prisma/sql-client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { calculateBoundingBox, calculateHaversineDistanceKm } from '../common/utils/geo.util.js';
 import { isValidObjectId, slugify } from '../common/utils/string.util.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import { UniversitiesCacheService } from '../universities/universities-cache.service.js';
 import { AMENITY_CATALOG_ITEMS } from './constants/amenities-catalog.js';
 import { findCityCenter } from './constants/city-centers.js';
@@ -39,6 +40,7 @@ export { calculateHaversineDistanceKm, calculateRelevanceScore };
 export class PensionsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly sqlPrisma: SqlPrismaService,
     @Optional() private readonly universitiesCache?: UniversitiesCacheService,
   ) {}
 
@@ -464,17 +466,33 @@ export class PensionsService {
         _count: {
           select: {
             reviews: { where: { deletedAt: null } },
-            proposals: { where: { status: ProposalStatus.PENDING } },
           },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
 
+    const pensionIds = pensions.map((p) => p.id);
+    const pendingProposalsByPension = new Map<string, number>();
+
+    if (pensionIds.length > 0) {
+      const proposalGroups = await this.sqlPrisma.pensionProposal.groupBy({
+        by: ['pensionId'],
+        where: {
+          pensionId: { in: pensionIds },
+          status: ProposalStatus.PENDING,
+        },
+        _count: { id: true },
+      });
+      for (const group of proposalGroups) {
+        pendingProposalsByPension.set(group.pensionId, group._count.id);
+      }
+    }
+
     return pensions.map((p) => {
       const doc = p as unknown as PensionDocRaw;
       const activeRooms = (doc.rooms || []).filter((r) => !r.deletedAt);
-      const pendingProposalsCount = doc._count?.proposals ?? 0;
+      const pendingProposalsCount = pendingProposalsByPension.get(doc.id) ?? 0;
       const availableRoomsCount = activeRooms.filter(
         (r) => r.isAvailable && r.isActive !== false,
       ).length;
@@ -505,8 +523,15 @@ export class PensionsService {
       where: isValidObjectId(idOrSlug)
         ? { OR: [{ id: idOrSlug }, { slug: idOrSlug }] }
         : { slug: idOrSlug },
-      include: {
-        landlord: {
+    });
+
+    if (!pension) {
+      throw new NotFoundException(`Pension '${idOrSlug}' not found`);
+    }
+
+    const landlord = pension.landlordId
+      ? await this.sqlPrisma.user.findUnique({
+          where: { id: pension.landlordId },
           select: {
             id: true,
             firstName: true,
@@ -515,20 +540,21 @@ export class PensionsService {
             email: true,
             avatarUrl: true,
           },
-        },
+        })
+      : null;
+
+    return formatPensionItem(
+      {
+        ...(pension as unknown as PensionDocRaw),
+        landlord,
       },
-    });
-
-    if (!pension) {
-      throw new NotFoundException(`Pension '${idOrSlug}' not found`);
-    }
-
-    return formatPensionItem(pension as unknown as PensionDocRaw, 100);
+      100,
+    );
   }
 
   async getAmenitiesCatalog(): Promise<PensionAmenityCatalogItemDto[]> {
     try {
-      const dbAmenities = await this.prisma.amenity.findMany({
+      const dbAmenities = await this.sqlPrisma.amenity.findMany({
         where: { deletedAt: null },
         orderBy: [{ category: 'asc' }, { name: 'asc' }],
       });
@@ -554,7 +580,7 @@ export class PensionsService {
     distanceMeters: number | undefined,
   ): Promise<EmbeddedNearbyUniversityRaw[] | undefined> {
     if (nearbyUniversityId !== undefined) {
-      const uni = await this.prisma.university.findUnique({
+      const uni = await this.sqlPrisma.university.findUnique({
         where: { id: nearbyUniversityId },
         select: { id: true, name: true, shortName: true, latitude: true, longitude: true },
       });
@@ -713,7 +739,7 @@ export class PensionsService {
       }),
       cachedUnis && cachedUnis.length > 0
         ? Promise.resolve(cachedUnis)
-        : this.prisma.university.findMany({
+        : this.sqlPrisma.university.findMany({
             where: { deletedAt: null },
             select: { city: true, latitude: true, longitude: true },
           }),

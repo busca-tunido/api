@@ -1,8 +1,9 @@
 import { ConflictException, ForbiddenException } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
+import type { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import { ReviewsService } from './reviews.service.js';
 
 type MockPrismaService = {
@@ -21,9 +22,16 @@ type MockPrismaService = {
   };
 };
 
+type MockSqlPrismaService = {
+  user: {
+    findMany: ReturnType<typeof vi.fn>;
+  };
+};
+
 describe('ReviewsService', () => {
   let service: ReviewsService;
   let mockPrisma: MockPrismaService;
+  let mockSqlPrisma: MockSqlPrismaService;
 
   const mockStudent: SanitizedUser = {
     id: 'student-1',
@@ -70,7 +78,16 @@ describe('ReviewsService', () => {
       },
     };
 
-    service = new ReviewsService(mockPrisma as unknown as PrismaService);
+    mockSqlPrisma = {
+      user: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+    };
+
+    service = new ReviewsService(
+      mockPrisma as unknown as PrismaService,
+      mockSqlPrisma as unknown as SqlPrismaService,
+    );
   });
 
   describe('findByPension', () => {
@@ -79,6 +96,7 @@ describe('ReviewsService', () => {
       mockPrisma.review.findMany.mockResolvedValue([
         {
           id: 'rev-1',
+          userId: 'student-1',
           overallRating: 5,
           cleanlinessRating: 5,
           landlordRating: 4,
@@ -88,6 +106,15 @@ describe('ReviewsService', () => {
           helpfulUserIds: ['student-1'],
         },
       ]);
+      mockSqlPrisma.user.findMany.mockResolvedValue([
+        {
+          id: 'student-1',
+          firstName: 'Matías',
+          lastName: 'Rojas',
+          avatarUrl: null,
+          university: { shortName: 'UCH', name: 'Universidad de Chile' },
+        },
+      ]);
 
       const result = await service.findByPension('pension-1', undefined, 'student-1');
       expect(result.items).toHaveLength(1);
@@ -95,6 +122,24 @@ describe('ReviewsService', () => {
         1,
       );
       expect((result.items[0] as { userVoted?: boolean }).userVoted).toBe(true);
+      expect((result.items[0] as { user: { id: string } | null }).user).toEqual({
+        id: 'student-1',
+        firstName: 'Matías',
+        lastName: 'Rojas',
+        avatarUrl: null,
+        university: { shortName: 'UCH', name: 'Universidad de Chile' },
+      });
+      expect(mockSqlPrisma.user.findMany).toHaveBeenCalledTimes(1);
+      expect(mockSqlPrisma.user.findMany).toHaveBeenCalledWith({
+        where: { id: { in: ['student-1'] } },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          university: { select: { shortName: true, name: true } },
+        },
+      });
       expect(result.pagination.total).toBe(1);
       expect(result.summary).toEqual({
         totalReviews: 1,
@@ -103,6 +148,50 @@ describe('ReviewsService', () => {
         starDistribution: { 5: 1, 4: 0, 3: 0, 2: 0, 1: 0 },
         categoryAverages: { cleanliness: 5, landlord: 4, quietness: 5, wifi: 4 },
       });
+    });
+
+    it('should batch hydrate unique userIds in a single SQL query without N+1', async () => {
+      mockPrisma.review.count.mockResolvedValue(2);
+      mockPrisma.review.findMany.mockResolvedValue([
+        {
+          id: 'rev-1',
+          userId: 'student-1',
+          overallRating: 5,
+          cleanlinessRating: null,
+          landlordRating: null,
+          quietnessRating: null,
+          wifiRating: null,
+          images: [],
+          helpfulUserIds: [],
+        },
+        {
+          id: 'rev-2',
+          userId: 'student-1',
+          overallRating: 4,
+          cleanlinessRating: null,
+          landlordRating: null,
+          quietnessRating: null,
+          wifiRating: null,
+          images: [],
+          helpfulUserIds: [],
+        },
+      ]);
+      mockSqlPrisma.user.findMany.mockResolvedValue([
+        {
+          id: 'student-1',
+          firstName: 'Matías',
+          lastName: 'Rojas',
+          avatarUrl: null,
+          university: null,
+        },
+      ]);
+
+      const result = await service.findByPension('pension-1');
+      expect(mockSqlPrisma.user.findMany).toHaveBeenCalledTimes(1);
+      expect(mockSqlPrisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: { in: ['student-1'] } } }),
+      );
+      expect(result.items).toHaveLength(2);
     });
   });
 

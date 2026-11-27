@@ -1,10 +1,12 @@
+import type { PrismaClient } from '@prisma/client';
 import type {
-  PrismaClient,
   ProposalStatus,
   ProposalType,
   ReportReason,
   ReportStatus,
-} from '@prisma/client';
+  Prisma as SqlPrisma,
+  PrismaClient as SqlPrismaClient,
+} from '@prisma/sql-client';
 import { loadCampusPolygonCache, resolveUniversityCampuses } from '../../enrich-campus-areas.js';
 import {
   type AmenityRecord,
@@ -18,6 +20,7 @@ import {
   assignCityToUniversity,
   chunkArray,
   createPrismaClient,
+  createSqlPrismaClient,
   fetchAndValidateChileCities,
   fetchAndValidateUniversities,
   generateShortName,
@@ -32,6 +35,7 @@ export type StaticCatalogData = {
 
 export type LoadCatalogOptions = {
   prisma?: PrismaClient;
+  sqlPrisma?: SqlPrismaClient;
   syncCatalogs?: boolean;
   refreshOsm?: boolean;
 };
@@ -40,21 +44,23 @@ export const loadStaticCatalogs = async (
   options?: LoadCatalogOptions,
 ): Promise<StaticCatalogData> => {
   const prisma = options?.prisma ?? createPrismaClient().prisma;
-  const shouldDisconnect = !options?.prisma;
+  const sqlPrisma = options?.sqlPrisma ?? createSqlPrismaClient().sqlPrisma;
+  const shouldDisconnectMongo = !options?.prisma;
+  const shouldDisconnectSql = !options?.sqlPrisma;
 
   try {
-    console.log('--- Limpiando colecciones en MongoDB Atlas ---');
-    await Promise.all([
-      prisma.report.deleteMany({}),
-      prisma.pensionProposal.deleteMany({}),
-      prisma.review.deleteMany({}),
-      prisma.pension.deleteMany({}),
-      prisma.user.deleteMany({}),
-      prisma.university.deleteMany({}),
-      prisma.amenity.deleteMany({}),
-    ]);
+    console.log('--- Limpiando colecciones en MongoDB Atlas y tablas en PostgreSQL ---');
+    await Promise.all([prisma.review.deleteMany({}), prisma.pension.deleteMany({})]);
+    await sqlPrisma.report.deleteMany({});
+    await sqlPrisma.pensionProposal.deleteMany({});
+    await sqlPrisma.userFavorite.deleteMany({});
+    await sqlPrisma.user.deleteMany({});
+    await sqlPrisma.campusArea.deleteMany({});
+    await sqlPrisma.universityEmailDomain.deleteMany({});
+    await sqlPrisma.university.deleteMany({});
+    await sqlPrisma.amenity.deleteMany({});
 
-    console.log('--- Insertando catálogo de amenidades ---');
+    console.log('--- Insertando catálogo de amenidades en PostgreSQL ---');
     const amenityData = AMENITY_DEFINITIONS.map((def) => ({
       id: createDeterministicObjectId(`amenity-${def.slug}`),
       slug: def.slug,
@@ -64,7 +70,7 @@ export const loadStaticCatalogs = async (
       deletedAt: null,
     }));
 
-    await prisma.amenity.createMany({ data: amenityData });
+    await sqlPrisma.amenity.createMany({ data: amenityData });
 
     const amenityRecords: AmenityRecord[] = amenityData.map((a) => ({
       id: a.id,
@@ -91,13 +97,28 @@ export const loadStaticCatalogs = async (
       id: string;
       name: string;
       shortName: string | null;
-      emailDomains: string[];
       city: string;
       address: string;
       latitude: number;
       longitude: number;
-      campuses: Awaited<ReturnType<typeof resolveUniversityCampuses>>['campuses'];
       deletedAt: null;
+    }> = [];
+
+    const emailDomainCreateRows: Array<{
+      id: string;
+      universityId: string;
+      domain: string;
+    }> = [];
+    const seenDomains = new Set<string>();
+
+    const campusAreaCreateRows: Array<{
+      id: string;
+      universityId: string;
+      name: string;
+      acronym: string;
+      centerLat: number;
+      centerLng: number;
+      polygon: SqlPrisma.InputJsonValue;
     }> = [];
 
     const universityRecords: UniversityRecord[] = [];
@@ -125,20 +146,45 @@ export const loadStaticCatalogs = async (
         id,
         name: uni.name,
         shortName,
-        emailDomains: uni.domains,
         city: assignedCity.city,
         address: `${assignedCity.city} Campus Principal`,
         latitude: resolved.latitude,
         longitude: resolved.longitude,
-        campuses: resolved.campuses,
         deletedAt: null,
       });
+
+      const assignedDomains: string[] = [];
+      for (const rawDomain of uni.domains) {
+        const cleanDomain = rawDomain.toLowerCase().trim();
+        if (cleanDomain && !seenDomains.has(cleanDomain)) {
+          seenDomains.add(cleanDomain);
+          assignedDomains.push(cleanDomain);
+          emailDomainCreateRows.push({
+            id: createDeterministicObjectId(`uni-domain-${id}-${cleanDomain}`),
+            universityId: id,
+            domain: cleanDomain,
+          });
+        }
+      }
+
+      for (let cIdx = 0; cIdx < resolved.campuses.length; cIdx++) {
+        const campus = resolved.campuses[cIdx];
+        campusAreaCreateRows.push({
+          id: createDeterministicObjectId(`campus-${id}-${cIdx}-${campus.acronym}`),
+          universityId: id,
+          name: campus.name,
+          acronym: campus.acronym,
+          centerLat: campus.centerLat,
+          centerLng: campus.centerLng,
+          polygon: campus.polygon as unknown as SqlPrisma.InputJsonValue,
+        });
+      }
 
       universityRecords.push({
         id,
         name: uni.name,
         shortName,
-        emailDomains: uni.domains,
+        emailDomains: assignedDomains.length > 0 ? assignedDomains : uni.domains,
         city: assignedCity.city,
         latitude: resolved.latitude,
         longitude: resolved.longitude,
@@ -146,7 +192,18 @@ export const loadStaticCatalogs = async (
     }
 
     for (const batch of chunkArray(universityCreateRows, 50)) {
-      await prisma.university.createMany({ data: batch });
+      await sqlPrisma.university.createMany({ data: batch });
+    }
+
+    for (const batch of chunkArray(emailDomainCreateRows, 100)) {
+      await sqlPrisma.universityEmailDomain.createMany({
+        data: batch,
+        skipDuplicates: true,
+      });
+    }
+
+    for (const batch of chunkArray(campusAreaCreateRows, 100)) {
+      await sqlPrisma.campusArea.createMany({ data: batch });
     }
 
     return {
@@ -155,8 +212,11 @@ export const loadStaticCatalogs = async (
       amenityRecords,
     };
   } finally {
-    if (shouldDisconnect) {
+    if (shouldDisconnectMongo) {
       await prisma.$disconnect();
+    }
+    if (shouldDisconnectSql) {
+      await sqlPrisma.$disconnect();
     }
   }
 };
@@ -164,12 +224,15 @@ export const loadStaticCatalogs = async (
 export const persistDatasetToMongo = async (
   dataset: BlueprintDataset,
   prismaClient?: PrismaClient,
+  sqlPrismaClient?: SqlPrismaClient,
 ): Promise<void> => {
   const prisma = prismaClient ?? createPrismaClient().prisma;
-  const shouldDisconnect = !prismaClient;
+  const sqlPrisma = sqlPrismaClient ?? createSqlPrismaClient().sqlPrisma;
+  const shouldDisconnectMongo = !prismaClient;
+  const shouldDisconnectSql = !sqlPrismaClient;
 
   try {
-    console.log(`--- Persistiendo ${dataset.users.length} usuarios en MongoDB ---`);
+    console.log(`--- Persistiendo ${dataset.users.length} usuarios en PostgreSQL ---`);
     const userRows = dataset.users.map((user) => ({
       id: user.id,
       email: user.email,
@@ -181,12 +244,11 @@ export const persistDatasetToMongo = async (
       isEmailVerified: true,
       avatarUrl: user.avatarUrl,
       universityId: user.universityId,
-      favoritePensionIds: user.favoritePensionIds,
       deletedAt: null,
     }));
 
     for (const batch of chunkArray(userRows, 100)) {
-      await prisma.user.createMany({ data: batch });
+      await sqlPrisma.user.createMany({ data: batch });
     }
 
     console.log(`--- Persistiendo ${dataset.pensions.length} pensiones en MongoDB ---`);
@@ -272,6 +334,23 @@ export const persistDatasetToMongo = async (
       await prisma.pension.createMany({ data: batch });
     }
 
+    const favoriteRows: Array<{ userId: string; pensionId: string }> = [];
+    for (const user of dataset.users) {
+      for (const pensionId of user.favoritePensionIds) {
+        favoriteRows.push({ userId: user.id, pensionId });
+      }
+    }
+
+    if (favoriteRows.length > 0) {
+      console.log(`--- Persistiendo ${favoriteRows.length} favoritos en PostgreSQL ---`);
+      for (const batch of chunkArray(favoriteRows, 200)) {
+        await sqlPrisma.userFavorite.createMany({
+          data: batch,
+          skipDuplicates: true,
+        });
+      }
+    }
+
     console.log(`--- Persistiendo ${dataset.reviews.length} reseñas en MongoDB ---`);
     const studentUserIds = dataset.users.filter((u) => u.role === 'STUDENT').map((u) => u.id);
     const stayStart = new Date('2025-03-01');
@@ -312,9 +391,10 @@ export const persistDatasetToMongo = async (
       await prisma.review.createMany({ data: batch });
     }
 
-    console.log('--- Sembrando reportes de moderación y propuestas de prueba ---');
+    console.log('--- Sembrando reportes de moderación y propuestas en PostgreSQL ---');
     if (dataset.pensions.length > 0 && dataset.users.length > 0) {
       const reportRows = Array.from({ length: 15 }, (_, i) => ({
+        id: createDeterministicObjectId(`report-${i}`),
         pensionId: dataset.pensions[i % dataset.pensions.length].id,
         userId: dataset.users[i % dataset.users.length].id,
         reason: 'INACCURATE_PRICE' as ReportReason,
@@ -324,9 +404,10 @@ export const persistDatasetToMongo = async (
       }));
 
       await Promise.all([
-        prisma.report.createMany({ data: reportRows }),
-        prisma.pensionProposal.create({
+        sqlPrisma.report.createMany({ data: reportRows }),
+        sqlPrisma.pensionProposal.create({
           data: {
+            id: createDeterministicObjectId('proposal-0'),
             pensionId: dataset.pensions[0].id,
             submittedById: dataset.users[0].id,
             type: 'AMENITIES_UPDATE' as ProposalType,
@@ -340,10 +421,13 @@ export const persistDatasetToMongo = async (
       ]);
     }
 
-    console.log('=== Inserción de base de datos finalizada con éxito ===');
+    console.log('=== Inserción híbrida (PostgreSQL + MongoDB) finalizada con éxito ===');
   } finally {
-    if (shouldDisconnect) {
+    if (shouldDisconnectMongo) {
       await prisma.$disconnect();
+    }
+    if (shouldDisconnectSql) {
+      await sqlPrisma.$disconnect();
     }
   }
 };

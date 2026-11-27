@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ProposalStatus, ProposalType } from '@prisma/client';
+import { ProposalStatus, ProposalType } from '@prisma/sql-client';
 import { PaginationMetaDto } from '../../common/dto/pagination.dto.js';
 
 export class ProposalUserDto {

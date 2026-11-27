@@ -11,20 +11,15 @@ describe('PrismaService', () => {
 
     const service = module.get<PrismaService>(PrismaService);
     expect(service).toBeDefined();
-    expect(typeof service.user.findMany).toBe('function');
     expect(typeof service.pension.findMany).toBe('function');
     expect(typeof service.review.findMany).toBe('function');
   });
 
-  it('should include all required domain models in SOFT_DELETE_MODELS', () => {
-    expect(SOFT_DELETE_MODELS.has('User')).toBe(true);
+  it('should include all required MongoDB domain models in SOFT_DELETE_MODELS', () => {
     expect(SOFT_DELETE_MODELS.has('Pension')).toBe(true);
-    expect(SOFT_DELETE_MODELS.has('Room')).toBe(true);
-    expect(SOFT_DELETE_MODELS.has('PensionImage')).toBe(true);
-    expect(SOFT_DELETE_MODELS.has('Amenity')).toBe(true);
     expect(SOFT_DELETE_MODELS.has('Review')).toBe(true);
-    expect(SOFT_DELETE_MODELS.has('Report')).toBe(true);
-    expect(SOFT_DELETE_MODELS.has('University')).toBe(true);
+    expect(SOFT_DELETE_MODELS.has('User')).toBe(false);
+    expect(SOFT_DELETE_MODELS.has('University')).toBe(false);
   });
 
   it('should have lifecycle hooks defined', async () => {

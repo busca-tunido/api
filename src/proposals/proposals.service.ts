@@ -4,9 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { type Prisma, ProposalStatus, Role } from '@prisma/client';
+import type { Prisma as MongoPrisma } from '@prisma/client';
+import { type Prisma, ProposalStatus, Role } from '@prisma/sql-client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import type { CreateProposalDto } from './dto/create-proposal.dto.js';
 import type { ReviewProposalDto } from './dto/review-proposal.dto.js';
 
@@ -25,7 +27,10 @@ const PROPOSAL_NAME_SELECT = {
 
 @Injectable()
 export class ProposalsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly sqlPrisma: SqlPrismaService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async create(pensionId: string, dto: CreateProposalDto, user: SanitizedUser): Promise<unknown> {
     const pension = await this.prisma.pension.findUnique({
@@ -36,7 +41,7 @@ export class ProposalsService {
       throw new NotFoundException(`Pension '${pensionId}' not found`);
     }
 
-    return this.prisma.pensionProposal.create({
+    return this.sqlPrisma.pensionProposal.create({
       data: {
         pensionId,
         submittedById: user.id,
@@ -68,7 +73,7 @@ export class ProposalsService {
       }
     }
 
-    return this.prisma.pensionProposal.findMany({
+    return this.sqlPrisma.pensionProposal.findMany({
       where: {
         pensionId,
         ...(status ? { status } : {}),
@@ -106,32 +111,44 @@ export class ProposalsService {
     const skip = (safePage - 1) * safeLimit;
 
     const [total, items] = await Promise.all([
-      this.prisma.pensionProposal.count({ where }),
-      this.prisma.pensionProposal.findMany({
+      this.sqlPrisma.pensionProposal.count({ where }),
+      this.sqlPrisma.pensionProposal.findMany({
         where,
         skip,
         take: safeLimit,
         orderBy: { createdAt: 'desc' },
         include: {
-          pension: {
-            select: {
-              id: true,
-              title: true,
-              address: true,
-              city: true,
-            },
-          },
           submittedBy: { select: PROPOSAL_SUBMITTER_SELECT },
           reviewedBy: { select: PROPOSAL_NAME_SELECT },
         },
       }),
     ]);
 
+    const pensionIds = Array.from(new Set(items.map((item) => item.pensionId)));
+    const pensions =
+      pensionIds.length > 0
+        ? await this.prisma.pension.findMany({
+            where: { id: { in: pensionIds } },
+            select: {
+              id: true,
+              title: true,
+              address: true,
+              city: true,
+            },
+          })
+        : [];
+    const pensionMap = new Map(pensions.map((pension) => [pension.id, pension]));
+
+    const enrichedItems = items.map((item) => ({
+      ...item,
+      pension: pensionMap.get(item.pensionId) ?? null,
+    }));
+
     const totalPages = Math.ceil(total / safeLimit) || 1;
     const hasMore = skip + safeLimit < total;
 
     return {
-      items,
+      items: enrichedItems,
       pagination: {
         page: safePage,
         limit: safeLimit,
@@ -148,10 +165,9 @@ export class ProposalsService {
   }
 
   async findProposalWithDiff(id: string): Promise<unknown> {
-    const proposal = await this.prisma.pensionProposal.findUnique({
+    const proposal = await this.sqlPrisma.pensionProposal.findUnique({
       where: { id },
       include: {
-        pension: true,
         submittedBy: { select: PROPOSAL_SUBMITTER_SELECT },
         reviewedBy: { select: PROPOSAL_NAME_SELECT },
       },
@@ -161,8 +177,12 @@ export class ProposalsService {
       throw new NotFoundException(`Proposal '${id}' not found`);
     }
 
+    const pension = await this.prisma.pension.findUnique({
+      where: { id: proposal.pensionId },
+    });
+
     const proposed = (proposal.proposedChanges || {}) as Record<string, unknown>;
-    const pension = proposal.pension as unknown as Record<string, unknown>;
+    const pensionRecord = (pension ?? {}) as unknown as Record<string, unknown>;
     const diff: Record<string, { current: unknown; proposed: unknown }> = {};
 
     for (const key of Object.keys(proposed)) {
@@ -170,38 +190,41 @@ export class ProposalsService {
         continue;
       }
       diff[key] = {
-        current: pension[key] ?? null,
+        current: pensionRecord[key] ?? null,
         proposed: proposed[key],
       };
     }
 
     return {
-      proposal,
+      proposal: {
+        ...proposal,
+        pension: pension ?? null,
+      },
       diff,
     };
   }
 
   async review(id: string, dto: ReviewProposalDto, reviewer: SanitizedUser): Promise<unknown> {
-    const proposal = await this.prisma.pensionProposal.findUnique({
+    const proposal = await this.sqlPrisma.pensionProposal.findUnique({
       where: { id },
-      include: {
-        pension: {
-          select: {
-            id: true,
-            landlordId: true,
-          },
-        },
-      },
     });
 
     if (!proposal) {
       throw new NotFoundException(`Proposal '${id}' not found`);
     }
 
+    const pension = await this.prisma.pension.findUnique({
+      where: { id: proposal.pensionId },
+      select: {
+        id: true,
+        landlordId: true,
+      },
+    });
+
     if (
       reviewer.role !== Role.ADMIN &&
       reviewer.role !== Role.MODERATOR &&
-      proposal.pension?.landlordId !== reviewer.id
+      pension?.landlordId !== reviewer.id
     ) {
       throw new ForbiddenException('No tienes permisos para revisar sugerencias de esta pensión');
     }
@@ -215,7 +238,7 @@ export class ProposalsService {
         throw new BadRequestException('Review notes are required when rejecting a proposal');
       }
 
-      return this.prisma.pensionProposal.update({
+      return this.sqlPrisma.pensionProposal.update({
         where: { id },
         data: {
           status: ProposalStatus.REJECTED,
@@ -231,46 +254,50 @@ export class ProposalsService {
         ? dto.modifiedChanges
         : ((proposal.proposedChanges || {}) as Record<string, unknown>);
 
-    return this.prisma.$transaction(async (tx) => {
-      const { amenitiesToAdd, amenitiesToRemove, ...directFields } = changesToApply;
+    const { amenitiesToAdd, amenitiesToRemove, ...directFields } = changesToApply;
 
-      const updateData: Prisma.PensionUpdateInput = {
-        ...directFields,
-      };
+    const updateData: MongoPrisma.PensionUpdateInput = {
+      ...directFields,
+    };
 
-      if (Array.isArray(amenitiesToAdd) || Array.isArray(amenitiesToRemove)) {
-        const currentPension = await tx.pension.findUnique({
-          where: { id: proposal.pensionId },
-          select: { amenities: true },
-        });
-        const currentSet = new Set(currentPension?.amenities || []);
-        if (Array.isArray(amenitiesToAdd)) {
-          for (const a of amenitiesToAdd as string[]) currentSet.add(a);
-        }
-        if (Array.isArray(amenitiesToRemove)) {
-          for (const r of amenitiesToRemove as string[]) currentSet.delete(r);
-        }
-        updateData.amenities = Array.from(currentSet);
-      }
-
-      await tx.pension.update({
+    if (Array.isArray(amenitiesToAdd) || Array.isArray(amenitiesToRemove)) {
+      const currentPension = await this.prisma.pension.findUnique({
         where: { id: proposal.pensionId },
-        data: updateData,
+        select: { amenities: true },
       });
+      const currentSet = new Set(currentPension?.amenities || []);
+      if (Array.isArray(amenitiesToAdd)) {
+        for (const amenity of amenitiesToAdd) {
+          if (typeof amenity === 'string') {
+            currentSet.add(amenity);
+          }
+        }
+      }
+      if (Array.isArray(amenitiesToRemove)) {
+        for (const amenity of amenitiesToRemove) {
+          if (typeof amenity === 'string') {
+            currentSet.delete(amenity);
+          }
+        }
+      }
+      updateData.amenities = Array.from(currentSet);
+    }
 
-      return tx.pensionProposal.update({
-        where: { id },
-        data: {
-          status:
-            dto.action === 'APPROVE'
-              ? ProposalStatus.APPROVED
-              : ProposalStatus.MODIFIED_AND_APPROVED,
-          appliedChanges: changesToApply as Prisma.InputJsonValue,
-          reviewNotes: dto.reviewNotes,
-          reviewedById: reviewer.id,
-          reviewedAt: new Date(),
-        },
-      });
+    await this.prisma.pension.update({
+      where: { id: proposal.pensionId },
+      data: updateData,
+    });
+
+    return this.sqlPrisma.pensionProposal.update({
+      where: { id },
+      data: {
+        status:
+          dto.action === 'APPROVE' ? ProposalStatus.APPROVED : ProposalStatus.MODIFIED_AND_APPROVED,
+        appliedChanges: changesToApply as Prisma.InputJsonValue,
+        reviewNotes: dto.reviewNotes,
+        reviewedById: reviewer.id,
+        reviewedAt: new Date(),
+      },
     });
   }
 }

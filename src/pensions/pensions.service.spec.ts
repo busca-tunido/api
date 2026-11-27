@@ -1,8 +1,9 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { ProposalStatus, Role } from '@prisma/sql-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
+import type { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import { PensionsService } from './pensions.service.js';
 
 type MockPrismaService = {
@@ -16,6 +17,9 @@ type MockPrismaService = {
     groupBy: ReturnType<typeof vi.fn>;
     aggregate: ReturnType<typeof vi.fn>;
   };
+};
+
+type MockSqlPrismaService = {
   university: {
     findUnique: ReturnType<typeof vi.fn>;
     findMany: ReturnType<typeof vi.fn>;
@@ -23,11 +27,18 @@ type MockPrismaService = {
   amenity: {
     findMany: ReturnType<typeof vi.fn>;
   };
+  user: {
+    findUnique: ReturnType<typeof vi.fn>;
+  };
+  pensionProposal: {
+    groupBy: ReturnType<typeof vi.fn>;
+  };
 };
 
 describe('PensionsService', () => {
   let service: PensionsService;
   let mockPrisma: MockPrismaService;
+  let mockSqlPrisma: MockSqlPrismaService;
 
   const mockLandlord: SanitizedUser = {
     id: 'landlord-1',
@@ -83,6 +94,9 @@ describe('PensionsService', () => {
         groupBy: vi.fn().mockResolvedValue([{ city: 'Santiago', _count: { id: 5 } }]),
         aggregate: vi.fn(),
       },
+    };
+
+    mockSqlPrisma = {
       university: {
         findUnique: vi.fn(),
         findMany: vi.fn().mockResolvedValue([]),
@@ -90,9 +104,18 @@ describe('PensionsService', () => {
       amenity: {
         findMany: vi.fn().mockResolvedValue([]),
       },
+      user: {
+        findUnique: vi.fn().mockResolvedValue(null),
+      },
+      pensionProposal: {
+        groupBy: vi.fn().mockResolvedValue([]),
+      },
     };
 
-    service = new PensionsService(mockPrisma as unknown as PrismaService);
+    service = new PensionsService(
+      mockPrisma as unknown as PrismaService,
+      mockSqlPrisma as unknown as SqlPrismaService,
+    );
   });
 
   describe('findAll', () => {
@@ -209,17 +232,95 @@ describe('PensionsService', () => {
   });
 
   describe('findBySlugOrId', () => {
-    it('should return pension if found', async () => {
-      mockPrisma.pension.findFirst.mockResolvedValue({ id: 'pension-1', slug: 'pension-1-slug' });
+    it('should return pension if found and resolve landlord from SQL database', async () => {
+      mockPrisma.pension.findFirst.mockResolvedValue({
+        id: 'pension-1',
+        slug: 'pension-1-slug',
+        landlordId: 'landlord-1',
+      });
+      mockSqlPrisma.user.findUnique.mockResolvedValue({
+        id: 'landlord-1',
+        firstName: 'Carlos',
+        lastName: 'Valdés',
+        phone: '+56912345678',
+        email: 'landlord@test.cl',
+        avatarUrl: null,
+      });
 
-      const result = await service.findBySlugOrId('pension-1-slug');
-      expect((result as { id: string }).id).toBe('pension-1');
+      const result = (await service.findBySlugOrId('pension-1-slug')) as {
+        id: string;
+        landlord: { id: string; firstName: string } | null;
+      };
+      expect(result.id).toBe('pension-1');
+      expect(mockSqlPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'landlord-1' },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          email: true,
+          avatarUrl: true,
+        },
+      });
+      expect(result.landlord).toEqual({
+        id: 'landlord-1',
+        firstName: 'Carlos',
+        lastName: 'Valdés',
+        phone: '+56912345678',
+        email: 'landlord@test.cl',
+        avatarUrl: null,
+      });
     });
 
     it('should throw NotFoundException if not found', async () => {
       mockPrisma.pension.findFirst.mockResolvedValue(null);
 
       await expect(service.findBySlugOrId('non-existent')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('findMine', () => {
+    it('should fetch landlord pensions and resolve pending proposal counts from SQL', async () => {
+      mockPrisma.pension.findMany.mockResolvedValue([
+        {
+          id: 'pension-1',
+          title: 'Mi Pensión',
+          rooms: [
+            {
+              id: 'r1',
+              title: 'Hab 1',
+              type: 'SINGLE',
+              monthlyPrice: 200000,
+              hasPrivateBathroom: false,
+              totalBeds: 1,
+              availableBeds: 1,
+              isAvailable: true,
+              isActive: true,
+              images: [],
+              deletedAt: null,
+            },
+          ],
+        },
+      ]);
+      mockSqlPrisma.pensionProposal.groupBy.mockResolvedValue([
+        { pensionId: 'pension-1', _count: { id: 3 } },
+      ]);
+
+      const result = (await service.findMine('landlord-1')) as Array<{
+        id: string;
+        pendingProposalsCount: number;
+      }>;
+
+      expect(mockSqlPrisma.pensionProposal.groupBy).toHaveBeenCalledWith({
+        by: ['pensionId'],
+        where: {
+          pensionId: { in: ['pension-1'] },
+          status: ProposalStatus.PENDING,
+        },
+        _count: { id: true },
+      });
+      expect(result[0].pendingProposalsCount).toBe(3);
     });
   });
 
@@ -246,7 +347,7 @@ describe('PensionsService', () => {
     });
 
     it('should compute geodesic distance to university when distanceMeters is not passed', async () => {
-      mockPrisma.university.findUnique.mockResolvedValue({
+      mockSqlPrisma.university.findUnique.mockResolvedValue({
         id: 'uni-1',
         latitude: -33.4998,
         longitude: -70.6152,
@@ -270,7 +371,7 @@ describe('PensionsService', () => {
         mockLandlord,
       );
 
-      expect(mockPrisma.university.findUnique).toHaveBeenCalledWith({
+      expect(mockSqlPrisma.university.findUnique).toHaveBeenCalledWith({
         where: { id: 'uni-1' },
         select: { id: true, name: true, shortName: true, latitude: true, longitude: true },
       });
@@ -442,7 +543,7 @@ describe('PensionsService', () => {
         { city: 'Santiago', latitude: -33.45, longitude: -70.66 },
         { city: 'Valparaíso', latitude: -33.04, longitude: -71.62 },
       ]);
-      mockPrisma.university.findMany.mockResolvedValue([]);
+      mockSqlPrisma.university.findMany.mockResolvedValue([]);
 
       const result = await service.getCitiesSummary();
 
@@ -469,7 +570,7 @@ describe('PensionsService', () => {
         { city: 'Valparaíso', latitude: -33.04, longitude: -71.63 },
       ];
       mockPrisma.pension.groupBy.mockResolvedValue([{ city: 'Valparaíso', _count: { id: 2 } }]);
-      mockPrisma.university.findMany.mockResolvedValue([
+      mockSqlPrisma.university.findMany.mockResolvedValue([
         { city: 'Valparaíso', latitude: -33.12, longitude: -71.56 },
       ]);
       mockPrisma.pension.findMany
@@ -489,7 +590,7 @@ describe('PensionsService', () => {
     it('resolves the canonical center for unaccented city names without requiring listings', async () => {
       mockPrisma.pension.groupBy.mockResolvedValue([]);
       mockPrisma.pension.findMany.mockResolvedValue([]);
-      mockPrisma.university.findMany.mockResolvedValue([
+      mockSqlPrisma.university.findMany.mockResolvedValue([
         { city: ' VALPARAISO ', latitude: -33.12, longitude: -71.56 },
       ]);
       const result = await service.getCitiesSummary();
@@ -504,7 +605,7 @@ describe('PensionsService', () => {
 
   describe('getAmenitiesCatalog', () => {
     it('should return catalog from database if amenities exist', async () => {
-      mockPrisma.amenity.findMany.mockResolvedValue([
+      mockSqlPrisma.amenity.findMany.mockResolvedValue([
         {
           slug: 'wifi-alta-velocidad',
           name: 'Wi-Fi fibra óptica',
@@ -519,7 +620,7 @@ describe('PensionsService', () => {
     });
 
     it('should return default static catalog if database returns empty', async () => {
-      mockPrisma.amenity.findMany.mockResolvedValue([]);
+      mockSqlPrisma.amenity.findMany.mockResolvedValue([]);
 
       const result = await service.getAmenitiesCatalog();
       expect(result.length).toBeGreaterThanOrEqual(15);

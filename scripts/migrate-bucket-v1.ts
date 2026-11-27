@@ -10,15 +10,18 @@ if (typeof process.loadEnvFile === 'function') {
 }
 
 const ENDPOINT =
+  process.env.S3_ENDPOINT ||
+  process.env.PUBLIC_AWS_ENDPOINT_URL_S3 ||
   process.env.AWS_ENDPOINT_URL_S3 ||
-  'https://br-gentle-butterfly-aevuizs0.storage.c-2.us-east-2.aws.neon.tech';
-const REGION = process.env.AWS_REGION || 'us-east-2';
-const BUCKET = process.env.PUBLIC_STORAGE_BUCKET || 'uploads';
-const ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
-const SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+  '';
+const REGION =
+  process.env.S3_REGION || process.env.PUBLIC_AWS_REGION || process.env.AWS_REGION || 'auto';
+const BUCKET = process.env.S3_BUCKET || process.env.PUBLIC_STORAGE_BUCKET || 'uploads';
+const ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+const SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
 
-if (!ACCESS_KEY_ID || !SECRET_ACCESS_KEY) {
-  throw new Error('AWS credentials missing in environment.');
+if (!ENDPOINT || !ACCESS_KEY_ID || !SECRET_ACCESS_KEY) {
+  throw new Error('S3/AWS endpoint and credentials are required in environment.');
 }
 
 const s3 = new S3Client({

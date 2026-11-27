@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { isValidObjectId } from '../common/utils/string.util.js';
 import { PrismaService } from '../prisma/prisma.service.js';

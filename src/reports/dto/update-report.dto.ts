@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ReportStatus } from '@prisma/client';
+import { ReportStatus } from '@prisma/sql-client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdateReportDto {

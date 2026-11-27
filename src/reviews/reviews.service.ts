@@ -4,9 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { type Prisma, Role } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+import { Role, type Prisma as SqlPrisma } from '@prisma/sql-client';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import type { CreateReviewDto } from './dto/create-review.dto.js';
 import { FilterReviewsDto } from './dto/filter-reviews.dto.js';
 import type { UpdateReviewDto } from './dto/update-review.dto.js';
@@ -111,7 +113,7 @@ const REVIEW_USER_SELECT = {
       name: true,
     },
   },
-} satisfies Prisma.UserSelect;
+} satisfies SqlPrisma.UserSelect;
 
 const REVIEW_SORT_MAP: Record<string, Prisma.ReviewOrderByWithRelationInput> = {
   oldest: { createdAt: 'asc' },
@@ -218,7 +220,35 @@ function formatMutatedReview<T extends ReviewAliasedInput>(review: T) {
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly sqlPrisma: SqlPrismaService,
+  ) {}
+
+  private async hydrateReviewUsers<T extends { userId: string }>(
+    reviews: T[],
+  ): Promise<Array<T & { user: ReviewUserPayload | null }>> {
+    if (reviews.length === 0) {
+      return [];
+    }
+
+    const userIds = Array.from(new Set(reviews.map((r) => r.userId).filter(Boolean)));
+    if (userIds.length === 0) {
+      return reviews.map((review) => ({ ...review, user: null }));
+    }
+
+    const users = await this.sqlPrisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: REVIEW_USER_SELECT,
+    });
+
+    const userMap = new Map<string, ReviewUserPayload>(users.map((u) => [u.id, u]));
+
+    return reviews.map((review) => ({
+      ...review,
+      user: userMap.get(review.userId) ?? null,
+    }));
+  }
 
   private async findOwnedReviewOrThrow(
     id: string,
@@ -281,9 +311,6 @@ export class ReviewsService {
         skip,
         take: limit,
         orderBy,
-        include: {
-          user: { select: REVIEW_USER_SELECT },
-        },
       }),
       this.prisma.review.findMany({
         where: baseWhere,
@@ -298,7 +325,9 @@ export class ReviewsService {
       }),
     ]);
 
-    const mappedItems = items.map((review) => ({
+    const hydratedItems = await this.hydrateReviewUsers(items);
+
+    const mappedItems = hydratedItems.map((review) => ({
       ...buildReviewAliases(review, currentUserId),
       stayDuration: review.stayDurationCategory ?? null,
     }));
@@ -325,7 +354,7 @@ export class ReviewsService {
   }
 
   async findUserStays(userId: string): Promise<unknown[]> {
-    const reviews = await this.prisma.review.findMany({
+    const rawReviews = await this.prisma.review.findMany({
       where: {
         userId,
         deletedAt: null,
@@ -343,9 +372,10 @@ export class ReviewsService {
             rooms: true,
           },
         },
-        user: { select: REVIEW_USER_SELECT },
       },
     });
+
+    const reviews = await this.hydrateReviewUsers(rawReviews);
 
     return reviews.map((review) => {
       const pension = review.pension as unknown as PensionStayRaw;
@@ -449,14 +479,12 @@ export class ReviewsService {
         isResidentVerified: user.isEmailVerified,
         helpfulUserIds: [],
       },
-      include: {
-        user: { select: REVIEW_USER_SELECT },
-      },
     });
 
     await this.recalculatePensionRating(pension.id);
 
-    return formatMutatedReview(review);
+    const [hydratedReview] = await this.hydrateReviewUsers([review]);
+    return formatMutatedReview(hydratedReview);
   }
 
   async update(id: string, dto: UpdateReviewDto, user: SanitizedUser): Promise<unknown> {
@@ -465,14 +493,12 @@ export class ReviewsService {
     const updated = await this.prisma.review.update({
       where: { id },
       data: dto,
-      include: {
-        user: { select: REVIEW_USER_SELECT },
-      },
     });
 
     await this.recalculatePensionRating(review.pensionId);
 
-    return formatMutatedReview(updated);
+    const [hydratedReview] = await this.hydrateReviewUsers([updated]);
+    return formatMutatedReview(hydratedReview);
   }
 
   async delete(id: string, user: SanitizedUser): Promise<{ id: string; deleted: boolean }> {

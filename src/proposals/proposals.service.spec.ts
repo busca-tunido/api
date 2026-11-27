@@ -1,15 +1,12 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ProposalStatus, ProposalType, Role } from '@prisma/client';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ProposalStatus, ProposalType, Role } from '@prisma/sql-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
+import type { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import { ProposalsService } from './proposals.service.js';
 
-type MockPrisma = {
-  pension: {
-    findUnique: ReturnType<typeof vi.fn>;
-    update: ReturnType<typeof vi.fn>;
-  };
+type MockSqlPrisma = {
   pensionProposal: {
     create: ReturnType<typeof vi.fn>;
     findMany: ReturnType<typeof vi.fn>;
@@ -17,11 +14,19 @@ type MockPrisma = {
     update: ReturnType<typeof vi.fn>;
     count: ReturnType<typeof vi.fn>;
   };
-  $transaction: ReturnType<typeof vi.fn>;
+};
+
+type MockPrisma = {
+  pension: {
+    findUnique: ReturnType<typeof vi.fn>;
+    findMany: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+  };
 };
 
 describe('ProposalsService', () => {
   let service: ProposalsService;
+  let mockSqlPrisma: MockSqlPrisma;
   let mockPrisma: MockPrisma;
 
   const mockUser: SanitizedUser = {
@@ -52,12 +57,22 @@ describe('ProposalsService', () => {
     updatedAt: new Date(),
   };
 
+  const mockLandlord: SanitizedUser = {
+    id: 'landlord-1',
+    email: 'landlord@test.cl',
+    firstName: 'Owner',
+    lastName: 'One',
+    phone: null,
+    avatarUrl: null,
+    role: Role.LANDLORD,
+    isEmailVerified: true,
+    universityId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(() => {
-    mockPrisma = {
-      pension: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-      },
+    mockSqlPrisma = {
       pensionProposal: {
         create: vi.fn(),
         findMany: vi.fn(),
@@ -65,16 +80,26 @@ describe('ProposalsService', () => {
         update: vi.fn(),
         count: vi.fn(),
       },
-      $transaction: vi.fn(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockPrisma)),
     };
 
-    service = new ProposalsService(mockPrisma as unknown as PrismaService);
+    mockPrisma = {
+      pension: {
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        update: vi.fn(),
+      },
+    };
+
+    service = new ProposalsService(
+      mockSqlPrisma as unknown as SqlPrismaService,
+      mockPrisma as unknown as PrismaService,
+    );
   });
 
   describe('create', () => {
     it('should create proposal successfully', async () => {
       mockPrisma.pension.findUnique.mockResolvedValue({ id: 'pension-1' });
-      mockPrisma.pensionProposal.create.mockResolvedValue({
+      mockSqlPrisma.pensionProposal.create.mockResolvedValue({
         id: 'prop-1',
         pensionId: 'pension-1',
         submittedById: mockUser.id,
@@ -94,7 +119,7 @@ describe('ProposalsService', () => {
       expect(mockPrisma.pension.findUnique).toHaveBeenCalledWith({
         where: { id: 'pension-1', deletedAt: null },
       });
-      expect(mockPrisma.pensionProposal.create).toHaveBeenCalled();
+      expect(mockSqlPrisma.pensionProposal.create).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
 
@@ -114,14 +139,42 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('findByPension', () => {
+    it('should return proposals for owning landlord', async () => {
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: mockLandlord.id,
+      });
+      mockSqlPrisma.pensionProposal.findMany.mockResolvedValue([{ id: 'prop-1' }]);
+
+      const result = await service.findByPension('pension-1', mockLandlord);
+      expect(result).toEqual([{ id: 'prop-1' }]);
+    });
+
+    it('should throw ForbiddenException when non-owner landlord queries pension proposals', async () => {
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: 'other-landlord',
+      });
+
+      await expect(service.findByPension('pension-1', mockLandlord)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+  });
+
   describe('review', () => {
     it('should reject proposal with notes', async () => {
-      mockPrisma.pensionProposal.findUnique.mockResolvedValue({
+      mockSqlPrisma.pensionProposal.findUnique.mockResolvedValue({
         id: 'prop-1',
         pensionId: 'pension-1',
         status: ProposalStatus.PENDING,
       });
-      mockPrisma.pensionProposal.update.mockResolvedValue({
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: mockLandlord.id,
+      });
+      mockSqlPrisma.pensionProposal.update.mockResolvedValue({
         id: 'prop-1',
         status: ProposalStatus.REJECTED,
       });
@@ -132,7 +185,7 @@ describe('ProposalsService', () => {
         mockModerator,
       );
 
-      expect(mockPrisma.pensionProposal.update).toHaveBeenCalledWith(
+      expect(mockSqlPrisma.pensionProposal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'prop-1' },
           data: expect.objectContaining({
@@ -146,9 +199,14 @@ describe('ProposalsService', () => {
     });
 
     it('should throw BadRequestException if rejecting without notes', async () => {
-      mockPrisma.pensionProposal.findUnique.mockResolvedValue({
+      mockSqlPrisma.pensionProposal.findUnique.mockResolvedValue({
         id: 'prop-1',
+        pensionId: 'pension-1',
         status: ProposalStatus.PENDING,
+      });
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: mockLandlord.id,
       });
 
       await expect(service.review('prop-1', { action: 'REJECT' }, mockModerator)).rejects.toThrow(
@@ -156,15 +214,19 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('should approve proposal and apply direct changes in transaction', async () => {
-      mockPrisma.pensionProposal.findUnique.mockResolvedValue({
+    it('should approve proposal and update pension in MongoDB then proposal in PostgreSQL', async () => {
+      mockSqlPrisma.pensionProposal.findUnique.mockResolvedValue({
         id: 'prop-1',
         pensionId: 'pension-1',
         status: ProposalStatus.PENDING,
         proposedChanges: { curfewTime: '23:30' },
       });
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: mockLandlord.id,
+      });
       mockPrisma.pension.update.mockResolvedValue({ id: 'pension-1', curfewTime: '23:30' });
-      mockPrisma.pensionProposal.update.mockResolvedValue({
+      mockSqlPrisma.pensionProposal.update.mockResolvedValue({
         id: 'prop-1',
         status: ProposalStatus.APPROVED,
       });
@@ -175,17 +237,32 @@ describe('ProposalsService', () => {
         mockModerator,
       );
 
-      expect(mockPrisma.$transaction).toHaveBeenCalled();
       expect(mockPrisma.pension.update).toHaveBeenCalledWith({
         where: { id: 'pension-1' },
         data: { curfewTime: '23:30' },
       });
+      expect(mockSqlPrisma.pensionProposal.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'prop-1' },
+          data: expect.objectContaining({
+            status: ProposalStatus.APPROVED,
+            appliedChanges: { curfewTime: '23:30' },
+            reviewNotes: 'Aprobado correctamente',
+            reviewedById: mockModerator.id,
+          }),
+        }),
+      );
     });
 
     it('should throw BadRequestException if proposal is already resolved', async () => {
-      mockPrisma.pensionProposal.findUnique.mockResolvedValue({
+      mockSqlPrisma.pensionProposal.findUnique.mockResolvedValue({
         id: 'prop-1',
+        pensionId: 'pension-1',
         status: ProposalStatus.APPROVED,
+      });
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        landlordId: mockLandlord.id,
       });
 
       await expect(service.review('prop-1', { action: 'APPROVE' }, mockModerator)).rejects.toThrow(
@@ -195,13 +272,33 @@ describe('ProposalsService', () => {
   });
 
   describe('findModerationProposals', () => {
-    it('should return OpenAPI-aligned items and pagination metadata', async () => {
-      mockPrisma.pensionProposal.count.mockResolvedValue(1);
-      mockPrisma.pensionProposal.findMany.mockResolvedValue([{ id: 'prop-1' }]);
+    it('should return OpenAPI-aligned items enriched with MongoDB pensions and pagination metadata', async () => {
+      mockSqlPrisma.pensionProposal.count.mockResolvedValue(1);
+      mockSqlPrisma.pensionProposal.findMany.mockResolvedValue([
+        { id: 'prop-1', pensionId: 'pension-1' },
+      ]);
+      mockPrisma.pension.findMany.mockResolvedValue([
+        { id: 'pension-1', title: 'Residencia Sur', address: 'Av. 123', city: 'Santiago' },
+      ]);
 
       const result = await service.findModerationProposals(ProposalStatus.PENDING, 1, 20);
+      expect(mockPrisma.pension.findMany).toHaveBeenCalledWith({
+        where: { id: { in: ['pension-1'] } },
+        select: { id: true, title: true, address: true, city: true },
+      });
       expect(result).toEqual({
-        items: [{ id: 'prop-1' }],
+        items: [
+          {
+            id: 'prop-1',
+            pensionId: 'pension-1',
+            pension: {
+              id: 'pension-1',
+              title: 'Residencia Sur',
+              address: 'Av. 123',
+              city: 'Santiago',
+            },
+          },
+        ],
         pagination: {
           page: 1,
           limit: 20,
@@ -215,6 +312,52 @@ describe('ProposalsService', () => {
         totalPages: 1,
         hasMore: false,
       });
+    });
+  });
+
+  describe('findProposalWithDiff', () => {
+    it('should compute diff between MongoDB pension and SQL proposal', async () => {
+      mockSqlPrisma.pensionProposal.findUnique.mockResolvedValue({
+        id: 'prop-1',
+        pensionId: 'pension-1',
+        proposedChanges: {
+          curfewTime: '23:30',
+          amenitiesToAdd: ['wifi'],
+        },
+      });
+      mockPrisma.pension.findUnique.mockResolvedValue({
+        id: 'pension-1',
+        curfewTime: '22:00',
+      });
+
+      const result = await service.findProposalWithDiff('prop-1');
+
+      expect(result).toEqual({
+        proposal: {
+          id: 'prop-1',
+          pensionId: 'pension-1',
+          proposedChanges: {
+            curfewTime: '23:30',
+            amenitiesToAdd: ['wifi'],
+          },
+          pension: {
+            id: 'pension-1',
+            curfewTime: '22:00',
+          },
+        },
+        diff: {
+          curfewTime: {
+            current: '22:00',
+            proposed: '23:30',
+          },
+        },
+      });
+    });
+
+    it('should throw NotFoundException if proposal does not exist', async () => {
+      mockSqlPrisma.pensionProposal.findUnique.mockResolvedValue(null);
+
+      await expect(service.findProposalWithDiff('prop-404')).rejects.toThrow(NotFoundException);
     });
   });
 });

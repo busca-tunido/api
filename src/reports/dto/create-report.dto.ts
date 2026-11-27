@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportReason } from '@prisma/client';
+import { ReportReason } from '@prisma/sql-client';
 import { IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateReportDto {

@@ -74,10 +74,22 @@ describe('validateEnv', () => {
     expect(() => validateEnv({ ...baseValidConfig, PORT: 'invalid-port' })).toThrow('Invalid PORT');
   });
 
+  it('should require SQL_DATABASE_URL in production mode', () => {
+    const prodConfig = {
+      ...baseValidConfig,
+      NODE_ENV: 'production',
+    };
+    expect(() => validateEnv(prodConfig)).toThrow(
+      'SQL_DATABASE_URL environment variable is required in production.',
+    );
+  });
+
   it('should require AWS storage variables in production mode', () => {
     const prodConfig = {
       ...baseValidConfig,
       NODE_ENV: 'production',
+      SQL_DATABASE_URL:
+        'postgresql://user:pass@ep-cool.sa-east-1.aws.neon.tech/neondb?sslmode=require',
     };
     expect(() => validateEnv(prodConfig)).toThrow(
       'PUBLIC_AWS_ENDPOINT_URL_S3 environment variable is required in production.',
@@ -88,6 +100,8 @@ describe('validateEnv', () => {
     const prodConfig = {
       ...baseValidConfig,
       NODE_ENV: 'production',
+      SQL_DATABASE_URL:
+        'postgresql://user:pass@ep-cool.sa-east-1.aws.neon.tech/neondb?sslmode=require',
       JWT_SECRET: 'super-secret-jwt-key-with-sufficient-length-32',
       S3_ENDPOINT: 'https://account123.r2.cloudflarestorage.com',
       S3_REGION: 'auto',
@@ -98,6 +112,9 @@ describe('validateEnv', () => {
       TURNSTILE_SECRET_KEY: 'prod-turnstile-secret-key-live',
     };
     const validated = validateEnv(prodConfig);
+    expect(validated.SQL_DATABASE_URL).toBe(
+      'postgresql://user:pass@ep-cool.sa-east-1.aws.neon.tech/neondb?sslmode=require',
+    );
     expect(validated.S3_ENDPOINT).toBe('https://account123.r2.cloudflarestorage.com');
     expect(validated.S3_REGION).toBe('auto');
     expect(validated.S3_BUCKET).toBe('buscatunido-media');
@@ -111,6 +128,8 @@ describe('validateEnv', () => {
     const prodConfig = {
       ...baseValidConfig,
       NODE_ENV: 'production',
+      SQL_DATABASE_URL:
+        'postgresql://user:pass@ep-cool.sa-east-1.aws.neon.tech/neondb?sslmode=require',
       JWT_SECRET: 'super-secret-jwt-key-with-sufficient-length-32',
       PUBLIC_AWS_ENDPOINT_URL_S3: 'https://branch.storage.c-2.us-east-2.aws.neon.tech',
       AWS_ACCESS_KEY_ID: 'neon-key',
@@ -131,6 +150,8 @@ describe('validateEnv', () => {
     const prodConfig = {
       ...baseValidConfig,
       NODE_ENV: 'production',
+      SQL_DATABASE_URL:
+        'postgresql://user:pass@ep-cool.sa-east-1.aws.neon.tech/neondb?sslmode=require',
       JWT_SECRET: 'short-secret',
       PUBLIC_AWS_ENDPOINT_URL_S3: 'https://branch.storage.c-2.us-east-2.aws.neon.tech',
       AWS_ACCESS_KEY_ID: 'neon-key',
@@ -148,6 +169,8 @@ describe('validateEnv', () => {
     const prodConfig = {
       ...baseValidConfig,
       NODE_ENV: 'production',
+      SQL_DATABASE_URL:
+        'postgresql://user:pass@ep-cool.sa-east-1.aws.neon.tech/neondb?sslmode=require',
       JWT_SECRET: 'super-secret-jwt-key-with-sufficient-length-32',
       PUBLIC_AWS_ENDPOINT_URL_S3: 'https://branch.storage.c-2.us-east-2.aws.neon.tech',
       AWS_ACCESS_KEY_ID: 'neon-key',

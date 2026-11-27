@@ -102,7 +102,7 @@
       "name": "App",
       "item": [
         {
-          "name": "GET /",
+          "name": "API welcome root endpoint",
           "request": {
             "method": "GET",
             "header": [],
@@ -112,6 +112,25 @@
                 "{{baseUrl}}"
               ],
               "path": []
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Check API and database health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
             },
             "auth": {
               "type": "noauth"
@@ -178,7 +197,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -263,7 +282,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -348,7 +367,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -431,7 +450,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -514,7 +533,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -596,7 +615,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -624,7 +643,7 @@
           ]
         },
         {
-          "name": "Check if an email address is already registered",
+          "name": "Check if an email address is already registered and auto-detect university",
           "request": {
             "method": "GET",
             "header": [],
@@ -641,7 +660,7 @@
                 {
                   "key": "email",
                   "value": "{{email}}",
-                  "description": "Correo electrónico a verificar"
+                  "disabled": false
                 }
               ]
             },
@@ -702,7 +721,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -731,702 +750,6 @@
       ]
     },
     {
-      "name": "Pensions",
-      "item": [
-        {
-          "name": "List pensions with filtering and pagination",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/pensions",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions"
-              ]
-            },
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "try {",
-                  "  const res = pm.response.json();",
-                  "  const data = res && res.data !== undefined ? res.data : res;",
-                  "  const setVar = (key, val) => {",
-                  "    if (val === undefined || val === null || val === \"\") return;",
-                  "    const str = String(val);",
-                  "    if (typeof pm !== \"undefined\") {",
-                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
-                  "      if (pm.environment) pm.environment.set(key, str);",
-                  "      if (pm.globals) pm.globals.set(key, str);",
-                  "    }",
-                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
-                  "      postman.setEnvironmentVariable(key, str);",
-                  "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
-                  "  };",
-                  "  const first = (arrOrObj) => {",
-                  "    if (!arrOrObj) return null;",
-                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
-                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
-                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
-                  "    return null;",
-                  "  };",
-                  "  const reqEmail = (() => {",
-                  "    try {",
-                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
-                  "        return JSON.parse(pm.request.body.raw).email || null;",
-                  "      }",
-                  "    } catch (e) {}",
-                  "    return null;",
-                  "  })();",
-                  "  setVar(\"pensionId\", first(data)?.id);",
-                  "  setVar(\"pensionSlug\", first(data)?.slug);",
-                  "} catch (e) {",
-                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Create a new pension (Landlord or Admin)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Residencia San Joaquín\",\n  \"description\": \"Excelente pensión cerca de campus San Joaquín, habitaciones amobladas con WiFi y áreas comunes.\",\n  \"address\": \"Av. Vicuña Mackenna 4860\",\n  \"city\": \"Santiago\",\n  \"neighborhood\": \"San Joaquín\",\n  \"latitude\": -33.4996,\n  \"longitude\": -70.6145,\n  \"baseMonthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"currency\": \"CLP\",\n  \"waterIncluded\": true,\n  \"electricityIncluded\": true,\n  \"gasIncluded\": true,\n  \"internetIncluded\": true,\n  \"curfewTime\": \"23:00\",\n  \"guestsAllowed\": true,\n  \"smokingAllowed\": false,\n  \"petsAllowed\": false,\n  \"genderPreference\": \"ANY\",\n  \"quietHoursStart\": \"23:00\",\n  \"quietHoursEnd\": \"07:00\",\n  \"amenitySlugs\": [\n    \"wifi-alta-velocidad\",\n    \"bano-privado\"\n  ],\n  \"nearbyUniversityId\": \"{{universityId}}\",\n  \"distanceMeters\": 500\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/pensions",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "try {",
-                  "  const res = pm.response.json();",
-                  "  const data = res && res.data !== undefined ? res.data : res;",
-                  "  const setVar = (key, val) => {",
-                  "    if (val === undefined || val === null || val === \"\") return;",
-                  "    const str = String(val);",
-                  "    if (typeof pm !== \"undefined\") {",
-                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
-                  "      if (pm.environment) pm.environment.set(key, str);",
-                  "      if (pm.globals) pm.globals.set(key, str);",
-                  "    }",
-                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
-                  "      postman.setEnvironmentVariable(key, str);",
-                  "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
-                  "  };",
-                  "  const first = (arrOrObj) => {",
-                  "    if (!arrOrObj) return null;",
-                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
-                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
-                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
-                  "    return null;",
-                  "  };",
-                  "  const reqEmail = (() => {",
-                  "    try {",
-                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
-                  "        return JSON.parse(pm.request.body.raw).email || null;",
-                  "      }",
-                  "    } catch (e) {}",
-                  "    return null;",
-                  "  })();",
-                  "  setVar(\"pensionId\", data.id);",
-                  "  setVar(\"pensionSlug\", data.slug);",
-                  "} catch (e) {",
-                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get price distribution histogram for pensions",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/pensions/price-histogram",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions",
-                "price-histogram"
-              ]
-            },
-            "auth": {
-              "type": "noauth"
-            }
-          }
-        },
-        {
-          "name": "List pensions owned by authenticated landlord",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/pensions/mine",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions",
-                "mine"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get pension detail by ID or Slug",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions",
-                "{{pensionId}}"
-              ]
-            },
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "try {",
-                  "  const res = pm.response.json();",
-                  "  const data = res && res.data !== undefined ? res.data : res;",
-                  "  const setVar = (key, val) => {",
-                  "    if (val === undefined || val === null || val === \"\") return;",
-                  "    const str = String(val);",
-                  "    if (typeof pm !== \"undefined\") {",
-                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
-                  "      if (pm.environment) pm.environment.set(key, str);",
-                  "      if (pm.globals) pm.globals.set(key, str);",
-                  "    }",
-                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
-                  "      postman.setEnvironmentVariable(key, str);",
-                  "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
-                  "  };",
-                  "  const first = (arrOrObj) => {",
-                  "    if (!arrOrObj) return null;",
-                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
-                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
-                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
-                  "    return null;",
-                  "  };",
-                  "  const reqEmail = (() => {",
-                  "    try {",
-                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
-                  "        return JSON.parse(pm.request.body.raw).email || null;",
-                  "      }",
-                  "    } catch (e) {}",
-                  "    return null;",
-                  "  })();",
-                  "  setVar(\"pensionId\", data.id);",
-                  "  setVar(\"pensionSlug\", data.slug);",
-                  "} catch (e) {",
-                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Update pension details (Owner or Admin)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Residencia San Joaquín - Actualizada\",\n  \"description\": \"Pensión universitaria renovada con nuevas habitaciones disponibles y ambiente tranquilo.\",\n  \"baseMonthlyPrice\": 260000,\n  \"deposit\": 260000,\n  \"curfewTime\": \"23:30\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions",
-                "{{pensionId}}"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Soft delete pension (Owner or Admin)",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions",
-                "{{pensionId}}"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Rooms",
-      "item": [
-        {
-          "name": "List rooms for a specific pension",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/pensions/{{pensionId}}/rooms",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions",
-                "{{pensionId}}",
-                "rooms"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "try {",
-                  "  const res = pm.response.json();",
-                  "  const data = res && res.data !== undefined ? res.data : res;",
-                  "  const setVar = (key, val) => {",
-                  "    if (val === undefined || val === null || val === \"\") return;",
-                  "    const str = String(val);",
-                  "    if (typeof pm !== \"undefined\") {",
-                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
-                  "      if (pm.environment) pm.environment.set(key, str);",
-                  "      if (pm.globals) pm.globals.set(key, str);",
-                  "    }",
-                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
-                  "      postman.setEnvironmentVariable(key, str);",
-                  "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
-                  "  };",
-                  "  const first = (arrOrObj) => {",
-                  "    if (!arrOrObj) return null;",
-                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
-                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
-                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
-                  "    return null;",
-                  "  };",
-                  "  const reqEmail = (() => {",
-                  "    try {",
-                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
-                  "        return JSON.parse(pm.request.body.raw).email || null;",
-                  "      }",
-                  "    } catch (e) {}",
-                  "    return null;",
-                  "  })();",
-                  "  setVar(\"roomId\", first(data)?.id);",
-                  "} catch (e) {",
-                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Add a new room to a pension (Owner or Admin)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"roomNumber\": \"Hab 101\",\n  \"title\": \"Habitación Individual Luminosa\",\n  \"description\": \"Pieza amoblada con clóset, escritorio y buena iluminación para estudio.\",\n  \"type\": \"SINGLE\",\n  \"monthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"hasPrivateBathroom\": true,\n  \"totalBeds\": 1,\n  \"availableBeds\": 1,\n  \"isAvailable\": true,\n  \"images\": [\n    \"{{uploadedImageUrl}}\"\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/pensions/{{pensionId}}/rooms",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pensions",
-                "{{pensionId}}",
-                "rooms"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "try {",
-                  "  const res = pm.response.json();",
-                  "  const data = res && res.data !== undefined ? res.data : res;",
-                  "  const setVar = (key, val) => {",
-                  "    if (val === undefined || val === null || val === \"\") return;",
-                  "    const str = String(val);",
-                  "    if (typeof pm !== \"undefined\") {",
-                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
-                  "      if (pm.environment) pm.environment.set(key, str);",
-                  "      if (pm.globals) pm.globals.set(key, str);",
-                  "    }",
-                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
-                  "      postman.setEnvironmentVariable(key, str);",
-                  "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
-                  "  };",
-                  "  const first = (arrOrObj) => {",
-                  "    if (!arrOrObj) return null;",
-                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
-                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
-                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
-                  "    return null;",
-                  "  };",
-                  "  const reqEmail = (() => {",
-                  "    try {",
-                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
-                  "        return JSON.parse(pm.request.body.raw).email || null;",
-                  "      }",
-                  "    } catch (e) {}",
-                  "    return null;",
-                  "  })();",
-                  "  setVar(\"roomId\", data.id);",
-                  "} catch (e) {",
-                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get room by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/rooms/{{roomId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "rooms",
-                "{{roomId}}"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "try {",
-                  "  const res = pm.response.json();",
-                  "  const data = res && res.data !== undefined ? res.data : res;",
-                  "  const setVar = (key, val) => {",
-                  "    if (val === undefined || val === null || val === \"\") return;",
-                  "    const str = String(val);",
-                  "    if (typeof pm !== \"undefined\") {",
-                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
-                  "      if (pm.environment) pm.environment.set(key, str);",
-                  "      if (pm.globals) pm.globals.set(key, str);",
-                  "    }",
-                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
-                  "      postman.setEnvironmentVariable(key, str);",
-                  "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
-                  "  };",
-                  "  const first = (arrOrObj) => {",
-                  "    if (!arrOrObj) return null;",
-                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
-                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
-                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
-                  "    return null;",
-                  "  };",
-                  "  const reqEmail = (() => {",
-                  "    try {",
-                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
-                  "        return JSON.parse(pm.request.body.raw).email || null;",
-                  "      }",
-                  "    } catch (e) {}",
-                  "    return null;",
-                  "  })();",
-                  "  setVar(\"roomId\", data.id);",
-                  "} catch (e) {",
-                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Update room details (Owner or Admin)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Habitación Individual - Precio Promocional\",\n  \"monthlyPrice\": 240000,\n  \"isAvailable\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/rooms/{{roomId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "rooms",
-                "{{roomId}}"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Soft delete room (Owner or Admin)",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/rooms/{{roomId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "rooms",
-                "{{roomId}}"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
       "name": "Universities",
       "item": [
         {
@@ -1435,7 +758,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/universities?city=",
+              "raw": "{{baseUrl}}/universities?city=&includeCampuses=",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1445,6 +768,11 @@
               "query": [
                 {
                   "key": "city",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "includeCampuses",
                   "value": "",
                   "disabled": true
                 }
@@ -1474,7 +802,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -1565,7 +893,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -1590,6 +918,33 @@
               }
             }
           ]
+        },
+        {
+          "name": "List all university campus areas with perimeter polygons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/universities/campuses?city=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "universities",
+                "campuses"
+              ],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
         },
         {
           "name": "Get university by ID",
@@ -1630,7 +985,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -1674,7 +1029,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Universidad de Chile - Campus Central\",\n  \"shortName\": \"UCH\",\n  \"emailDomains\": [\n    \"uchile.cl\",\n    \"alumnos.uchile.cl\",\n    \"ingenieria.uchile.cl\"\n  ]\n}",
+              "raw": "{\n  \"name\": \"Universidad de Chile\",\n  \"shortName\": \"UCH\",\n  \"emailDomains\": [\n    \"uchile.cl\",\n    \"alumnos.uchile.cl\"\n  ],\n  \"city\": \"Santiago\",\n  \"address\": \"Av. Libertador Bernardo O'Higgins 1058\",\n  \"latitude\": -33.4442,\n  \"longitude\": -70.6517\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1739,28 +1094,290 @@
       ]
     },
     {
-      "name": "Reviews",
+      "name": "Pensions",
       "item": [
         {
-          "name": "Get paginated reviews for a pension with optional rating filter and sorting",
+          "name": "List pensions with filtering and pagination",
           "request": {
             "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions?city=Santiago&neighborhood=San Joaquín&minPrice=150000&maxPrice=400000&genderPreference=&universityId={{universityId}}&amenities=&roomType=&hasPrivateBathroom=true&includesMeals=true&minBeds=1&search=República&page=1&limit=12&latitude=-33.4489&longitude=-70.6693&radiusKm=30&minLat=-33.5&maxLat=-33.4&minLng=-70.7&maxLng=-70.6&sortBy=&view=&ratingTier=&onlyAvailable=true&internetIncluded=true&petsAllowed=true&guestsAllowed=true&smokingAllowed=true&noCurfew=true&waterIncluded=true&electricityIncluded=true&gasIncluded=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions"
+              ],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "Santiago",
+                  "disabled": true
+                },
+                {
+                  "key": "neighborhood",
+                  "value": "San Joaquín",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "150000",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "400000",
+                  "disabled": true
+                },
+                {
+                  "key": "genderPreference",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "universityId",
+                  "value": "{{universityId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "amenities",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "roomType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hasPrivateBathroom",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "includesMeals",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "minBeds",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "República",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "12",
+                  "disabled": true
+                },
+                {
+                  "key": "latitude",
+                  "value": "-33.4489",
+                  "description": "Latitude coordinate of user location",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "-70.6693",
+                  "description": "Longitude coordinate of user location",
+                  "disabled": true
+                },
+                {
+                  "key": "radiusKm",
+                  "value": "30",
+                  "description": "Radius in km (1-100)",
+                  "disabled": true
+                },
+                {
+                  "key": "minLat",
+                  "value": "-33.5",
+                  "description": "Minimum latitude boundary (South)",
+                  "disabled": true
+                },
+                {
+                  "key": "maxLat",
+                  "value": "-33.4",
+                  "description": "Maximum latitude boundary (North)",
+                  "disabled": true
+                },
+                {
+                  "key": "minLng",
+                  "value": "-70.7",
+                  "description": "Minimum longitude boundary (West)",
+                  "disabled": true
+                },
+                {
+                  "key": "maxLng",
+                  "value": "-70.6",
+                  "description": "Maximum longitude boundary (East)",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "view",
+                  "value": "",
+                  "description": "Payload projection mode (full, card, or map)",
+                  "disabled": true
+                },
+                {
+                  "key": "ratingTier",
+                  "value": "",
+                  "description": "Filter by community rating tier (high, medium, low, unreviewed)",
+                  "disabled": true
+                },
+                {
+                  "key": "onlyAvailable",
+                  "value": "true",
+                  "description": "Filter pensions that have at least one available active room",
+                  "disabled": true
+                },
+                {
+                  "key": "internetIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with WiFi / Internet included",
+                  "disabled": true
+                },
+                {
+                  "key": "petsAllowed",
+                  "value": "true",
+                  "description": "Filter pensions that allow pets",
+                  "disabled": true
+                },
+                {
+                  "key": "guestsAllowed",
+                  "value": "true",
+                  "description": "Filter pensions that allow guests",
+                  "disabled": true
+                },
+                {
+                  "key": "smokingAllowed",
+                  "value": "true",
+                  "description": "Filter pensions that allow smoking",
+                  "disabled": true
+                },
+                {
+                  "key": "noCurfew",
+                  "value": "true",
+                  "description": "Filter pensions without a curfew time restriction",
+                  "disabled": true
+                },
+                {
+                  "key": "waterIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with water utility included",
+                  "disabled": true
+                },
+                {
+                  "key": "electricityIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with electricity utility included",
+                  "disabled": true
+                },
+                {
+                  "key": "gasIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with gas utility included",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"pensionId\", first(data)?.id);",
+                  "  setVar(\"pensionSlug\", first(data)?.slug);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a new pension (Landlord or Admin)",
+          "request": {
+            "method": "POST",
             "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}",
                 "type": "text"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Residencia San Joaquín\",\n  \"description\": \"Excelente pensión cerca de campus San Joaquín\",\n  \"address\": \"Av. Vicuña Mackenna 4860\",\n  \"city\": \"Santiago\",\n  \"neighborhood\": \"San Joaquín\",\n  \"latitude\": -33.4996,\n  \"longitude\": -70.6145,\n  \"baseMonthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"currency\": \"CLP\",\n  \"waterIncluded\": true,\n  \"electricityIncluded\": true,\n  \"gasIncluded\": true,\n  \"internetIncluded\": true,\n  \"curfewTime\": \"23:00\",\n  \"guestsAllowed\": true,\n  \"smokingAllowed\": false,\n  \"petsAllowed\": false,\n  \"genderPreference\": null,\n  \"quietHoursStart\": \"23:00\",\n  \"quietHoursEnd\": \"07:00\",\n  \"amenitySlugs\": [\n    \"wifi-alta-velocidad\",\n    \"bano-privado\"\n  ],\n  \"nearbyUniversityId\": \"6659f8c123456789abcdef01\",\n  \"distanceMeters\": 500,\n  \"contactName\": \"Sra. Carmen Gloria\",\n  \"contactPhone\": \"+56 9 1234 5678\",\n  \"contactWhatsapp\": \"+56 9 1234 5678\",\n  \"contactEmail\": \"contacto@residencia.cl\",\n  \"images\": [\n    \"https://media.buscatunido.cl/v1/production/pensions/photo-1.webp\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/pensions/{{pensionId}}/reviews",
+              "raw": "{{baseUrl}}/pensions",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "pensions",
-                "{{pensionId}}",
-                "reviews"
+                "pensions"
               ]
             },
             "auth": {
@@ -1794,7 +1411,912 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"pensionId\", data.id);",
+                  "  setVar(\"pensionSlug\", data.slug);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get price distribution histogram for pensions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/price-histogram?city=Santiago&neighborhood=San Joaquín&minPrice=150000&maxPrice=400000&genderPreference=&universityId={{universityId}}&amenities=&roomType=&hasPrivateBathroom=true&includesMeals=true&minBeds=1&search=República&page=1&limit=12&latitude=-33.4489&longitude=-70.6693&radiusKm=30&minLat=-33.5&maxLat=-33.4&minLng=-70.7&maxLng=-70.6&sortBy=&view=&ratingTier=&onlyAvailable=true&internetIncluded=true&petsAllowed=true&guestsAllowed=true&smokingAllowed=true&noCurfew=true&waterIncluded=true&electricityIncluded=true&gasIncluded=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "price-histogram"
+              ],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "Santiago",
+                  "disabled": true
+                },
+                {
+                  "key": "neighborhood",
+                  "value": "San Joaquín",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "150000",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "400000",
+                  "disabled": true
+                },
+                {
+                  "key": "genderPreference",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "universityId",
+                  "value": "{{universityId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "amenities",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "roomType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hasPrivateBathroom",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "includesMeals",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "minBeds",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "República",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "12",
+                  "disabled": true
+                },
+                {
+                  "key": "latitude",
+                  "value": "-33.4489",
+                  "description": "Latitude coordinate of user location",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "-70.6693",
+                  "description": "Longitude coordinate of user location",
+                  "disabled": true
+                },
+                {
+                  "key": "radiusKm",
+                  "value": "30",
+                  "description": "Radius in km (1-100)",
+                  "disabled": true
+                },
+                {
+                  "key": "minLat",
+                  "value": "-33.5",
+                  "description": "Minimum latitude boundary (South)",
+                  "disabled": true
+                },
+                {
+                  "key": "maxLat",
+                  "value": "-33.4",
+                  "description": "Maximum latitude boundary (North)",
+                  "disabled": true
+                },
+                {
+                  "key": "minLng",
+                  "value": "-70.7",
+                  "description": "Minimum longitude boundary (West)",
+                  "disabled": true
+                },
+                {
+                  "key": "maxLng",
+                  "value": "-70.6",
+                  "description": "Maximum longitude boundary (East)",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "view",
+                  "value": "",
+                  "description": "Payload projection mode (full, card, or map)",
+                  "disabled": true
+                },
+                {
+                  "key": "ratingTier",
+                  "value": "",
+                  "description": "Filter by community rating tier (high, medium, low, unreviewed)",
+                  "disabled": true
+                },
+                {
+                  "key": "onlyAvailable",
+                  "value": "true",
+                  "description": "Filter pensions that have at least one available active room",
+                  "disabled": true
+                },
+                {
+                  "key": "internetIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with WiFi / Internet included",
+                  "disabled": true
+                },
+                {
+                  "key": "petsAllowed",
+                  "value": "true",
+                  "description": "Filter pensions that allow pets",
+                  "disabled": true
+                },
+                {
+                  "key": "guestsAllowed",
+                  "value": "true",
+                  "description": "Filter pensions that allow guests",
+                  "disabled": true
+                },
+                {
+                  "key": "smokingAllowed",
+                  "value": "true",
+                  "description": "Filter pensions that allow smoking",
+                  "disabled": true
+                },
+                {
+                  "key": "noCurfew",
+                  "value": "true",
+                  "description": "Filter pensions without a curfew time restriction",
+                  "disabled": true
+                },
+                {
+                  "key": "waterIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with water utility included",
+                  "disabled": true
+                },
+                {
+                  "key": "electricityIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with electricity utility included",
+                  "disabled": true
+                },
+                {
+                  "key": "gasIncluded",
+                  "value": "true",
+                  "description": "Filter pensions with gas utility included",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "List pensions owned by authenticated landlord",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "mine"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List all cities with absolute pension counts and coordinates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/cities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "cities"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "List all available pension amenities catalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/amenities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "amenities"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get pension detail by ID or Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"pensionId\", data.id);",
+                  "  setVar(\"pensionSlug\", data.slug);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update pension details (Owner or Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Residencia San Joaquín\",\n  \"description\": \"Excelente pensión cerca de campus San Joaquín\",\n  \"address\": \"Av. Vicuña Mackenna 4860\",\n  \"city\": \"Santiago\",\n  \"neighborhood\": \"San Joaquín\",\n  \"latitude\": -33.4996,\n  \"longitude\": -70.6145,\n  \"baseMonthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"currency\": \"CLP\",\n  \"waterIncluded\": true,\n  \"electricityIncluded\": true,\n  \"gasIncluded\": true,\n  \"internetIncluded\": true,\n  \"curfewTime\": \"23:00\",\n  \"guestsAllowed\": true,\n  \"smokingAllowed\": false,\n  \"petsAllowed\": false,\n  \"genderPreference\": null,\n  \"quietHoursStart\": \"23:00\",\n  \"quietHoursEnd\": \"07:00\",\n  \"amenitySlugs\": [\n    \"wifi-alta-velocidad\",\n    \"bano-privado\"\n  ],\n  \"nearbyUniversityId\": \"6659f8c123456789abcdef01\",\n  \"distanceMeters\": 500,\n  \"contactName\": \"Sra. Carmen Gloria\",\n  \"contactPhone\": \"+56 9 1234 5678\",\n  \"contactWhatsapp\": \"+56 9 1234 5678\",\n  \"contactEmail\": \"contacto@residencia.cl\",\n  \"images\": [\n    \"https://media.buscatunido.cl/v1/production/pensions/photo-1.webp\"\n  ],\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Soft delete pension (Owner or Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cities",
+      "item": [
+        {
+          "name": "List all cities with absolute pension counts and coordinates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cities"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rooms",
+      "item": [
+        {
+          "name": "List rooms for a specific pension",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "rooms"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"roomId\", first(data)?.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add a new room to a pension (Owner or Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomNumber\": \"Hab 101\",\n  \"title\": \"Habitación Individual Luminosa\",\n  \"description\": \"Pieza amoblada con clóset y escritorio.\",\n  \"type\": null,\n  \"monthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"hasPrivateBathroom\": false,\n  \"bathType\": \"PRIVATE\",\n  \"totalBeds\": 1,\n  \"availableBeds\": 1,\n  \"isAvailable\": true,\n  \"isActive\": true,\n  \"images\": [\n    \"https://example.com/room1.webp\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "rooms"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"roomId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get room by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{roomId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
+                  "  };",
+                  "  const first = (arrOrObj) => {",
+                  "    if (!arrOrObj) return null;",
+                  "    if (Array.isArray(arrOrObj)) return arrOrObj.length > 0 ? arrOrObj[0] : null;",
+                  "    if (arrOrObj.items && Array.isArray(arrOrObj.items)) return arrOrObj.items.length > 0 ? arrOrObj.items[0] : null;",
+                  "    if (typeof arrOrObj === \"object\") return arrOrObj;",
+                  "    return null;",
+                  "  };",
+                  "  const reqEmail = (() => {",
+                  "    try {",
+                  "      if (typeof pm !== \"undefined\" && pm.request && pm.request.body && pm.request.body.raw) {",
+                  "        return JSON.parse(pm.request.body.raw).email || null;",
+                  "      }",
+                  "    } catch (e) {}",
+                  "    return null;",
+                  "  })();",
+                  "  setVar(\"roomId\", data.id);",
+                  "} catch (e) {",
+                  "  console.warn(\"[BuscaTuNido] Error al extraer variables de respuesta:\", e.message);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update room details (Owner or Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomNumber\": \"Hab 101\",\n  \"title\": \"Habitación Individual Luminosa\",\n  \"description\": \"Pieza amoblada con clóset y escritorio.\",\n  \"type\": null,\n  \"monthlyPrice\": 250000,\n  \"deposit\": 250000,\n  \"hasPrivateBathroom\": false,\n  \"bathType\": \"PRIVATE\",\n  \"totalBeds\": 1,\n  \"availableBeds\": 1,\n  \"isAvailable\": true,\n  \"isActive\": true,\n  \"images\": [\n    \"https://example.com/room1.webp\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{roomId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Soft delete room (Owner or Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{roomId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Get paginated reviews for a pension with optional rating filter and sorting",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/reviews?page=1&limit=10&rating=5&minRating=4&maxRating=3&hasPhotos=true&stayDurationCategory=&sortBy=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pensions",
+                "{{pensionId}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (1-50)",
+                  "disabled": true
+                },
+                {
+                  "key": "rating",
+                  "value": "5",
+                  "description": "Filter by exact overall rating",
+                  "disabled": true
+                },
+                {
+                  "key": "minRating",
+                  "value": "4",
+                  "description": "Filter by minimum overall rating",
+                  "disabled": true
+                },
+                {
+                  "key": "maxRating",
+                  "value": "3",
+                  "description": "Filter by maximum overall rating",
+                  "disabled": true
+                },
+                {
+                  "key": "hasPhotos",
+                  "value": "true",
+                  "description": "Only include reviews that have at least one image",
+                  "disabled": true
+                },
+                {
+                  "key": "stayDurationCategory",
+                  "value": "",
+                  "description": "Filter by stay duration category",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "",
+                  "description": "Sort order for reviews",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  const data = res && res.data !== undefined ? res.data : res;",
+                  "  const setVar = (key, val) => {",
+                  "    if (val === undefined || val === null || val === \"\") return;",
+                  "    const str = String(val);",
+                  "    if (typeof pm !== \"undefined\") {",
+                  "      if (pm.collectionVariables) pm.collectionVariables.set(key, str);",
+                  "      if (pm.environment) pm.environment.set(key, str);",
+                  "      if (pm.globals) pm.globals.set(key, str);",
+                  "    }",
+                  "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
+                  "      postman.setEnvironmentVariable(key, str);",
+                  "    }",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -1838,7 +2360,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"overallRating\": 5,\n  \"cleanlinessRating\": 5,\n  \"landlordRating\": 4,\n  \"quietnessRating\": 4,\n  \"wifiRating\": 5,\n  \"comment\": \"Excelente pensión y ambiente de estudio. La dueña es muy amable y atenta a cualquier necesidad.\",\n  \"images\": [\n    \"{{uploadedImageUrl}}\"\n  ],\n  \"stayDurationCategory\": \"ONE_SEMESTER\"\n}",
+              "raw": "{\n  \"overallRating\": 5,\n  \"cleanlinessRating\": 5,\n  \"landlordRating\": 4,\n  \"quietnessRating\": 4,\n  \"wifiRating\": 5,\n  \"comment\": \"Excelente pensión y ambiente de estudio.\",\n  \"images\": [\n    \"https://example.com/review1.webp\"\n  ],\n  \"stayDurationCategory\": null\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1887,7 +2409,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -1963,7 +2485,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"overallRating\": 5,\n  \"cleanlinessRating\": 5,\n  \"comment\": \"Actualización: completé mi segundo semestre aquí y sigo recomendando este lugar 100%.\",\n  \"wifiRating\": 5\n}",
+              "raw": "{\n  \"overallRating\": 5,\n  \"cleanlinessRating\": 5,\n  \"landlordRating\": 4,\n  \"quietnessRating\": 4,\n  \"wifiRating\": 5,\n  \"comment\": \"Excelente pensión y ambiente de estudio.\",\n  \"images\": [\n    \"https://example.com/review1.webp\"\n  ],\n  \"stayDurationCategory\": null\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2037,7 +2559,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/reviews/helpful/voted",
+              "raw": "{{baseUrl}}/reviews/helpful/voted?pensionId=",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2045,6 +2567,13 @@
                 "reviews",
                 "helpful",
                 "voted"
+              ],
+              "query": [
+                {
+                  "key": "pensionId",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             },
             "auth": {
@@ -2156,7 +2685,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -2200,7 +2729,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"pensionId\": \"{{pensionId}}\",\n  \"reason\": \"INACCURATE_PRICE\",\n  \"description\": \"El precio cobrado en la visita no coincide con el valor mensual publicado en la ficha de la pensión.\"\n}",
+              "raw": "{\n  \"pensionId\": \"6659f8c123456789abcdef01\",\n  \"reason\": \"INACCURATE_PRICE\",\n  \"description\": \"El precio cobrado no coincide con el publicado en el sitio web.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2247,7 +2776,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -2291,7 +2820,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolutionNotes\": \"Se contactó al arrendador y se corrigió el precio publicado en el perfil.\"\n}",
+              "raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolutionNotes\": \"Se contactó al arrendador y se corrigió el precio publicado.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2319,12 +2848,78 @@
               ]
             }
           }
+        },
+        {
+          "name": "Delete a report (Admin or Moderator only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/{{reportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "{{reportId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
         }
       ]
     },
     {
       "name": "Favorites",
       "item": [
+        {
+          "name": "List favorite pension IDs for the current user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/ids",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites",
+                "ids"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
         {
           "name": "List all favorite pensions for the current user",
           "request": {
@@ -2446,7 +3041,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"BASIC_INFO\",\n  \"proposedChanges\": {\n    \"curfewTime\": \"23:30\",\n    \"quietHoursStart\": \"22:00\",\n    \"amenitiesToAdd\": [\n      \"sala-estudio\"\n    ],\n    \"amenitiesToRemove\": []\n  },\n  \"submissionNotes\": \"Actualización tras consulta presencial con el arrendador.\"\n}",
+              "raw": "{\n  \"type\": null,\n  \"proposedChanges\": {\n    \"curfewTime\": \"23:30\",\n    \"quietHoursStart\": \"22:00\",\n    \"amenitiesToAdd\": [\n      \"sala-estudio\"\n    ],\n    \"amenitiesToRemove\": []\n  },\n  \"submissionNotes\": \"Actualización tras consulta presencial.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2495,7 +3090,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -2533,7 +3128,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pensions/{{pensionId}}/proposals",
+              "raw": "{{baseUrl}}/pensions/{{pensionId}}/proposals?status=&page=1&limit=20",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2541,6 +3136,23 @@
                 "pensions",
                 "{{pensionId}}",
                 "proposals"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
               ]
             },
             "auth": {
@@ -2567,7 +3179,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/moderation/proposals?limit=&page=&status=PENDING",
+              "raw": "{{baseUrl}}/moderation/proposals?status=&page=1&limit=20",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2577,18 +3189,18 @@
               ],
               "query": [
                 {
-                  "key": "limit",
+                  "key": "status",
                   "value": "",
                   "disabled": true
                 },
                 {
                   "key": "page",
-                  "value": "",
+                  "value": "1",
                   "disabled": true
                 },
                 {
-                  "key": "status",
-                  "value": "PENDING",
+                  "key": "limit",
+                  "value": "20",
                   "disabled": true
                 }
               ]
@@ -2624,7 +3236,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -2703,7 +3315,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",
@@ -2747,7 +3359,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"action\": \"APPROVE\",\n  \"reviewNotes\": \"Cambios validados telefónicamente con el propietario de la pensión.\"\n}",
+              "raw": "{\n  \"action\": \"APPROVE\",\n  \"reviewNotes\": \"Cambios validados telefónicamente.\",\n  \"modifiedChanges\": {\n    \"curfewTime\": \"23:30\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2801,7 +3413,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"isHidden\": true,\n  \"reason\": \"Comentario con lenguaje inapropiado o difamatorio que infringe las normas de la comunidad.\"\n}",
+              "raw": "{\n  \"isHidden\": true,\n  \"reason\": \"Comentario con lenguaje inapropiado o difamatorio.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2850,7 +3462,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"verificationStatus\": \"COMMUNITY_VERIFIED\",\n  \"isActive\": true,\n  \"reason\": \"Pensión validada presencialmente por la comunidad estudiantil.\"\n}",
+              "raw": "{\n  \"verificationStatus\": \"COMMUNITY_VERIFIED\",\n  \"isActive\": false,\n  \"reason\": \"Publicación suspendida por reporte fundado de fraude.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2887,7 +3499,101 @@
       "name": "Uploads",
       "item": [
         {
-          "name": "Upload and process image to WebP with responsive variants",
+          "name": "Generate short-lived presigned PUT URLs for direct WebP upload (primary + thumbnail)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contentType\": \"image/webp\",\n  \"primarySizeBytes\": 185420,\n  \"thumbnailSizeBytes\": 28400,\n  \"width\": 1600,\n  \"height\": 1067\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/uploads/presign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "uploads",
+                "presign"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify uploaded WebP magic bytes (RIFF/WEBP) in object storage after direct PUT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"width\": 1600,\n  \"height\": 1067,\n  \"size\": 185420\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/uploads/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "uploads",
+                "verify"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fallback multipart upload that converts images to WebP with thumbnail on server",
           "request": {
             "method": "POST",
             "header": [
@@ -2948,7 +3654,7 @@
                   "    if (typeof postman !== \"undefined\" && postman.setEnvironmentVariable) {",
                   "      postman.setEnvironmentVariable(key, str);",
                   "    }",
-                  "    console.log(`[BuscaTuNido] Variable asignada {{${key}}}: ${str}`);",
+                  "    console.log(\"[BuscaTuNido] Variable asignada {{\" + key + \"}}: \" + str);",
                   "  };",
                   "  const first = (arrOrObj) => {",
                   "    if (!arrOrObj) return null;",

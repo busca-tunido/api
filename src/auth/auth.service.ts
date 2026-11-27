@@ -6,9 +6,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { type Prisma, Role } from '@prisma/client';
+import { type Prisma, Role } from '@prisma/sql-client';
 import bcrypt from 'bcryptjs';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import { UniversitiesService } from '../universities/universities.service.js';
 import type { LoginDto } from './dto/login.dto.js';
 import type { RegisterDto } from './dto/register.dto.js';
@@ -74,7 +74,7 @@ function toSanitizedUser(user: SelectedUserProfile): SanitizedUser {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly sqlPrisma: SqlPrismaService,
     private readonly jwtService: JwtService,
     private readonly universitiesService: UniversitiesService,
   ) {}
@@ -90,7 +90,7 @@ export class AuthService {
     }
 
     if (requestedUniversityId) {
-      const university = await this.prisma.university.findUnique({
+      const university = await this.sqlPrisma.university.findUnique({
         where: { id: requestedUniversityId },
         select: { id: true },
       });
@@ -117,7 +117,7 @@ export class AuthService {
     const targetRole = dto.role || Role.STUDENT;
 
     const [existing, resolvedUniversityId] = await Promise.all([
-      this.prisma.user.findUnique({
+      this.sqlPrisma.user.findUnique({
         where: { email: normalizedEmail },
         select: { id: true },
       }),
@@ -141,7 +141,7 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(dto.password, salt);
 
-    const user = await this.prisma.user.create({
+    const user = await this.sqlPrisma.user.create({
       data: {
         email: normalizedEmail,
         passwordHash,
@@ -159,7 +159,7 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     const normalizedEmail = dto.email.toLowerCase().trim();
-    const user = await this.prisma.user.findUnique({
+    const user = await this.sqlPrisma.user.findUnique({
       where: { email: normalizedEmail },
       select: {
         ...USER_PROFILE_SELECT,
@@ -180,7 +180,7 @@ export class AuthService {
   }
 
   async getProfile(userId: string): Promise<SanitizedUser> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.sqlPrisma.user.findUnique({
       where: { id: userId, deletedAt: null },
       select: USER_PROFILE_SELECT,
     });
@@ -194,7 +194,7 @@ export class AuthService {
 
   async checkEmail(email: string): Promise<CheckEmailResponse> {
     const normalizedEmail = email.toLowerCase().trim();
-    const user = await this.prisma.user.findUnique({
+    const user = await this.sqlPrisma.user.findUnique({
       where: { email: normalizedEmail },
       select: { id: true, deletedAt: true },
     });

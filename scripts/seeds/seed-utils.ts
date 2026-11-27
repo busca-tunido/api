@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { type AmenityCategory, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { type AmenityCategory, PrismaClient as SqlPrismaClient } from '@prisma/sql-client';
 
 try {
   process.loadEnvFile?.();
@@ -350,6 +351,22 @@ export const createPrismaClient = (): { prisma: PrismaClient } => {
   }
   const prisma = new PrismaClient();
   return { prisma };
+};
+
+export const createSqlPrismaClient = (): { sqlPrisma: SqlPrismaClient } => {
+  const connectionString =
+    process.env.SQL_DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL;
+  if (!connectionString) {
+    throw new Error('SQL_DATABASE_URL environment variable is required.');
+  }
+  const sqlPrisma = new SqlPrismaClient({
+    datasources: {
+      db: {
+        url: connectionString.trim().replace(/^["']|["']$/g, ''),
+      },
+    },
+  });
+  return { sqlPrisma };
 };
 
 export const chunkArray = <T>(array: readonly T[], size: number): T[][] => {

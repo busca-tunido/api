@@ -1,5 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
-import { Role, VerificationStatus } from '@prisma/client';
+import { VerificationStatus } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SanitizedUser } from '../auth/types/auth.types.js';
 import type { PrismaService } from '../prisma/prisma.service.js';

@@ -4,7 +4,8 @@ import {
   calculateTransitMinutes,
   calculateWalkingMinutes,
 } from '../common/utils/geo.util.js';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { env } from '../env.js';
+import { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 
 export type CachedUniversity = {
   id: string;
@@ -38,14 +39,21 @@ export class UniversitiesCacheService implements OnModuleInit {
   private domainIndex = new Map<string, CachedUniversityDomainMatch>();
   private initialized = false;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly sqlPrisma: SqlPrismaService) {}
 
   async onModuleInit(): Promise<void> {
+    if (process.env.SKIP_DB_CONNECT === 'true' || !env.SQL_DATABASE_URL) {
+      return;
+    }
     await this.refresh();
   }
 
   async refresh(): Promise<void> {
-    const list = await this.prisma.university.findMany({
+    if (process.env.SKIP_DB_CONNECT === 'true' || !env.SQL_DATABASE_URL) {
+      return;
+    }
+
+    const list = await this.sqlPrisma.university.findMany({
       where: { deletedAt: null },
       select: {
         id: true,
@@ -53,7 +61,11 @@ export class UniversitiesCacheService implements OnModuleInit {
         shortName: true,
         city: true,
         address: true,
-        emailDomains: true,
+        emailDomains: {
+          select: {
+            domain: true,
+          },
+        },
         latitude: true,
         longitude: true,
       },
@@ -74,7 +86,11 @@ export class UniversitiesCacheService implements OnModuleInit {
         });
       }
 
-      if (Array.isArray(u.emailDomains)) {
+      const rawDomains = Array.isArray(u.emailDomains)
+        ? u.emailDomains.map((d) => (typeof d === 'string' ? d : d.domain))
+        : [];
+
+      if (rawDomains.length > 0) {
         const domainMatch: CachedUniversityDomainMatch = {
           id: u.id,
           name: u.name,
@@ -82,7 +98,7 @@ export class UniversitiesCacheService implements OnModuleInit {
           city: u.city,
           address: u.address,
         };
-        for (const rawDomain of u.emailDomains) {
+        for (const rawDomain of rawDomains) {
           const domain = rawDomain.toLowerCase().trim();
           if (domain && !nextDomainIndex.has(domain)) {
             nextDomainIndex.set(domain, domainMatch);

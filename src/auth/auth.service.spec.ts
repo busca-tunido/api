@@ -5,14 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { JwtService } from '@nestjs/jwt';
-import { Role } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 import bcrypt from 'bcryptjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PrismaService } from '../prisma/prisma.service.js';
+import type { SqlPrismaService } from '../sql-prisma/sql-prisma.service.js';
 import type { UniversitiesService } from '../universities/universities.service.js';
 import { AuthService } from './auth.service.js';
 
-type MockPrismaService = {
+type MockSqlPrismaService = {
   user: {
     findUnique: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -32,12 +32,12 @@ type MockUniversitiesService = {
 
 describe('AuthService', () => {
   let service: AuthService;
-  let mockPrisma: MockPrismaService;
+  let mockSqlPrisma: MockSqlPrismaService;
   let mockJwtService: MockJwtService;
   let mockUniversitiesService: MockUniversitiesService;
 
   beforeEach(() => {
-    mockPrisma = {
+    mockSqlPrisma = {
       user: {
         findUnique: vi.fn(),
         create: vi.fn(),
@@ -56,7 +56,7 @@ describe('AuthService', () => {
     };
 
     service = new AuthService(
-      mockPrisma as unknown as PrismaService,
+      mockSqlPrisma as unknown as SqlPrismaService,
       mockJwtService as unknown as JwtService,
       mockUniversitiesService as unknown as UniversitiesService,
     );
@@ -64,7 +64,7 @@ describe('AuthService', () => {
 
   describe('register', () => {
     it('should register a new user successfully', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
       mockUniversitiesService.findByEmailDomain.mockResolvedValue({
         id: 'uni-1',
         name: 'Universidad de Chile',
@@ -85,7 +85,7 @@ describe('AuthService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockPrisma.user.create.mockResolvedValue(createdUser);
+      mockSqlPrisma.user.create.mockResolvedValue(createdUser);
 
       const result = await service.register({
         email: 'test@uchile.cl',
@@ -102,7 +102,7 @@ describe('AuthService', () => {
         role: Role.STUDENT,
       });
       expect(mockUniversitiesService.findByEmailDomain).toHaveBeenCalledWith('test@uchile.cl');
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+      expect(mockSqlPrisma.user.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           email: 'test@uchile.cl',
           role: Role.STUDENT,
@@ -113,7 +113,7 @@ describe('AuthService', () => {
     });
 
     it('should automatically bind universityId when registering student with valid domain', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
       mockUniversitiesService.findByEmailDomain.mockResolvedValue({
         id: 'uni-uchile',
         name: 'Universidad de Chile',
@@ -134,7 +134,7 @@ describe('AuthService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockPrisma.user.create.mockResolvedValue(createdUser);
+      mockSqlPrisma.user.create.mockResolvedValue(createdUser);
 
       const result = await service.register({
         email: 'estudiante@uchile.cl',
@@ -150,7 +150,7 @@ describe('AuthService', () => {
     });
 
     it('should throw BadRequestException if student email domain is not registered', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
       mockUniversitiesService.findByEmailDomain.mockResolvedValue(null);
 
       await expect(
@@ -168,7 +168,7 @@ describe('AuthService', () => {
     });
 
     it('should register landlord without enforcing institutional email domain', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
       const createdUser = {
         id: 'landlord-1',
         email: 'owner@gmail.com',
@@ -182,7 +182,7 @@ describe('AuthService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockPrisma.user.create.mockResolvedValue(createdUser);
+      mockSqlPrisma.user.create.mockResolvedValue(createdUser);
 
       const result = await service.register({
         email: 'owner@gmail.com',
@@ -197,7 +197,7 @@ describe('AuthService', () => {
     });
 
     it('should throw ConflictException if email is already taken', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ id: 'existing-id' });
+      mockSqlPrisma.user.findUnique.mockResolvedValue({ id: 'existing-id' });
 
       await expect(
         service.register({
@@ -237,7 +237,7 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should log in with correct credentials', async () => {
       const hashedPassword = await bcrypt.hash('secretPass123', 10);
-      mockPrisma.user.findUnique.mockResolvedValue({
+      mockSqlPrisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         email: 'test@uchile.cl',
         passwordHash: hashedPassword,
@@ -268,7 +268,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if password does not match', async () => {
       const hashedPassword = await bcrypt.hash('secretPass123', 10);
-      mockPrisma.user.findUnique.mockResolvedValue({
+      mockSqlPrisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         email: 'test@uchile.cl',
         passwordHash: hashedPassword,
@@ -283,7 +283,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if user is not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
         service.login({
@@ -309,7 +309,7 @@ describe('AuthService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(user);
 
       const profile = await service.getProfile('user-1');
       expect(profile.id).toBe('user-1');
@@ -317,7 +317,7 @@ describe('AuthService', () => {
     });
 
     it('should throw NotFoundException if user does not exist', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(service.getProfile('non-existing-id')).rejects.toThrow(NotFoundException);
     });
@@ -336,11 +336,11 @@ describe('AuthService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(user);
 
       const profile = await service.getProfile('user-1');
       expect(profile).not.toHaveProperty('passwordHash');
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+      expect(mockSqlPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user-1', deletedAt: null },
         select: expect.objectContaining({
           id: true,
@@ -353,10 +353,10 @@ describe('AuthService', () => {
     });
 
     it('should throw NotFoundException if user account is deactivated/deleted', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(service.getProfile('deactivated-user-id')).rejects.toThrow(NotFoundException);
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+      expect(mockSqlPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'deactivated-user-id', deletedAt: null },
         select: expect.any(Object),
       });
@@ -365,14 +365,14 @@ describe('AuthService', () => {
 
   describe('checkEmail', () => {
     it('should return exists: true without disclosing role when email is found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
+      mockSqlPrisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         deletedAt: null,
       });
 
       const result = await service.checkEmail('ESTUDIANTE.DEMO@UCHILE.CL ');
       expect(result).toEqual({ exists: true });
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+      expect(mockSqlPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { email: 'estudiante.demo@uchile.cl' },
         select: { id: true, deletedAt: true },
       });
@@ -380,7 +380,7 @@ describe('AuthService', () => {
     });
 
     it('should return exists: false with detectedUniversity when email is not found but domain matches', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
       mockUniversitiesService.findByEmailDomain.mockResolvedValue({
         id: 'uni-1',
         name: 'Universidad de Chile',
@@ -405,7 +405,7 @@ describe('AuthService', () => {
     });
 
     it('should return exists: false and detectedUniversity: null when domain is unrecognized', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
       mockUniversitiesService.findByEmailDomain.mockResolvedValue(null);
 
       const result = await service.checkEmail('unregistered@gmail.com');
@@ -419,7 +419,7 @@ describe('AuthService', () => {
     });
 
     it('should return exists: false when user is deactivated/deleted and resolve domain', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
+      mockSqlPrisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         role: Role.STUDENT,
         deletedAt: new Date(),

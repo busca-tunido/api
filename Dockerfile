@@ -51,10 +51,14 @@ COPY prisma.config.ts ./
 
 # Generate Prisma Client + extract `.prisma` directory out of pnpm virtual store
 RUN DATABASE_URL="mongodb://localhost:27017/buscatunido" \
-    pnpm exec prisma generate \
+    SQL_DATABASE_URL="postgresql://localhost:5432/buscatunido" \
+    pnpm exec prisma generate --schema=prisma/schema.prisma \
+    && SQL_DATABASE_URL="postgresql://localhost:5432/buscatunido" \
+    pnpm exec prisma generate --schema=prisma/schema.sql.prisma \
     && PRISMA_GEN_DIR="$(find /app/node_modules -type d -name '.prisma' | head -n 1)" \
     && test -n "$PRISMA_GEN_DIR" \
-    && cp -R "$PRISMA_GEN_DIR" /app/generated-prisma
+    && cp -R "$PRISMA_GEN_DIR" /app/generated-prisma \
+    && cp -R /app/node_modules/@prisma/sql-client /app/generated-sql-client
 
 COPY tsconfig.json tsconfig.build.json nest-cli.json .swcrc ./
 COPY src ./src
@@ -82,6 +86,7 @@ RUN apt-get update \
 
 COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/generated-prisma ./node_modules/.prisma
+COPY --from=builder --chown=node:node /app/generated-sql-client ./node_modules/@prisma/sql-client
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/package.json ./package.json
 

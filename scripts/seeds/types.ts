@@ -1,10 +1,10 @@
 import type {
   GenderPreference,
-  Role,
   RoomType,
   StayDurationCategory,
   VerificationStatus,
 } from '@prisma/client';
+import type { Role } from '@prisma/sql-client';
 import type { TierKey } from './config.js';
 
 export type DraftUser = {

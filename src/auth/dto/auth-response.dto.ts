@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 
 export class SanitizedUserResponseDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef01' })

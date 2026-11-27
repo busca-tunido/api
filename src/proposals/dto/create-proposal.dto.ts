@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ProposalType } from '@prisma/client';
+import { ProposalType } from '@prisma/sql-client';
 import { IsEnum, IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateProposalDto {

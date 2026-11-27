@@ -1,16 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { isValidObjectId } from '../common/utils/string.util.js';
 
-export const SOFT_DELETE_MODELS = new Set<string>([
-  'User',
-  'University',
-  'Pension',
-  'Room',
-  'PensionImage',
-  'Amenity',
-  'Review',
-  'Report',
-]);
+export const SOFT_DELETE_MODELS = new Set<string>(['Pension', 'Review']);
 
 type SoftDeleteRecord = {
   deletedAt: Date | null;

@@ -12,6 +12,7 @@ import { ProposalsModule } from './proposals/proposals.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { RoomsModule } from './rooms/rooms.module.js';
+import { SqlPrismaModule } from './sql-prisma/sql-prisma.module.js';
 import { StorageModule } from './storage/storage.module.js';
 import { UniversitiesModule } from './universities/universities.module.js';
 import { UploadsModule } from './uploads/uploads.module.js';
@@ -23,6 +24,7 @@ import { UploadsModule } from './uploads/uploads.module.js';
       validate: validateEnv,
     }),
     PrismaModule,
+    SqlPrismaModule,
     StorageModule,
     AuthModule,
     PensionsModule,

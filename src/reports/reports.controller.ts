@@ -1,6 +1,16 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ReportStatus, Role } from '@prisma/client';
+import { ReportStatus, Role } from '@prisma/sql-client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -11,7 +21,7 @@ import {
   ApiStandardErrors,
 } from '../common/decorators/api-envelope-response.decorator.js';
 import { CreateReportDto } from './dto/create-report.dto.js';
-import { ReportResponseDto } from './dto/report-response.dto.js';
+import { DeleteReportResponseDto, ReportResponseDto } from './dto/report-response.dto.js';
 import { UpdateReportDto } from './dto/update-report.dto.js';
 import { ReportsService } from './reports.service.js';
 
@@ -62,5 +72,20 @@ export class ReportsController {
   @ApiStandardErrors([400, 401, 403, 404, 500])
   async update(@Param('id') id: string, @Body() dto: UpdateReportDto): Promise<unknown> {
     return this.reportsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a report (Admin or Moderator only)' })
+  @ApiParam({ name: 'id', type: String, description: 'ID del reporte' })
+  @ApiEnvelopeResponse(DeleteReportResponseDto, {
+    status: 200,
+    description: 'Report deleted successfully',
+  })
+  @ApiStandardErrors([401, 403, 404])
+  async remove(@Param('id') id: string): Promise<{ id: string; deleted: boolean }> {
+    return this.reportsService.delete(id);
   }
 }

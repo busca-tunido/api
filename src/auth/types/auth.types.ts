@@ -1,4 +1,4 @@
-import type { Role } from '@prisma/client';
+import type { Role } from '@prisma/sql-client';
 
 export type JwtPayload = {
   sub: string;

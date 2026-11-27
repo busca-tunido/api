@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '../dist/app.module.js';
 
 async function exportOpenApi(): Promise<void> {
+  process.env.SKIP_DB_CONNECT = 'true';
   const app = await NestFactory.create(AppModule, new FastifyAdapter(), {
     logger: false,
     abortOnError: false,
@@ -13,7 +14,9 @@ async function exportOpenApi(): Promise<void> {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('BuscaTuNido API')
-    .setDescription('Backend REST API for BuscaTuNido platform')
+    .setDescription(
+      'Backend REST API de BuscaTuNido con arquitectura híbrida PostgreSQL (SQL) + MongoDB Atlas (NoSQL), autenticación JWT/RBAC, rate-limiting y subidas directas WebP S3/R2.',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();

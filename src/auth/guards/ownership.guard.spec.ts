@@ -1,5 +1,5 @@
 import { type ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 import { describe, expect, it } from 'vitest';
 import { OwnershipGuard } from './ownership.guard.js';
 

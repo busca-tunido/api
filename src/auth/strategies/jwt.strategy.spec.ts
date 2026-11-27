@@ -1,11 +1,11 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Role } from '@prisma/sql-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PrismaService } from '../../prisma/prisma.service.js';
+import type { SqlPrismaService } from '../../sql-prisma/sql-prisma.service.js';
 import type { JwtPayload } from '../types/auth.types.js';
 import { JwtStrategy } from './jwt.strategy.js';
 
-type MockPrismaService = {
+type MockSqlPrismaService = {
   user: {
     findUnique: ReturnType<typeof vi.fn>;
   };
@@ -13,16 +13,16 @@ type MockPrismaService = {
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
-  let mockPrisma: MockPrismaService;
+  let mockSqlPrisma: MockSqlPrismaService;
 
   beforeEach(() => {
-    mockPrisma = {
+    mockSqlPrisma = {
       user: {
         findUnique: vi.fn(),
       },
     };
 
-    strategy = new JwtStrategy(mockPrisma as unknown as PrismaService);
+    strategy = new JwtStrategy(mockSqlPrisma as unknown as SqlPrismaService);
   });
 
   describe('validate', () => {
@@ -47,12 +47,12 @@ describe('JwtStrategy', () => {
         updatedAt: new Date(),
       };
 
-      mockPrisma.user.findUnique.mockResolvedValue(dbUser);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(dbUser);
 
       const result = await strategy.validate(payload);
       expect(result.id).toBe('user-active-1');
       expect(result.email).toBe('estudiante.demo@uchile.cl');
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+      expect(mockSqlPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user-active-1' },
         select: expect.objectContaining({
           id: true,
@@ -69,7 +69,7 @@ describe('JwtStrategy', () => {
         role: Role.STUDENT,
       };
 
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
       await expect(strategy.validate(payload)).rejects.toThrow(
@@ -84,7 +84,7 @@ describe('JwtStrategy', () => {
         role: Role.LANDLORD,
       };
 
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockSqlPrisma.user.findUnique.mockResolvedValue(null);
 
       await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
     });

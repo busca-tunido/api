@@ -39,6 +39,11 @@ const envSchema = z
         message: 'DATABASE_URL environment variable is required.',
       })
       .transform((val) => (val as string).trim().replace(/^["']|["']$/g, '')),
+    SQL_DATABASE_URL: z
+      .string()
+      .trim()
+      .transform((val) => val.replace(/^["']|["']$/g, ''))
+      .optional(),
     JWT_SECRET: z
       .unknown()
       .refine((val): val is string => typeof val === 'string' && val.trim().length > 0, {
@@ -72,6 +77,13 @@ const envSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production') {
+      if (!data.SQL_DATABASE_URL) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'SQL_DATABASE_URL environment variable is required in production.',
+          path: ['SQL_DATABASE_URL'],
+        });
+      }
       if (!data.PUBLIC_AWS_ENDPOINT_URL_S3) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -131,6 +143,7 @@ export type EnvironmentConfig = {
   readonly PORT: number;
   readonly PUBLIC_PORT: number;
   readonly DATABASE_URL: string;
+  readonly SQL_DATABASE_URL?: string;
   readonly NODE_ENV: Environment;
   readonly JWT_SECRET: string;
   readonly JWT_EXPIRES_IN: string;
@@ -167,6 +180,8 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     NODE_ENV: config.NODE_ENV,
     PORT: config.PUBLIC_PORT ?? config.PORT,
     DATABASE_URL: config.DATABASE_URL,
+    SQL_DATABASE_URL:
+      config.SQL_DATABASE_URL || config.POSTGRES_URL || config.POSTGRES_PRISMA_URL || undefined,
     JWT_SECRET: config.JWT_SECRET,
     PUBLIC_JWT_EXPIRATION:
       config.PUBLIC_JWT_EXPIRATION ||
@@ -216,6 +231,7 @@ export const validateEnv = (config: Record<string, unknown>): EnvironmentConfig 
     PORT: port,
     PUBLIC_PORT: port,
     DATABASE_URL: data.DATABASE_URL,
+    SQL_DATABASE_URL: data.SQL_DATABASE_URL || undefined,
     NODE_ENV: data.NODE_ENV,
     JWT_SECRET: data.JWT_SECRET,
     JWT_EXPIRES_IN: expiresIn,

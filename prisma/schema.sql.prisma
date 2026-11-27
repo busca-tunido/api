@@ -1,0 +1,200 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("SQL_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/sql-client"
+}
+
+enum Role {
+  STUDENT
+  LANDLORD
+  MODERATOR
+  ADMIN
+}
+
+enum AmenityCategory {
+  BASIC_UTILITY
+  ROOM_FEATURE
+  COMMON_AREA
+  STUDY_WORK
+  SAFETY_SECURITY
+}
+
+enum ReportReason {
+  FRAUD_OR_SCAM
+  INACCURATE_PRICE
+  MISLEADING_PHOTOS
+  HOUSE_RULES_VIOLATION
+  PROPERTY_UNAVAILABLE
+  INAPPROPRIATE_CONTENT
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MODIFIED_AND_APPROVED
+}
+
+enum ProposalType {
+  AMENITIES_UPDATE
+  BASIC_INFO
+  LOCATION_UPDATE
+  FULL_UPDATE
+}
+
+model University {
+  id           String                  @id @default(cuid()) @db.VarChar(36)
+  name         String
+  shortName    String?                 @map("short_name")
+  city         String
+  address      String
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime                @default(now()) @map("created_at")
+  updatedAt    DateTime                @updatedAt @map("updated_at")
+  deletedAt    DateTime?               @map("deleted_at")
+
+  emailDomains UniversityEmailDomain[]
+  campuses     CampusArea[]
+  students     User[]
+
+  @@index([city])
+  @@index([deletedAt])
+  @@map("universities")
+}
+
+model UniversityEmailDomain {
+  id           String     @id @default(cuid()) @db.VarChar(36)
+  universityId String     @map("university_id") @db.VarChar(36)
+  domain       String     @unique
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@index([universityId])
+  @@map("university_email_domains")
+}
+
+model CampusArea {
+  id           String     @id @default(cuid()) @db.VarChar(36)
+  universityId String     @map("university_id") @db.VarChar(36)
+  name         String
+  acronym      String
+  centerLat    Float      @map("center_lat")
+  centerLng    Float      @map("center_lng")
+  polygon      Json       @default("[]")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@index([universityId])
+  @@map("campus_areas")
+}
+
+model User {
+  id              String            @id @default(cuid()) @db.VarChar(36)
+  email           String            @unique
+  passwordHash    String            @map("password_hash")
+  firstName       String            @map("first_name")
+  lastName        String            @map("last_name")
+  phone           String?
+  avatarUrl       String?           @map("avatar_url")
+  role            Role              @default(STUDENT)
+  isEmailVerified Boolean           @default(false) @map("is_email_verified")
+  universityId    String?           @map("university_id") @db.VarChar(36)
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  deletedAt       DateTime?         @map("deleted_at")
+
+  university         University?       @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  favorites          UserFavorite[]
+  reports            Report[]
+  submittedProposals PensionProposal[] @relation("SubmittedProposals")
+  reviewedProposals  PensionProposal[] @relation("ReviewedProposals")
+
+  @@index([universityId])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model UserFavorite {
+  userId    String   @map("user_id") @db.VarChar(36)
+  pensionId String   @map("pension_id") @db.VarChar(36)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, pensionId])
+  @@index([pensionId])
+  @@map("user_favorites")
+}
+
+model Amenity {
+  id        String          @id @default(cuid()) @db.VarChar(36)
+  slug      String          @unique
+  name      String
+  category  AmenityCategory @default(BASIC_UTILITY)
+  iconKey   String?         @map("icon_key")
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  deletedAt DateTime?       @map("deleted_at")
+
+  @@index([deletedAt])
+  @@map("amenities")
+}
+
+model Report {
+  id              String       @id @default(cuid()) @db.VarChar(36)
+  pensionId       String       @map("pension_id") @db.VarChar(36)
+  userId          String       @map("user_id") @db.VarChar(36)
+  reason          ReportReason
+  description     String
+  status          ReportStatus @default(PENDING)
+  resolutionNotes String?      @map("resolution_notes")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  deletedAt       DateTime?    @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([pensionId])
+  @@index([userId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("reports")
+}
+
+model PensionProposal {
+  id              String         @id @default(cuid()) @db.VarChar(36)
+  pensionId       String         @map("pension_id") @db.VarChar(36)
+  submittedById   String         @map("submitted_by_id") @db.VarChar(36)
+  reviewedById    String?        @map("reviewed_by_id") @db.VarChar(36)
+  type            ProposalType   @default(BASIC_INFO)
+  status          ProposalStatus @default(PENDING)
+  proposedChanges Json           @map("proposed_changes")
+  appliedChanges  Json?          @map("applied_changes")
+  submissionNotes String?        @map("submission_notes")
+  reviewNotes     String?        @map("review_notes")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  reviewedAt      DateTime?      @map("reviewed_at")
+
+  submittedBy User  @relation("SubmittedProposals", fields: [submittedById], references: [id], onDelete: Cascade)
+  reviewedBy  User? @relation("ReviewedProposals", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([pensionId])
+  @@index([submittedById])
+  @@index([status])
+  @@map("pension_proposals")
+}

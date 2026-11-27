@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ReportReason, ReportStatus } from '@prisma/client';
+import { ReportReason, ReportStatus } from '@prisma/sql-client';
+
+export class DeleteReportResponseDto {
+  @ApiProperty({ type: String, example: 'rep-123' })
+  id!: string;
+
+  @ApiProperty({ type: Boolean, example: true })
+  deleted!: boolean;
+}
 
 export class ReportPensionSummaryDto {
   @ApiProperty({ type: String, example: '6659f8c123456789abcdef01' })

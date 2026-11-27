@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/sql-client';
 import bcrypt from 'bcryptjs';
 import { env } from '../src/env.js';
 

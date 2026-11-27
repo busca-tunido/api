@@ -5,11 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { fakerES_MX as faker } from '@faker-js/faker';
 import type {
   GenderPreference,
-  Role,
   RoomType,
   StayDurationCategory,
   VerificationStatus,
 } from '@prisma/client';
+import type { Role } from '@prisma/sql-client';
 import bcrypt from 'bcryptjs';
 import {
   CITY_BASE_MEDIAN,
